@@ -3,7 +3,7 @@ mixin article(data)
   - var body = data.Bodies;
   - var imgBase = 'http://ram.komica2.net/00/src/';
   - var imgThumBase = 'http://ram.komica2.net/00/thumb/'
-  article.col-xs-12.clearfix(data-number= head.No)
+  article.thread.col-xs-12.clearfix(data-number= head.No)
     form
       if head.Picture
         header.col-xs-12.imgInfo
@@ -17,7 +17,11 @@ mixin article(data)
               img(src= imgThumBase + picName)
           +articleHeader(head)
           section.mainContent
-            p.content= head.Content
+            - var split = head.Content.split('\n')
+            p.content
+              each text in split
+                span= text
+                br
           each reply in body
             +replyBox(reply)
 
@@ -33,7 +37,11 @@ mixin replyBox(reply)
       - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
       a.imgContainer
         img(src= imgThumBase + picName)
-    p.content= reply.Content
+    - var split = reply.Content.split('\n')
+    p.content
+      each text in split
+        span= text
+        br
 
 mixin articleHeader(info)
   header
