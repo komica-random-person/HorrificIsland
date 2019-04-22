@@ -69,7 +69,7 @@ const task_browserSync = cb => {
       reloadDelay: 1500,
     });
   };
-  gulp.series(prepro, task)();
+  gulp.series(build_utils, prepro, task)();
   cb();
 };
 exports.dev = task_browserSync;
