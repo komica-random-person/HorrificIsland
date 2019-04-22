@@ -32,7 +32,8 @@ const util_static = cb => {
   cb();
 };
 const build_utils = cb => {
-  return gulp.series(util_sass, util_babel, util_static);
+  gulp.series(util_sass, util_babel, util_static)();
+  cb();
 }
 
 /* Dev */
@@ -76,7 +77,7 @@ const task_browserSync = cb => {
 exports.dev = task_browserSync;
 
 const defaultTask = cb => {
-  const series = gulp.series(clean, gulp.parallel([util_babel, util_sass, util_static]));
+  const series = gulp.series(clean, build_utils);
   series();
   cb();
 };

@@ -1,10 +1,12 @@
 {
   "name": "komica",
   "version": "1.0.0",
-  "description": "",
+  "description": "A fake komica website",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prestart": "./node_modules/gulp/bin/gulp.js",
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",
