@@ -51,9 +51,9 @@ mixin articleHeader(info)
     span.name= info.Name
     span.date= info.Date
     span.time= info.Time
-    span.id(data-id= info.Id)= 'ID:' + info.Id
+    span.id.quotable(data-quotetype= 'id', data-id= info.Id)= 'ID:' + info.Id
     span.num(data-num= info.No)
-      a.link= 'No.' + info.No
+      a.link.quotable(data-quotetype= 'num', data-num= info.No)= 'No.' + info.No
     span.del
       a.link 刪除
     span.res
@@ -83,6 +83,9 @@ div.container
   each discussion in pageContent
     +article(discussion)
 
+  section#hoverBox
+
   p !{JSON.stringify(pageContent)}
+
 
 

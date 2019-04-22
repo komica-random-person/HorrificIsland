@@ -43,7 +43,6 @@ const watch = cb => {
   cb();
 };
 const task_nodemon = cb => {
-  build_utils();
   let started = false;
   return nodemon({
     script: 'server.js',
