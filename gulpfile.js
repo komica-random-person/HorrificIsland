@@ -4,7 +4,6 @@ const babel = require('gulp-babel');
 const sass = require('gulp-sass');
 const del = require('del');
 const nodemon = require('gulp-nodemon');
-const browserSync =  require('browser-sync');
 
 sass.compiler = require('node-sass');
 
@@ -60,6 +59,7 @@ const task_nodemon = cb => {
   });
 };
 const task_browserSync = cb => {
+  const browserSync =  require('browser-sync');
   const prepro = gulp.parallel(task_nodemon, watch);
   const task = () => {
     browserSync.init(null, {
@@ -73,7 +73,6 @@ const task_browserSync = cb => {
   gulp.series(prepro, task)();
   cb();
 };
-
 exports.dev = task_browserSync;
 
 const defaultTask = cb => {
