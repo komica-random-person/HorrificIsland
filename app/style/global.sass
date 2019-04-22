@@ -1,38 +1,53 @@
 body
   background: rgba(0, 0, 0, .8)
   color: rgba(255, 255, 255, .8)
-
+a.link
+  cursor: pointer
+  color: #81A2BE
 article
+  padding-bottom: 1em
   header.imgInfo h4
-    font-size: 8pt
-    margin-bottom: 0px
-    padding-left: 15px
+    font-size: .8em
+    margin-bottom: 3px
   .contentSection
+    padding: 0
+    header
+      span
+        display: inline-block
+        padding: 0 .3em
+        vertical-align: top
+        &.title
+          color: #B294BB
+          font-weight: bold
+          font-size: 1.125em
+        &.name
+          color: #EE88BC
     section
-      float: left
+      display: table
       max-width: calc(100% - 300px)
+      &.mainContent
+        padding: .9em 1em 1em 0em
+        word-break: break-all
+        p.content
+          padding: 0
     .imgContainer
       cursor: pointer
       img
         float: left
         vertical-align: top
         max-width: 250px
+        max-height: 500px
         display: inline-block
         padding-right: 10px
         margin-right: 5px
     p.content
-      padding-left: 5px
-    header
-      span
-        display: inline-block
-        padding: 3px
-        &.title
-          color: #B294BB
-        &.name
-          color: #EE88BC
+      padding: .9em 1em 1em 1.8em
+      text-align: justify
+      margin: 0
+      font-size: 1.15em
     .replyBox
       background: #282A2E
-      padding: 10px
-      margin-bottom: 10px
+      padding: .2em .5em
+      margin-bottom: 5px
       .col-xs-12
         padding-left: 0

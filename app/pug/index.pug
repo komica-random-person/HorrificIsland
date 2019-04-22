@@ -4,24 +4,35 @@ mixin article(data)
   - var imgBase = 'http://ram.komica2.net/00/src/';
   - var imgThumBase = 'http://ram.komica2.net/00/thumb/'
   article.col-xs-12.clearfix(data-number= head.No)
-    header.col-xs-12.imgInfo
-      h4.info= '檔名: '
-        a(href= imgBase + head.Picture, target='_blank')= head.Picture
-    section.content.col-xs-12
-      div.contentSection.col-xs-12
-        if head.Picture
-          - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
-          a.imgContainer
-            img(src= imgThumBase + picName)
-        +articleHeader(head)
-        section
-          p.content= head.Content
-        each reply in body
-          +replyBox(reply)
+    form
+      if head.Picture
+        header.col-xs-12.imgInfo
+          h4.info= '檔名: '
+            a(href= imgBase + head.Picture, target='_blank')= head.Picture
+      section.content.col-xs-12
+        div.contentSection.col-xs-12
+          if head.Picture
+            - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
+            a.imgContainer
+              img(src= imgThumBase + picName)
+          +articleHeader(head)
+          section.mainContent
+            p.content= head.Content
+          each reply in body
+            +replyBox(reply)
 
 mixin replyBox(reply)
   section.replyBox.clearfix
     +articleHeader(reply)
+    if reply.Picture
+      - var imgBase = 'http://ram.komica2.net/00/src/';
+      - var imgThumBase = 'http://ram.komica2.net/00/thumb/'
+      header.col-xs-12.imgInfo
+        h4.info= '檔名: '
+          a(href= imgBase + reply.Picture, target='_blank')= reply.Picture
+      - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
+      a.imgContainer
+        img(src= imgThumBase + picName)
     p.content= reply.Content
 
 mixin articleHeader(info)
@@ -31,13 +42,13 @@ mixin articleHeader(info)
     span.name= info.Name
     span.date= info.Date
     span.time= info.Time
-    span.id= 'ID:' + info.Id
-    span.num
-      a= 'No.' + info.No
+    span.id(data-id= info.Id)= 'ID:' + info.Id
+    span.num(data-num= info.No)
+      a.link= 'No.' + info.No
     span.del
-      a 刪除
+      a.link 刪除
     span.res
-      a 回覆
+      a.link 回覆
 
 div.container
   each discussion in pageContent

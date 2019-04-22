@@ -13,9 +13,9 @@ const clean = cb => {
   del(['dist/**/*']).then(() => cb());
 };
 const util_sass = cb => {
-  gulp.src('./app/sass/*.sass')
+  gulp.src('./app/style/*.sass')
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('dist/css/'));
+    .pipe(gulp.dest('dist/style/'));
   cb();
 };
 const util_babel = cb => {
@@ -38,7 +38,7 @@ const build_utils = cb => {
 /* Dev */
 const watch = cb => {
   gulp.watch('app/script/*.babel.js', util_babel);
-  gulp.watch('app/sass/*.sass', util_sass);
+  gulp.watch('app/style/*.sass', util_sass);
   gulp.watch('app/static/*', util_static);
   cb();
 };
@@ -63,7 +63,7 @@ const task_browserSync = cb => {
   const task = () => {
     browserSync.init(null, {
       proxy: 'http://localhost:9999',
-      files: ['dist/script/**', 'dist/css/**', './app/pug/*'],
+      files: ['dist/script/*', 'dist/style/*', './app/pug/*'],
       browser: ['chrome'],
       port: 5000,
       reloadDelay: 1500,
