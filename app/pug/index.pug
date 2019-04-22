@@ -1,8 +1,8 @@
+- var imgBase = 'http://ram.komica2.net/00/src/';
+- var imgThumBase = 'http://ram.komica2.net/00/thumb/'
 mixin article(data)
   - var head = data.Head;
   - var body = data.Bodies;
-  - var imgBase = 'http://ram.komica2.net/00/src/';
-  - var imgThumBase = 'http://ram.komica2.net/00/thumb/'
   article.thread.col-xs-12.clearfix(data-number= head.No)
     form
       if head.Picture
@@ -29,8 +29,6 @@ mixin replyBox(reply)
   section.replyBox.clearfix
     +articleHeader(reply)
     if reply.Picture
-      - var imgBase = 'http://ram.komica2.net/00/src/';
-      - var imgThumBase = 'http://ram.komica2.net/00/thumb/'
       header.col-xs-12.imgInfo
         h4.info= '檔名: '
           a(href= imgBase + reply.Picture, target='_blank')= reply.Picture

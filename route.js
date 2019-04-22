@@ -9,7 +9,7 @@ module.exports = app => {
   } else
     next();
   });
-  
+
   app.get('^/$', (req, res) => {
     req.app.get('getMainContent')(content => {
       const pageInfo = {
