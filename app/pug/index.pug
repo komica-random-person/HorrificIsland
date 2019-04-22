@@ -6,12 +6,14 @@ mixin article(data)
   article.thread.col-xs-12.clearfix(data-number= head.No)
     form
       if head.Picture
+        // show image information if image exists
         header.col-xs-12.imgInfo
           h4.info= '檔名: '
             a(href= imgBase + head.Picture, target='_blank')= head.Picture
       section.content.col-xs-12
         div.contentSection.col-xs-12
           if head.Picture
+            // show image if image exists
             - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
             a.imgContainer
               img(src= imgThumBase + picName)
@@ -32,6 +34,7 @@ mixin replyBox(reply)
       header.col-xs-12.imgInfo
         h4.info= '檔名: '
           a(href= imgBase + reply.Picture, target='_blank')= reply.Picture
+      // there exist a ($filename)s.jpg file for each image, use Regex to get the url
       - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
       a.imgContainer
         img(src= imgThumBase + picName)
@@ -56,7 +59,27 @@ mixin articleHeader(info)
     span.res
       a.link 回覆
 
+mixin postForm(labelText, id, placeholder, type)
+  section.postInfo
+    label
+      h4.label= labelText
+      if type == 'text' || type == 'file'
+        input(id= id, placeholder=placeholder, type=type, maxlength='100')
+      else
+        textarea(id= id, placeholder=placeholder)
+
 div.container
+  header.pageTitle
+    h1 Horrific Island?
+
+  section.postContainer
+    div.postTable
+      h2 這邊之後再改幹
+      +postForm('名稱', 'postName', '欲顯示之名稱', 'text')
+      +postForm('標題', 'postTitle', '輸入標題', 'text')
+      +postForm('內文', 'postContent', '無本文', 'textarea')
+      +postForm('附加圖檔', 'postImg', '', 'file')
+
   each discussion in pageContent
     +article(discussion)
 
