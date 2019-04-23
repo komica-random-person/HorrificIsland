@@ -10,22 +10,21 @@ mixin article(data)
         header.col-xs-12.imgInfo
           h4.info= '檔名: '
             a(href= imgBase + head.Picture, target='_blank')= head.Picture
-      section.content.col-xs-12
-        div.contentSection.col-xs-12
-          if head.Picture
-            // show image if image exists
-            - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
-            a.imgContainer
-              img(src= imgThumBase + picName)
-          +articleHeader(head)
-          section.mainContent
-            - var split = head.Content.split('\n')
-            p.content
-              each text in split
-                span= text
-                br
-          each reply in body
-            +replyBox(reply)
+      section.contentSection.col-xs-12
+        if head.Picture
+          // show image if image exists
+          - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
+          a.imgContainer(href= imgBase + head.Picture, target= '_blank')
+            img(src= imgThumBase + picName)
+        +articleHeader(head)
+        section.mainContent
+          - var split = head.Content.split('\n')
+          p.content
+            each text in split
+              span= text
+              br
+        each reply in body
+          +replyBox(reply)
 
 mixin replyBox(reply)
   section.replyBox.clearfix
