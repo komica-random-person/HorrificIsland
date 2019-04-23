@@ -28,27 +28,83 @@ $(() => {
   };
   updateRefNum();
 
+  /* Bind .quote with hoverbox */
+  const bindHoverBox = () => {
+    $('.quote').each((index, element) => {
+      hoverbox.bindQuoteHoverEvent(element);
+    });
+  };
+  bindHoverBox();
 });
 
 class HoverBox {
   constructor() {
     this.e = getID('hoverBox');
+    this.showList = {};
+  }
+  bindQuoteHoverEvent(element) {
+    const self = this;
+    element.addEventListener('mouseleave', evt => {
+      /* damn */
+      if(self.showList[evt.target.dataset.num] === true)
+        self.e.innerHTML = '';
+    });
+    element.addEventListener('mouseenter', evt => {
+      let parent = element;
+      while(parent.className.match(/thread/) === null)
+        parent = parent.parentNode;
+      const targetNum = evt.target.dataset.num;
+      const reference = parent.dataset.number === targetNum ? parent : getQuery(`.replyBox[data-number="${targetNum}"]`, parent);
+      if(reference !== null) {
+        const isP = reference.tagName === 'ARTICLE';
+        const hEle = reference.querySelector(isP ? 'header[data-type="main"]' : 'header[data-type="reply"]');
+        const imgHeadElement = reference.querySelector(isP ? 'header.imgInfo' : 'section.imgInfo');
+        const imgElement = imgHeadElement === null ? null : isP ? imgHeadElement.nextSibling.children[0] : imgHeadElement.nextSibling;
+        const info = {
+          name: hEle.children[0 + (isP ? 1 : 0)].innerText,
+          date: hEle.children[1 + (isP ? 1 : 0)].innerText,
+          time: hEle.children[2 + (isP ? 1 : 0)].innerText,
+          id:   hEle.children[3 + (isP ? 1 : 0)].innerText,
+          num:  hEle.children[4 + (isP ? 1 : 0)].innerText,
+          img: imgHeadElement === null ? null : {
+            name: imgHeadElement.querySelector('a').innerText,
+            ori: imgElement.getAttribute('href'),
+            thumb: imgElement.children[0].getAttribute('src')
+          },
+          content: reference.querySelector('p.content').innerHTML
+        };
+        const content = self.getReplyBox(info);
+        self.e.innerHTML = self.mergeContent(content);
+        /* 應該要修改成動態產生，這樣之後才能 recursive */
+        self.showList[element.dataset.num] = true;
+      }
+    });
   }
   getReplyBox(info) {
+    const getImgBox = (img) => {
+      return `<section class="col-xs-12 imgInfo">
+            <h4 class="info">檔名: <a href="${img.ori}" target="_blank">${img.name}</a></h4>
+          </section>
+          <a class="imgContainer"><img src="${img.thumb}"></a>`;
+    };
     return `<section class="replyBox clearfix">
-  <header>
-    <span class="name">${info.name}</span>
-    <span class="date">${info.date}</span>
-    <span class="time">${info.time}</span>
-    <span class="id" data-id="${info.id}">ID:${info.id}</span>
-    <span class="num" data-num="${info.num}">
-      <a class="link">No.${info.num}</a>
-    </span>
-    <span class="del"><a class="link">刪除</a></span>
-    <span class="res"><a class="link">回覆</a></span>
-  </header>
-  <p class="content">${info.content}</p>
-</section>`;
+      <header>
+        <span class="name">${info.name}</span>
+        <span class="date">${info.date}</span>
+        <span class="time">${info.time}</span>
+        <span class="id" data-id="${info.id}">ID:${info.id}</span>
+        <span class="num" data-num="${info.num}">
+          <a class="link">No.${info.num}</a>
+        </span>
+        ${info.img === null ? '' : getImgBox(info.img)}
+        <span class="del"><a class="link">刪除</a></span>
+        <span class="res"><a class="link">回覆</a></span>
+      </header>
+      <p class="content">${info.content}</p>
+    </section>`;
+  }
+  mergeContent(...contents) {
+    return `<section class="contentSection">${contents.join('')}</section>`;
   }
 }
 

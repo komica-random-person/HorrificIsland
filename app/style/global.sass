@@ -29,14 +29,14 @@ a.link
             color: rgba(96, 96, 96, 1)
             width: 25em
 
-article.thread
+article.thread, #hoverBox
   margin-bottom: .7em
   padding-left: 0
   padding-bottom: 1.4em
   border-bottom: 2px solid rgba(255, 255, 255, .7)
-  header.imgInfo h4
-    font-size: .8em
-    margin-bottom: 3px
+  header.imgInfo h4, section.imgInfo h4
+    font-size: .85em
+    margin: .5em 0
   .contentSection
     header
       span
@@ -74,12 +74,6 @@ article.thread
       margin: 0
       font-size: 1.15em
       word-break: break-all
-    .replyBox
-      background: #282A2E
-      padding: .2em .5em
-      margin-bottom: 5px
-      .col-xs-12
-        padding-left: 0
   .quotable, .quote
     color: #81A2BE
     cursor: pointer
@@ -87,3 +81,23 @@ article.thread
       text-decoration: underline
     &.missing
       color: #ff8585
+.replyBox
+  background: #282A2E
+  padding: .2em .5em
+  margin-bottom: 5px
+  .col-xs-12
+    padding-left: 0
+
+#hoverBox
+  position: fixed
+  top: 0
+  left: 0
+  background: rgb(32, 32, 32)
+  border: 3px solid rgba(255, 255, 255, .7)
+  padding: 0
+  .contentSection
+    padding: 0
+  .replyBox
+    &:last-child
+      margin-bottom: 0
+

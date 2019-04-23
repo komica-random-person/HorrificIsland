@@ -6,17 +6,17 @@ mixin article(data)
   article.thread.col-xs-12.clearfix(data-number= head.No)
     form
       if head.Picture
-        // show image information if image exists
+        //- show image information if image exists
         header.col-xs-12.imgInfo
           h4.info= '檔名: '
             a(href= imgBase + head.Picture, target='_blank')= head.Picture
       section.contentSection.col-xs-12
         if head.Picture
-          // show image if image exists
+          //- show image if image exists
           - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
           a.imgContainer(href= imgBase + head.Picture, target= '_blank')
             img(src= imgThumBase + picName)
-        +articleHeader(head)
+        +articleHeader(head, 'main')
         section.mainContent
           - var split = head.Content.split('\n')
           p.content
@@ -27,13 +27,13 @@ mixin article(data)
           +replyBox(reply)
 
 mixin replyBox(reply)
-  section.replyBox.clearfix
-    +articleHeader(reply)
+  section.replyBox.clearfix(data-number= reply.No)
+    +articleHeader(reply, 'reply')
     if reply.Picture
-      header.col-xs-12.imgInfo
+      section.col-xs-12.imgInfo
         h4.info= '檔名: '
           a(href= imgBase + reply.Picture, target='_blank')= reply.Picture
-      // there exist a ($filename)s.jpg file for each image, use Regex to get the url
+      //- there exist a ($filename)s.jpg file for each image, use Regex to get the url
       - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
       a.imgContainer
         img(src= imgThumBase + picName)
@@ -43,8 +43,8 @@ mixin replyBox(reply)
         span= text
         br
 
-mixin articleHeader(info)
-  header
+mixin articleHeader(info, t)
+  header(data-type= t)
     if info.Title != ''
       span.title= info.Title
     span.name= info.Name
