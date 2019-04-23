@@ -46,7 +46,7 @@ $(() => {
         const match = p.innerText.match(/>>\d{8}\s*/g);
         match.forEach(_match => {
           /* Since split can't detect \n, slice the \n */
-          _match = _match.slice(_match.length - 1).match(/\s/) === null ? _match :  _match.slice(0, _match.length - 1);
+          _match = _match.slice(_match.length - 1).match(/\s/) === null ? _match :  _match.replace(/\s/g, '');
           const num = _match.slice(2);
           if(getQuery(`.quotable[data-num="${num}"]`, thread) !== null)
             p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
