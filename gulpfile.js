@@ -30,10 +30,9 @@ const util_static = cb => {
     .pipe(gulp.symlink('dist/static'));
   cb();
 };
-const build_utils = cb => {
-  gulp.series(util_sass, util_babel, util_static)();
-  cb();
-}
+const build_utils = () => {
+  return gulp.parallel(util_sass, util_babel, util_static);
+};
 
 /* Dev */
 const watch = cb => {
@@ -69,16 +68,13 @@ const task_browserSync = cb => {
       reloadDelay: 1500,
     });
   };
-  gulp.series(build_utils, prepro, task)();
-  cb();
+  return gulp.series(clean, build_utils(), prepro, task);
 };
-exports.dev = task_browserSync;
+exports.dev = task_browserSync();
 
-const defaultTask = cb => {
-  const series = gulp.series(clean, build_utils);
-  series();
-  cb();
+const defaultTask = () => {
+  return gulp.series(clean, build_utils());
 };
-exports.default = defaultTask;
+exports.default = defaultTask();
 
 
