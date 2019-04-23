@@ -10,6 +10,19 @@ const findParent = (element, pattern) => {
   return element.parentElement === null ? null : element;
 };
 
+const showImg = (imgContainer) => {
+  const zoomed = imgContainer.dataset.status === 'yes';
+  if(zoomed) {
+    imgContainer.dataset.status = 'no';
+    imgContainer.children[0].setAttribute('src', imgContainer.dataset.thumb);
+    imgContainer.className = imgContainer.className.replace(/\s*zoomed\s*/g, '');
+  } else {
+    imgContainer.dataset.status = 'yes';
+    imgContainer.children[0].setAttribute('src', imgContainer.dataset.ori);
+    imgContainer.className += ' zoomed';
+  }
+};
+
 $(() => {
   /* hover box */
   const hoverbox = new HoverBox();
@@ -17,7 +30,7 @@ $(() => {
     /* Scan every existing content and replace ">>\d{8}" with span.quote */
     $('p.content').each((_, p) => {
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
-        const thread = p.parentElement.parentElement;
+        const thread = findParent(p, /thread/); // p.parentElement.parentElement;
         const match = p.innerText.match(/>>\d{8}\s/g);
         match.forEach(_match => {
           /* Since split can't detect \n, slice the \n */

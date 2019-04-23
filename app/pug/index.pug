@@ -3,48 +3,49 @@
 mixin article(data)
   - var head = data.Head;
   - var body = data.Bodies;
-  article.thread.col-xs-12.clearfix(data-number= head.No)
+  article.thread.col-xs-12.clearfix(data-number=head.No)
     form
       if head.Picture
         //- show image information if image exists
         header.col-xs-12.imgInfo
           h4.info= '檔名: '
-            a(href= imgBase + head.Picture, target='_blank')= head.Picture
+            a(href=imgBase + head.Picture, target='_blank')= head.Picture
       section.contentSection.col-xs-12
         if head.Picture
-          //- show image if image exists
-          - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
-          a.imgContainer(href= imgBase + head.Picture, target= '_blank')
-            img(src= imgThumBase + picName)
+          //- show image if image exists, use REGEX to get image filename
+          - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg')
+          a.imgContainer(onclick='showImg(this)', data-ori=imgBase + head.Picture, data-thumb=imgThumBase + picName)
+            img(src=imgThumBase + picName)
         +articleHeader(head, 'main')
         section.mainContent
-          - var split = head.Content.split('\n')
           p.content
+            //- replace \n with <br>
+            - var split = head.Content.split('\n')
             each text in split
-              span= text
+              | #{text}
               br
         each reply in body
           +replyBox(reply)
 
 mixin replyBox(reply)
-  section.replyBox.clearfix(data-number= reply.No)
+  section.replyBox.clearfix(data-number=reply.No)
     +articleHeader(reply, 'reply')
     if reply.Picture
       section.col-xs-12.imgInfo
         h4.info= '檔名: '
-          a(href= imgBase + reply.Picture, target='_blank')= reply.Picture
+          a(href=imgBase + reply.Picture, target='_blank')= reply.Picture
       //- there exist a ($filename)s.jpg file for each image, use Regex to get the url
       - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
-      a.imgContainer
-        img(src= imgThumBase + picName)
+      a.imgContainer(onclick='showImg(this)', data-ori=imgBase + reply.Picture, data-thumb=imgThumBase + picName)
+        img(src=imgThumBase + picName)
     - var split = reply.Content.split('\n')
     p.content
       each text in split
-        span= text
+        | #{text}
         br
 
 mixin articleHeader(info, t)
-  header(data-type= t)
+  header(data-type=t)
     if info.Title != ''
       span.title= info.Title
     span.name= info.Name
@@ -63,28 +64,31 @@ mixin postForm(labelText, id, placeholder, type)
     label
       h4.label= labelText
       if type == 'text' || type == 'file'
-        input(id= id, placeholder=placeholder, type=type, maxlength='100')
+        input(id=id, placeholder=placeholder, type=type, maxlength='100')
       else
-        textarea(id= id, placeholder=placeholder)
+        textarea(id=id, placeholder=placeholder)
 
 div.container
   header.pageTitle
     h1 Horrific Island?
+    h2 (目前僅有爬 K 島之功能，API尚未搭建 Github:
+      a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
+      | )
 
-  section.postContainer
-    div.postTable
-      h2 這邊之後再改幹
-      +postForm('名稱', 'postName', '欲顯示之名稱', 'text')
-      +postForm('標題', 'postTitle', '輸入標題', 'text')
-      +postForm('內文', 'postContent', '無本文', 'textarea')
-      +postForm('附加圖檔', 'postImg', '', 'file')
+  //- section.postContainer
+  //-   div.postTable
+  //-     h2 這邊之後再改幹
+  //-     +postForm('名稱', 'postName', '欲顯示之名稱', 'text')
+  //-     +postForm('標題', 'postTitle', '輸入標題', 'text')
+  //-     +postForm('內文', 'postContent', '無本文', 'textarea')
+  //-     +postForm('附加圖檔', 'postImg', '', 'file')
 
   each discussion in pageContent
     +article(discussion)
 
   section#hoverBox.hoverBox
 
-  p !{JSON.stringify(pageContent)}
+  p.debug= JSON.stringify(pageContent)
 
 
 

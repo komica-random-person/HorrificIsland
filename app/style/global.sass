@@ -68,6 +68,10 @@ article.thread, #hoverBox
         display: inline-block
         padding-right: 10px
         margin-right: 5px
+      &.zoomed
+        display: table
+        img
+          max-width: 100%
     p.content
       padding: .9em 1em 1em 1.8em
       text-align: justify
@@ -98,9 +102,16 @@ article.thread, #hoverBox
   article
     margin-bottom: 0
     border: none
+    padding: 1em
   .contentSection
     padding: 0
+    section.mainContent
+      padding: 0
   .replyBox
     &:last-child
       margin-bottom: 0
+
+p.debug
+  text-align: justify
+  word-break: break-all
 
