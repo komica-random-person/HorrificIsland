@@ -105,8 +105,8 @@ class HoverBox {
         /* computes offset XY after showing element */
         const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : window.innerWidth - hoverBox.offsetWidth;
         const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
-        hoverBox.style.left = showX + 'px';
-        hoverBox.style.top = showY + 'px';
+        hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
+        hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
         self.showList[element.dataset.num] = hoverBox;
       }
     });
