@@ -71,7 +71,8 @@ const task_browserSync = cb => {
   };
   return gulp.series(clean, build_utils(), prepro, task);
 };
-exports.dev = task_browserSync();
+if(process.env.NODE_ENV === 'development')
+  exports.dev = task_browserSync();
 
 const defaultTask = () => {
   return gulp.series(clean, build_utils());
