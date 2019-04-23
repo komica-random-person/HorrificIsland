@@ -11,15 +11,16 @@ const findParent = (element, pattern) => {
 };
 
 const showImg = (imgContainer) => {
-  const zoomed = imgContainer.dataset.status === 'yes';
+  const e = imgContainer;
+  const zoomed = e.dataset.status === 'yes';
   if(zoomed) {
-    imgContainer.dataset.status = 'no';
-    imgContainer.children[0].setAttribute('src', imgContainer.dataset.thumb);
-    imgContainer.className = imgContainer.className.replace(/\s*zoomed\s*/g, '');
+    e.dataset.status = 'no';
+    e.children[0].setAttribute('src', e.dataset.thumb);
+    e.className = e.className.replace(/\s*zoomed\s*/g, '');
   } else {
-    imgContainer.dataset.status = 'yes';
-    imgContainer.children[0].setAttribute('src', imgContainer.dataset.ori);
-    imgContainer.className += ' zoomed';
+    e.dataset.status = 'yes';
+    e.children[0].setAttribute('src', e.dataset.ori);
+    e.className += ' zoomed';
   }
 };
 
@@ -31,10 +32,10 @@ $(() => {
     $('p.content').each((_, p) => {
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
         const thread = findParent(p, /thread/); // p.parentElement.parentElement;
-        const match = p.innerText.match(/>>\d{8}\s/g);
+        const match = p.innerText.match(/>>\d{8}\s*/g);
         match.forEach(_match => {
           /* Since split can't detect \n, slice the \n */
-          _match = _match.slice(0, _match.length - 1);
+          _match = _match.slice(_match.length - 1).match(/\s/) === null ? _match :  _match.slice(0, _match.length - 1);
           const num = _match.slice(2);
           if(getQuery(`.quotable[data-num="${num}"]`, thread) !== null)
             p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
