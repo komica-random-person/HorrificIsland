@@ -11,9 +11,12 @@ const findParent = (element, pattern) => {
 };
 
 const showImg = (imgContainer) => {
+  /* 1. determine whether element is zoomed in by attribute: data-status
+   * 2. check the file format, if is webm, create video element and insert to its parent */
   const e = imgContainer;
   const zoomed = e.dataset.status === 'yes';
   if(zoomed) {
+    /* if image is zoomed */
     e.dataset.status = 'no';
     e.children[0].setAttribute('src', e.dataset.thumb);
     e.className = e.className.replace(/\s*zoomed\s*/g, '').replace(/\s*video\s*/g, '');
@@ -38,11 +41,11 @@ const showImg = (imgContainer) => {
 $(() => {
   /* hover box */
   const hoverbox = new HoverBox();
-  const updateRefNum = () => {
+  const updateQuote = () => {
     /* Scan every existing content and replace ">>\d{8}" with span.quote */
     $('p.content').each((_, p) => {
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
-        const thread = findParent(p, /thread/); // p.parentElement.parentElement;
+        const thread = findParent(p, /thread/);
         const match = p.innerText.match(/>>\d{8}\s*/g);
         match.forEach(_match => {
           /* Since split can't detect \n, slice the \n */
@@ -54,9 +57,20 @@ $(() => {
             p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote missing" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
         });
       }
+      /* change the color of quote text */
+      if(p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/) !== null) {
+        /* REGEX 講解: 
+         * (1) (?: $pattern1 | $pattern2) 代表 $pattern1 跟 $pattern2 其中一個成立即可
+         * (2)[^$pattern] 代表 not $pattern */
+        const match = p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/g);
+        match.forEach(_match => {
+          _match = _match.replace(/\s/g, '');
+          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quoteText">${escape(_match)}</span>`)
+        });
+      }
     });
   };
-  updateRefNum();
+  updateQuote();
 
   /* Bind .quote with hoverbox */
   const bindHoverBox = () => {
