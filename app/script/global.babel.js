@@ -50,23 +50,42 @@ class HoverBox {
   bindQuoteHoverEvent(element) {
     const self = this;
     element.addEventListener('mouseleave', evt => {
-      /* damn */
-      if(self.showList[evt.target.dataset.num] === true)
-        self.e.innerHTML = '';
+      evt.stopImmediatePropagation();
+      const targetNum = evt.target.dataset.num;
+      if(self.showList[targetNum] !== undefined) {
+        const onHover = this.e.querySelector(`.hoverBox[data-num="${targetNum}"]:hover`) !== null;
+        if(!onHover){
+          self.e.removeChild(self.showList[targetNum]);
+        } else {
+          self.showList[targetNum].addEventListener('mouseleave', _evt => {
+            self.e.removeChild(_evt.target);
+          });
+        }
+        delete self.showList[targetNum];
+      }
     });
     element.addEventListener('mouseenter', evt => {
-       const parent = findParent(element, /thread/);
-       const targetNum = evt.target.dataset.num;
-       const reference = parent.dataset.number === targetNum ? parent : getQuery(`.replyBox[data-number="${targetNum}"]`, parent);
-       if(reference !== null) {
-         const isP = reference.tagName === 'ARTICLE';
-         const clone = $(reference).clone(true).find('.replyBox').remove().end()[0];
-         console.log(clone)
-         self.e.innerHTML = self.mergeContent(clone.outerHTML);
-         /* 應該要修改成動態產生，這樣之後才能 recursive */
-         self.showList[element.dataset.num] = true;
-       }
+      evt.stopImmediatePropagation();
+      const coord = [evt.clientX, evt.clientY];
+      const parent = findParent(element, /thread/);
+      const targetNum = evt.target.dataset.num;
+      const reference = parent.dataset.number === targetNum ? parent : getQuery(`.replyBox[data-number="${targetNum}"]`, parent);
+      if(reference !== null) {
+        const clone = $(reference).clone(true).find('.replyBox').remove().end()[0];
+        const hoverBox = document.createElement('div');
+        hoverBox.className = 'hoverBox';
+        hoverBox.innerHTML = self.mergeContent(clone.outerHTML);
+        hoverBox.dataset.num = targetNum;
+        self.e.appendChild(hoverBox);
+        /* computes offset XY after showing element */
+        const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : window.innerWidth - hoverBox.offsetWidth;
+        const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
+        hoverBox.style.left = showX + 'px';
+        hoverBox.style.top = showY + 'px';
+        self.showList[element.dataset.num] = hoverBox;
+      }
     });
+  }
   mergeContent(...contents) {
     return `<section class="contentSection">${contents.join('')}</section>`;
   }

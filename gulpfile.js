@@ -22,6 +22,7 @@ const util_babel = cb => {
     .pipe(babel({
       presets: ['@babel/preset-env']
     }))
+    .on('error', err => console.log(err.toString()))
     .pipe(gulp.dest('dist/script/'));
   cb();
 };
