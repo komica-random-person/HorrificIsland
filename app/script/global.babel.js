@@ -16,11 +16,22 @@ const showImg = (imgContainer) => {
   if(zoomed) {
     e.dataset.status = 'no';
     e.children[0].setAttribute('src', e.dataset.thumb);
-    e.className = e.className.replace(/\s*zoomed\s*/g, '');
+    e.className = e.className.replace(/\s*zoomed\s*/g, '').replace(/\s*video\s*/g, '');
+    if(e.children[e.children.length - 1].tagName === 'VIDEO')
+      e.removeChild(e.children[e.children.length - 1]);
   } else {
     e.dataset.status = 'yes';
     e.children[0].setAttribute('src', e.dataset.ori);
     e.className += ' zoomed';
+    if(e.dataset.ori.match(/webm/) !== null) {
+      const video = document.createElement('video');
+      video.setAttribute('src', e.dataset.ori);
+      video.loop = true;
+      video.autoplay = true;
+      video.controls = true;
+      e.appendChild(video);
+      e.className += ' video';
+    }
   }
 };
 
