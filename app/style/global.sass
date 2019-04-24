@@ -141,3 +141,22 @@ p.debug
 div.bar
   margin: 50px 0
   height: 5px
+
+@media screen and (max-width: 600px)
+  .container
+    padding: 5px
+    header.pageTitle h2
+      font-size: 1em
+    article.thread
+      padding: 0
+      section.contentSection
+        padding: 0
+        a.imgContainer
+          display: inline-block
+          width: 100%
+          & + header
+            width: 100%
+      p.content
+        padding: .5em
+        font-size: 1em
+
