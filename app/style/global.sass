@@ -104,6 +104,9 @@ article.thread, #hoverBox
         text-decoration: underline
   .quoteText
     color: #ADBD68
+  .replyBox.quotedArticle, &.quotedArticle .mainContent
+    p.quotedList
+      display: inline-block
 .replyBox
   background: #282A2E
   padding: .2em .5em
@@ -112,9 +115,6 @@ article.thread, #hoverBox
     padding-left: 0
   p.quotedList
     margin-top: 0
-  &.quotedArticle
-    p.quotedList
-      display: inline-block
 
 #hoverBox, .hoverBox
   position: fixed

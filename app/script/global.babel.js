@@ -64,7 +64,7 @@ $(() => {
             const quotedNumElement = quotedList.querySelector('.quotedNum');
             const quotedNum = Number(quotedNumElement.innerText);
             quotedNumElement.innerText = quotedNum + 1;
-            const span = $(document.createElement('span')).addClass('quoted').text('>>' + quoter.dataset.number);
+            const span = $(document.createElement('span')).addClass('quoted').attr('data-target', quotedNum).text('>>' + quoter.dataset.number);
             quotedList.appendChild(span[0]);
           });
         });
@@ -80,7 +80,9 @@ $(() => {
           p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quoteText">${escape(_match)}</span>`)
         });
       }
-      p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+)((?:[\s]|\<|$))/g, '<a href="$1">$1</a>$2');
+      /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
+       * 之後有推播，前端 append 可能要注意這部份 */
+      p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+?)([\s|\<|\^|\@])/g, '<a class="link" href="$1">$1</a>$2');
     });
   };
   updateQuote();
@@ -89,6 +91,9 @@ $(() => {
   const bindHoverBox = () => {
     $('.quote').each((index, element) => {
       hoverbox.bindQuoteHoverEvent(element);
+    });
+    $('.quotedArticle p.quotedList').each((index, element) => {
+      hoverbox.bindQuotedListBox(element);
     });
   };
   bindHoverBox();
@@ -166,6 +171,10 @@ class HoverBox {
       } else
         console.log(reference === null ? 'Reference element not found.' : getQuery(`.hoverBox[data-origin="${targetNum}"]`))
     });
+  }
+  bindQuotedListBox(element) {
+    /* Input is p.quotedList  */
+    console.log(element)
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
     const self = this;

@@ -9,7 +9,7 @@ mixin article(data)
         //- show image information if image exists
         header.col-xs-12.imgInfo
           h4.info= '檔名: '
-            a(href=imgBase + head.Picture, target='_blank')= head.Picture
+            a.link(href=imgBase + head.Picture, target='_blank')= head.Picture
       section.contentSection.col-xs-12
         if head.Picture
           //- show image if image exists, use REGEX to get image filename
@@ -37,7 +37,7 @@ mixin replyBox(reply)
     if reply.Picture
       section.col-xs-12.imgInfo
         h4.info= '檔名: '
-          a(href=imgBase + reply.Picture, target='_blank')= reply.Picture
+          a.link(href=imgBase + reply.Picture, target='_blank')= reply.Picture
       //- there exist a ($filename)s.jpg file for each image, use Regex to get the url
       - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
       a.imgContainer(onclick='showImg(this)', data-ori=imgBase + reply.Picture, data-thumb=imgThumBase + picName)
