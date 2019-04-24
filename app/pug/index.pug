@@ -24,6 +24,9 @@ mixin article(data)
             each text in split
               | #{text}
               br
+          p.quoted Replies(
+            span.quotedNum
+            | ):
         each reply in body
           +replyBox(reply)
 
@@ -43,6 +46,9 @@ mixin replyBox(reply)
       each text in split
         | #{text}
         br
+    p.quoted Replies(
+      span.quotedNum
+      | ):
 
 mixin articleHeader(info, t)
   header(data-type=t)

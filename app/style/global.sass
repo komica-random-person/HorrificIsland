@@ -83,13 +83,17 @@ article.thread, #hoverBox
       margin: 0
       font-size: 1.15em
       word-break: break-all
-  .quotable, .quote
+  .quotable, .quote, .quoted
     color: #81A2BE
     cursor: pointer
     &:hover, &:focus
       text-decoration: underline
     &.missing
       color: #ff8585
+  .quoted
+    margin-top: 1em
+    font-size: .9em
+    margin-bottom: 0
   .quoteText
     color: #ADBD68
 .replyBox
@@ -98,6 +102,8 @@ article.thread, #hoverBox
   margin-bottom: 5px
   .col-xs-12
     padding-left: 0
+  p.quoted
+    margin-top: 0
 
 #hoverBox, .hoverBox
   position: fixed

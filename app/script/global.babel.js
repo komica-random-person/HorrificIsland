@@ -86,43 +86,99 @@ class HoverBox {
     this.e = getID('hoverBox');
     this.showList = {};
   }
-  bindQuoteHoverEvent(element) {
+  bindQuoteHoverEvent(element, recursive=false) {
     const self = this;
     element.addEventListener('mouseleave', evt => {
       evt.stopImmediatePropagation();
-      const targetNum = evt.target.dataset.num;
-      if(self.showList[targetNum] !== undefined) {
-        const onHover = this.e.querySelector(`.hoverBox[data-num="${targetNum}"]:hover`) !== null;
-        if(!onHover){
-          self.e.removeChild(self.showList[targetNum]);
+      const threadNum = findParent(evt.target, recursive ? /hoverBox/ : /thread/).dataset.number;
+      if(self.showList[threadNum] !== undefined) {
+        const onHover = () => self.e.querySelector(`.hoverBox:hover`) !== null;
+        if(!onHover()) {
+          self.e.removeChild(self.showList[threadNum].element);
+          delete self.showList[threadNum];
         } else {
-          self.showList[targetNum].addEventListener('mouseleave', _evt => {
-            self.e.removeChild(_evt.target);
+          let lastChild = self.showList[threadNum];
+          while(lastChild.child !== null)
+            lastChild = lastChild.child;
+          lastChild.element.addEventListener('mouseleave', _evt => {
+            _evt.stopImmediatePropagation();
+            if(!onHover()) {
+              // self.e.removeChild(self.showList[threadNum].element);
+              // delete self.showList[threadNum];
+            } else {
+              const element = getQuery('.hoverBox:hover');
+              let target_level = self.showList[threadNum];
+              while(target_level.child !== null && target_level.element !== element)
+                target_level = target_level.child;
+              target_level.parent.element.removeChild(target_level.element);
+              target_level.parent.child = null;
+            }
           });
         }
-        delete self.showList[targetNum];
       }
     });
     element.addEventListener('mouseenter', evt => {
       evt.stopImmediatePropagation();
       const coord = [evt.clientX, evt.clientY];
-      const parent = findParent(element, /thread/);
       const targetNum = evt.target.dataset.num;
-      const reference = parent.dataset.number === targetNum ? parent : getQuery(`.replyBox[data-number="${targetNum}"]`, parent);
-      if(reference !== null) {
+      let parentElement = findParent(element, recursive ? /hoverBox/ : /thread/);
+      let [threadElement, reference] = [parentElement, null];
+      if(recursive) {
+        threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
+        reference = threadElement[0].dataset.number === targetNum ? threadElement[0] : threadElement.find(`*[data-number="${targetNum}"]`)[0];
+      } else
+        reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
+      if(reference !== null && getQuery(`.hoverBox[data-origin="${targetNum}"]`) === null) {
         const clone = $(reference).clone(true).find('.replyBox').remove().end()[0];
-        const hoverBox = document.createElement('div');
-        hoverBox.className = 'hoverBox';
-        hoverBox.innerHTML = self.mergeContent(clone.outerHTML);
-        hoverBox.dataset.num = targetNum;
-        self.e.appendChild(hoverBox);
-        /* computes offset XY after showing element */
-        const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : window.innerWidth - hoverBox.offsetWidth;
-        const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
-        hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
-        hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
-        self.showList[element.dataset.num] = hoverBox;
+        self.createHoverBox({
+          content: clone.outerHTML,
+          targetNum,
+          coord,
+          threadNum: recursive ? threadElement[0].dataset.number : threadElement.dataset.number,
+          parentElement: recursive ? parentElement : null
+        });
+      } else
+        console.log(reference === null ? 'Reference element not found.' : getQuery(`.hoverBox[data-origin="${targetNum}"]`))
+    });
+  }
+  createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
+    const self = this;
+    /* Check if hoverBox to this target is already exist */
+    let appendElement = self.e;
+    if(parentElement !== null) {
+      let p = self.showList[threadNum];
+      if(p.child !== null) {
+        while(p.element !== parentElement && p.child !== null)
+          p = p.child;
+        p.element.removeChild(p.child.element);
+        p.child = null;
       }
+    }
+    const hoverBox = document.createElement('div');
+    hoverBox.className = 'hoverBox';
+    hoverBox.innerHTML = self.mergeContent(content);
+    hoverBox.dataset.number = threadNum;
+    hoverBox.dataset.origin = targetNum;
+
+    let lastChild = { element: self.e };
+    if(self.showList[threadNum] !== undefined) {
+      lastChild = self.showList[threadNum];
+      while(lastChild.child !== null)
+        lastChild = lastChild.child;
+      lastChild.child = { element: hoverBox, parent: lastChild, child: null };
+    } else
+      self.showList[threadNum] = { element: hoverBox, parent: null, child: null };
+    lastChild.element.appendChild(hoverBox);
+
+    /* computes offset XY after showing element */
+    const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : window.innerWidth - hoverBox.offsetWidth;
+    const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
+    hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
+    hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
+
+
+    $(hoverBox).find('.quote').each((index, element) => {
+      self.bindQuoteHoverEvent(element, true);
     });
   }
   mergeContent(...contents) {
