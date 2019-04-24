@@ -59,7 +59,7 @@ $(() => {
       }
       /* change the color of quote text */
       if(p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/) !== null) {
-        /* REGEX 講解: 
+        /* REGEX 說明:
          * (1) (?: $pattern1 | $pattern2) 代表 $pattern1 跟 $pattern2 其中一個成立即可
          * (2)[^$pattern] 代表 not $pattern */
         const match = p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/g);
@@ -92,26 +92,35 @@ class HoverBox {
       evt.stopImmediatePropagation();
       const threadNum = findParent(evt.target, recursive ? /hoverBox/ : /thread/).dataset.number;
       if(self.showList[threadNum] !== undefined) {
+        /* just to make sure that self.showList works well. */
         const onHover = () => self.e.querySelector(`.hoverBox:hover`) !== null;
         if(!onHover()) {
+          /* 滑鼠沒有在任何 hoverBox 上，移除所有 hoverBox */
           self.e.removeChild(self.showList[threadNum].element);
           delete self.showList[threadNum];
         } else {
-          let lastChild = self.showList[threadNum];
-          while(lastChild.child !== null)
-            lastChild = lastChild.child;
+          if(recursive) {
+            /* 若為 hoverBox 中觸發的事件，檢查滑鼠是否位於觸發層級的子層級上，若否則刪除子層級 */
+            const element = findParent(evt.target, /hoverBox/);
+            const elementTree = self.showList[threadNum].findChild(element);
+            if(elementTree !== null) {
+              if(elementTree.child === null || !elementTree.child.element.matches(':hover'))
+                self.showList[threadNum].removeChildFromElement(element);
+            }
+          }
+
+          /* 由於滑鼠離開 span 卻沒有刪除 hoverBox，加入偵測滑鼠離開 hoverBox 的事件來判斷是否進行 hoverBox 的刪除 */
+          const lastChild = self.showList[threadNum].lastChild;
           lastChild.element.addEventListener('mouseleave', _evt => {
             _evt.stopImmediatePropagation();
             if(!onHover()) {
-              // self.e.removeChild(self.showList[threadNum].element);
-              // delete self.showList[threadNum];
+              self.e.removeChild(self.showList[threadNum].element);
+              delete self.showList[threadNum];
             } else {
-              const element = getQuery('.hoverBox:hover');
-              let target_level = self.showList[threadNum];
-              while(target_level.child !== null && target_level.element !== element)
-                target_level = target_level.child;
-              target_level.parent.element.removeChild(target_level.element);
-              target_level.parent.child = null;
+              /* 將觸發離開 hoverBox 事件之 hoverBox 刪除 */
+              const target = self.showList[threadNum].findChild(_evt.target);
+              if(target !== null)
+                target.removeNode();
             }
           });
         }
@@ -124,11 +133,14 @@ class HoverBox {
       let parentElement = findParent(element, recursive ? /hoverBox/ : /thread/);
       let [threadElement, reference] = [parentElement, null];
       if(recursive) {
+        /* 由於 recursive 關係，hoverBox 之 parentElement 會是 hoverBox, 要找到對應 thread 上的元素才能進行 quote */
         threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
         reference = threadElement[0].dataset.number === targetNum ? threadElement[0] : threadElement.find(`*[data-number="${targetNum}"]`)[0];
       } else
         reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
+
       if(reference !== null && getQuery(`.hoverBox[data-origin="${targetNum}"]`) === null) {
+        /* If reference exists in current thread and there's no existing hoverBox about same reference, show hoverBox */
         const clone = $(reference).clone(true).find('.replyBox').remove().end()[0];
         self.createHoverBox({
           content: clone.outerHTML,
@@ -146,13 +158,10 @@ class HoverBox {
     /* Check if hoverBox to this target is already exist */
     let appendElement = self.e;
     if(parentElement !== null) {
-      let p = self.showList[threadNum];
-      if(p.child !== null) {
-        while(p.element !== parentElement && p.child !== null)
-          p = p.child;
-        p.element.removeChild(p.child.element);
-        p.child = null;
-      }
+      /* 若存在相同層級的 hoverBox, 刪除之(倒裝三小w) */
+      const p = self.showList[threadNum].findChild(parentElement);
+      if(p !== null)
+        p.removeChild();
     }
     const hoverBox = document.createElement('div');
     hoverBox.className = 'hoverBox';
@@ -162,12 +171,10 @@ class HoverBox {
 
     let lastChild = { element: self.e };
     if(self.showList[threadNum] !== undefined) {
-      lastChild = self.showList[threadNum];
-      while(lastChild.child !== null)
-        lastChild = lastChild.child;
-      lastChild.child = { element: hoverBox, parent: lastChild, child: null };
+      lastChild = self.showList[threadNum].lastChild;
+      lastChild.child = new ElementTree(hoverBox, lastChild, null);
     } else
-      self.showList[threadNum] = { element: hoverBox, parent: null, child: null };
+      self.showList[threadNum] = new ElementTree(hoverBox, null, null);
     lastChild.element.appendChild(hoverBox);
 
     /* computes offset XY after showing element */
@@ -176,8 +183,8 @@ class HoverBox {
     hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
-
     $(hoverBox).find('.quote').each((index, element) => {
+      /* recursively bind */
       self.bindQuoteHoverEvent(element, true);
     });
   }
@@ -185,5 +192,49 @@ class HoverBox {
     return `<section class="contentSection">${contents.join('')}</section>`;
   }
 }
-
+class ElementTree {
+  constructor(element, parent, child) {
+    this.element = element;
+    this.parent = parent;
+    this.child = child;
+  }
+  get lastChild() {
+    let tree = this;
+    while(tree.child !== null)
+      tree = tree.child;
+    return tree;
+  }
+  removeNode() {
+    if(this.parent !== null && this.parent.element !== undefined) {
+      this.parent.element.removeChild(this.element);
+      this.parent.child = null;
+      return true
+    } else return false;
+  }
+  removeChild() {
+    if(this.child !== null) {
+      this.element.removeChild(this.child.element);
+      this.child = null;
+    } else return false
+  }
+  removeChildFromElement(element) {
+    const child = this.findChild(element);
+    if(child !== null) {
+      child.child.removeNode();
+      return true;
+    } else return false;
+  }
+  findParent(targetElement) {
+    let tree = this;
+    while(tree.parent !== null && targetElement !== tree.element)
+      tree = tree.parent;
+    return tree.element !== targetElement ? null : tree;
+  }
+  findChild(targetElement) {
+    let tree = this;
+    while(tree.child !== null && targetElement !== tree.element)
+      tree = tree.child;
+    return tree.element !== targetElement ? null : tree;
+  }
+}
 
