@@ -55,6 +55,17 @@ $(() => {
             p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
           else
             p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote missing" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
+          /* add number to quoted article */
+          const quotedArticle = $(`*[data-number="${num}"]`).addClass('quotedArticle');
+          quotedArticle.each((index, ele) => {
+            const quotedList = getQuery('.quotedList', ele);
+            const quoter = findParent(p, /replyBox/);
+            const quotedNumElement = quotedList.querySelector('.quotedNum');
+            const quotedNum = Number(quotedNumElement.innerText);
+            quotedNumElement.innerText = quotedNum + 1;
+            const span = $(document.createElement('span')).addClass('quoted').text('>>' + quoter.dataset.number);
+            quotedList.appendChild(span[0]);
+          });
         });
       }
       /* change the color of quote text */
@@ -108,11 +119,12 @@ class HoverBox {
                 self.showList[threadNum].removeChildFromElement(element);
             }
           }
-
           /* 由於滑鼠離開 span 卻沒有刪除 hoverBox，加入偵測滑鼠離開 hoverBox 的事件來判斷是否進行 hoverBox 的刪除 */
           const lastChild = self.showList[threadNum].lastChild;
           lastChild.element.addEventListener('mouseleave', _evt => {
             _evt.stopImmediatePropagation();
+            if(self.showList[threadNum] === undefined)
+              return false;
             if(!onHover()) {
               self.e.removeChild(self.showList[threadNum].element);
               delete self.showList[threadNum];
@@ -141,7 +153,7 @@ class HoverBox {
 
       if(reference !== null && getQuery(`.hoverBox[data-origin="${targetNum}"]`) === null) {
         /* If reference exists in current thread and there's no existing hoverBox about same reference, show hoverBox */
-        const clone = $(reference).clone(true).find('.replyBox').remove().end()[0];
+        const clone = $(reference).addClass('quoted').clone(true).find('.replyBox').remove().end()[0];
         self.createHoverBox({
           content: clone.outerHTML,
           targetNum,
