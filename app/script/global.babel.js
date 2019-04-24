@@ -11,7 +11,8 @@ const findParent = (element, pattern) => {
 };
 
 const showImg = (imgContainer) => {
-  /* 1. determine whether element is zoomed in by attribute: data-status
+  /* This function is for onclick event on IMG tag.
+   * 1. determine whether element is zoomed in by attribute: data-status
    * 2. check the file format, if is webm, create video element and insert to its parent */
   const e = imgContainer;
   const zoomed = e.dataset.status === 'yes';
@@ -79,6 +80,7 @@ $(() => {
           p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quoteText">${escape(_match)}</span>`)
         });
       }
+      p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+)((?:[\s]|\<|$))/g, '<a href="$1">$1</a>$2');
     });
   };
   updateQuote();
