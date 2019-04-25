@@ -62,10 +62,12 @@ $(() => {
             const quotedList = getQuery('.quotedList', ele);
             const quoter = findParent(p, /replyBox/);
             const quotedNumElement = quotedList.querySelector('.quotedNum');
-            const quotedNum = Number(quotedNumElement.innerText);
-            quotedNumElement.innerText = quotedNum + 1;
-            const span = $(document.createElement('span')).addClass('quoted').attr('data-target', quotedNum).text('>>' + quoter.dataset.number);
+            const quotedCount = Number(quotedNumElement.innerText);
+            quotedNumElement.innerText = quotedCount + 1;
+            const span = $(document.createElement('span')).addClass('quoted').attr('data-num', quoter.dataset.number).text('>>' + quoter.dataset.number);
             quotedList.appendChild(span[0]);
+            /* set quotedfrom attr for showing hoverBox */
+            quotedList.dataset.quotedfrom = quotedList.dataset.quotedfrom === undefined ? quoter.dataset.number : quotedList.dataset.quotedfrom + `, ${quoter.dataset.number}`;
           });
         });
       }
@@ -106,75 +108,94 @@ class HoverBox {
   }
   bindQuoteHoverEvent(element, recursive=false) {
     const self = this;
-    element.addEventListener('mouseleave', evt => {
-      evt.stopImmediatePropagation();
-      const threadNum = findParent(evt.target, recursive ? /hoverBox/ : /thread/).dataset.number;
-      if(self.showList[threadNum] !== undefined) {
-        /* just to make sure that self.showList works well. */
-        const onHover = () => self.e.querySelector(`.hoverBox:hover`) !== null;
-        if(!onHover()) {
-          /* 滑鼠沒有在任何 hoverBox 上，移除所有 hoverBox */
-          self.e.removeChild(self.showList[threadNum].element);
-          delete self.showList[threadNum];
-        } else {
-          if(recursive) {
-            /* 若為 hoverBox 中觸發的事件，檢查滑鼠是否位於觸發層級的子層級上，若否則刪除子層級 */
-            const element = findParent(evt.target, /hoverBox/);
-            const elementTree = self.showList[threadNum].findChild(element);
-            if(elementTree !== null) {
-              if(elementTree.child === null || !elementTree.child.element.matches(':hover'))
-                self.showList[threadNum].removeChildFromElement(element);
+    element.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
+    element.addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive }));
+  }
+  mouseLeaveHoverBox({ element, recursive }) {
+    const mouseLeaveEvt = (self => {
+      return evt => {
+        evt.stopImmediatePropagation();
+        const threadNum = findParent(evt.target, recursive ? /hoverBox/ : /thread/).dataset.number;
+        if(self.showList[threadNum] !== undefined) {
+          /* just to make sure that self.showList works well. */
+          const onHover = () => self.e.querySelector(`.hoverBox:hover`) !== null;
+          if(!onHover()) {
+            /* 滑鼠沒有在任何 hoverBox 上，移除所有 hoverBox */
+            self.e.removeChild(self.showList[threadNum].element);
+            delete self.showList[threadNum];
+          } else {
+            if(recursive) {
+              /* 若為 hoverBox 中觸發的事件，檢查滑鼠是否位於觸發層級的子層級上，若否則刪除子層級 */
+              const element = findParent(evt.target, /hoverBox/);
+              const elementTree = self.showList[threadNum].findChild(element);
+              if(elementTree !== null) {
+                if(elementTree.child === null || !elementTree.child.element.matches(':hover'))
+                  self.showList[threadNum].removeChildFromElement(element);
+              }
             }
+            /* 由於滑鼠離開 span 卻沒有刪除 hoverBox，加入偵測滑鼠離開 hoverBox 的事件來判斷是否進行 hoverBox 的刪除 */
+            const lastChild = self.showList[threadNum].lastChild;
+            lastChild.element.addEventListener('mouseleave', _evt => {
+              _evt.stopImmediatePropagation();
+              if(self.showList[threadNum] === undefined)
+                return false;
+              if(!onHover()) {
+                self.e.removeChild(self.showList[threadNum].element);
+                delete self.showList[threadNum];
+              } else {
+                /* 將觸發離開 hoverBox 事件之 hoverBox 刪除 */
+                const target = self.showList[threadNum].findChild(_evt.target);
+                if(target !== null)
+                  target.removeNode();
+              }
+            });
           }
-          /* 由於滑鼠離開 span 卻沒有刪除 hoverBox，加入偵測滑鼠離開 hoverBox 的事件來判斷是否進行 hoverBox 的刪除 */
-          const lastChild = self.showList[threadNum].lastChild;
-          lastChild.element.addEventListener('mouseleave', _evt => {
-            _evt.stopImmediatePropagation();
-            if(self.showList[threadNum] === undefined)
-              return false;
-            if(!onHover()) {
-              self.e.removeChild(self.showList[threadNum].element);
-              delete self.showList[threadNum];
-            } else {
-              /* 將觸發離開 hoverBox 事件之 hoverBox 刪除 */
-              const target = self.showList[threadNum].findChild(_evt.target);
-              if(target !== null)
-                target.removeNode();
-            }
-          });
         }
       }
-    });
-    element.addEventListener('mouseenter', evt => {
-      evt.stopImmediatePropagation();
-      const coord = [evt.clientX, evt.clientY];
-      const targetNum = evt.target.dataset.num;
-      let parentElement = findParent(element, recursive ? /hoverBox/ : /thread/);
-      let [threadElement, reference] = [parentElement, null];
-      if(recursive) {
-        /* 由於 recursive 關係，hoverBox 之 parentElement 會是 hoverBox, 要找到對應 thread 上的元素才能進行 quote */
-        threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
-        reference = threadElement[0].dataset.number === targetNum ? threadElement[0] : threadElement.find(`*[data-number="${targetNum}"]`)[0];
-      } else
-        reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
-
-      if(reference !== null && getQuery(`.hoverBox[data-origin="${targetNum}"]`) === null) {
-        /* If reference exists in current thread and there's no existing hoverBox about same reference, show hoverBox */
-        const clone = $(reference).addClass('quoted').clone(true).find('.replyBox').remove().end()[0];
-        self.createHoverBox({
-          content: clone.outerHTML,
-          targetNum,
-          coord,
-          threadNum: recursive ? threadElement[0].dataset.number : threadElement.dataset.number,
-          parentElement: recursive ? parentElement : null
-        });
-      } else
-        console.log(reference === null ? 'Reference element not found.' : getQuery(`.hoverBox[data-origin="${targetNum}"]`))
-    });
+    })(this);
+    return mouseLeaveEvt;
   }
-  bindQuotedListBox(element) {
+  mouseEnterHoverBox({ element, recursive }) {
+    /* 用閉包將 this 綁定至 self 變數中 */
+    const mouseEnterEvt = (self => {
+      return evt => {
+        evt.stopImmediatePropagation();
+        const coord = [evt.clientX, evt.clientY];
+        const targetNum = evt.target.dataset.num;
+        let parentElement = findParent(element, recursive ? /hoverBox/ : /thread/);
+        let [threadElement, reference] = [parentElement, null];
+        if(recursive) {
+          /* 由於 recursive 關係，hoverBox 之 parentElement 會是 hoverBox, 要找到對應 thread 上的元素才能進行 quote */
+          threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
+          reference = threadElement[0].dataset.number === targetNum ? threadElement[0] : threadElement.find(`*[data-number="${targetNum}"]`)[0];
+        } else
+          reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
+        // console.log({threadElement, reference, targetNum});
+
+        if(reference !== null) {
+          /* If reference exists in current thread and there's no existing hoverBox about same reference, show hoverBox */
+          const clone = $(reference).addClass('quoted').clone(true).find('.replyBox').remove().end()[0];
+          self.createHoverBox({
+            content: clone.outerHTML,
+            targetNum,
+            coord,
+            threadNum: recursive ? threadElement[0].dataset.number : threadElement.dataset.number,
+            parentElement: recursive ? parentElement : null
+          });
+        } else
+          console.log('Reference element not found.');
+     };
+    })(this);
+    return mouseEnterEvt;
+  }
+  bindQuotedListBox(element, recursive=false) {
     /* Input is p.quotedList  */
-    console.log(element)
+    const self = this;
+    const $quotedElement = $(element).find('.quoted');
+    $quotedElement.each((index, e) => {
+      e.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: e, recursive }));
+      e.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: e, recursive }));
+    });
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
     const self = this;
@@ -202,14 +223,14 @@ class HoverBox {
 
     /* computes offset XY after showing element */
     const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : window.innerWidth - hoverBox.offsetWidth;
-    const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
     hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
+    /* 必須先移動 X 來避免由於 X overflow 的 line break 改變 offsetHeight */
+    const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
-    $(hoverBox).find('.quote').each((index, element) => {
-      /* recursively bind */
-      self.bindQuoteHoverEvent(element, true);
-    });
+    /* recursively bind */
+    $(hoverBox).find('.quote').each((index, element) => self.bindQuoteHoverEvent(element, true)).end()
+      .find('p.quotedList').each((index, element) => self.bindQuotedListBox(element, true));
   }
   mergeContent(...contents) {
     return `<section class="contentSection">${contents.join('')}</section>`;
