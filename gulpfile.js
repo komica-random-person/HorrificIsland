@@ -4,8 +4,12 @@ const babel = require('gulp-babel');
 const sass = require('gulp-sass');
 const del = require('del');
 const nodemon = require('gulp-nodemon');
+const uglify = require('gulp-uglify');
+const noop = require('gulp-noop');
 
 sass.compiler = require('node-sass');
+
+console.log(`Gulp run under NODE_ENV=${process.env.NODE_ENV}`)
 
 const clean = cb => {
   /* Since del returns a promise, resolve it with additional func */
@@ -23,6 +27,7 @@ const util_babel = cb => {
       presets: ['@babel/preset-env']
     }))
     .on('error', err => console.log(err.toString()))
+    .pipe(process.env.NODE_ENV !== 'development' ? uglify() : noop())
     .pipe(gulp.dest('dist/script/'));
   cb();
 };
