@@ -27,8 +27,10 @@
     "gulp-uglify": "^3.0.2",
     "mongodb": "^3.2.3",
     "node-sass": "^4.11.0",
+    "path": "^0.12.7",
     "pug": "^2.0.3",
-    "request": "^2.88.0"
+    "request": "^2.88.0",
+    "serve-favicon": "^2.5.0"
   },
   "devDependencies": {
     "browser-sync": "^2.26.3"

@@ -32,7 +32,7 @@ const util_babel = cb => {
   cb();
 };
 const util_static = cb => {
-  gulp.src('static/**')
+  gulp.src('static/*')
     .pipe(gulp.symlink('dist/static'));
   cb();
 };
