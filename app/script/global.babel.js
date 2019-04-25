@@ -2,7 +2,7 @@
 const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
-const getQueriesArray = css => Array.prototype.slice.apply(getQueries(css));
+const getQueriesArray = (css, ele=document) => Array.prototype.slice.apply(getQueries(css, ele));
 const escape = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 const findParent = (element, pattern) => {
   while(element.parentElement !== null && element.className.match(pattern) === null)
@@ -53,9 +53,9 @@ $(() => {
           _match = _match.slice(_match.length - 1).match(/\s/) === null ? _match :  _match.replace(/\s/g, '');
           const num = _match.slice(2);
           if(getQuery(`.quotable[data-num="${num}"]`, thread) !== null)
-            p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
+            p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
           else
-            p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quote missing" data-quoteType="num" data-num="${num}">${escape(_match)}</span>`);
+            p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote missing" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
           /* add number to quoted article */
           const quotedArticle = $(`*[data-number="${num}"]`).addClass('quotedArticle');
           quotedArticle.each((index, ele) => {
@@ -64,8 +64,9 @@ $(() => {
             const quotedNumElement = quotedList.querySelector('.quotedNum');
             const quotedCount = Number(quotedNumElement.innerText);
             quotedNumElement.innerText = quotedCount + 1;
-            const span = $(document.createElement('span')).addClass('quoted').attr('data-num', quoter.dataset.number).text('>>' + quoter.dataset.number);
-            quotedList.appendChild(span[0]);
+            const $container = $(document.createElement('a')).addClass('link').attr('href', `#${quoter.dataset.number}`).append(document.createElement('span'));
+            const span = $($container[0].children[0]).addClass('quoted').attr('data-num', quoter.dataset.number).text('>>' + quoter.dataset.number);
+            quotedList.appendChild($container[0]);
             /* set quotedfrom attr for showing hoverBox */
             quotedList.dataset.quotedfrom = quotedList.dataset.quotedfrom === undefined ? quoter.dataset.number : quotedList.dataset.quotedfrom + `, ${quoter.dataset.number}`;
           });
@@ -99,6 +100,30 @@ $(() => {
     });
   };
   bindHoverBox();
+
+  /* 偵測串內的ID */
+  $('.thread').each((index, thread) => {
+    const table = {};
+    const IDs = getQueriesArray('span.id', thread);
+    IDs.forEach(idElement => {
+      const id = idElement.dataset.id;
+      if(table[id] === undefined)
+        table[id] = { num: 1, cnt: 1 };
+      else
+        table[id].num ++;
+    });
+    IDs.forEach(idElement => {
+      const id = idElement.dataset.id;
+      if(table[id].num === 1) {
+        idElement.className = idElement.className.replace(/\s*quotable\s*/g, '');
+      } else if(table[id].num >= 2) {
+        if(table[id].num >= 3)
+          idElement.className += ` id_${Math.floor(table[id].num / 3) * 3}`;
+        idElement.innerText = idElement.innerText + `(${table[id].cnt}/${table[id].num})`;
+        table[id].cnt ++;
+      }
+    });
+  });
 });
 
 class HoverBox {

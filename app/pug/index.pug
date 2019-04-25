@@ -3,7 +3,7 @@
 mixin article(data)
   - var head = data.Head;
   - var body = data.Bodies;
-  article.thread.col-xs-12.clearfix(data-number=head.No)
+  article.thread.col-xs-12.clearfix(id=head.No , data-number=head.No)
     form
       if head.Picture
         //- show image information if image exists
@@ -32,7 +32,7 @@ mixin article(data)
           +replyBox(reply)
 
 mixin replyBox(reply)
-  section.replyBox.clearfix(data-number=reply.No)
+  section.replyBox.clearfix(id=reply.No, data-number=reply.No)
     +articleHeader(reply, 'reply')
     if reply.Picture
       section.col-xs-12.imgInfo
