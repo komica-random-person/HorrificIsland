@@ -102,28 +102,35 @@ $(() => {
   bindHoverBox();
 
   /* 偵測串內的ID */
-  $('.thread').each((index, thread) => {
-    const table = {};
-    const IDs = getQueriesArray('span.id', thread);
-    IDs.forEach(idElement => {
-      const id = idElement.dataset.id;
-      if(table[id] === undefined)
-        table[id] = { num: 1, cnt: 1 };
-      else
-        table[id].num ++;
+  const bindIdReference = () => {
+    $('.thread').each((index, thread) => {
+      const table = {};
+      const IDs = getQueriesArray('span.id', thread);
+      IDs.forEach(idElement => {
+        /* count id in thread */
+        const id = idElement.dataset.id;
+        if(table[id] === undefined)
+          table[id] = { num: 1, cnt: 1 };
+        else
+          table[id].num ++;
+      });
+      IDs.forEach(idElement => {
+        const id = idElement.dataset.id;
+        if(table[id].num === 1) {
+          /* Remove highlight while the ID only shown once */
+          idElement.className = idElement.className.replace(/\s*quotable\s*/g, '');
+        } else if(table[id].num >= 2) {
+          if(table[id].num >= 3)
+            idElement.className += ` id_${Math.floor(table[id].num / 3) * 3}`;
+          idElement.innerText = idElement.innerText + `(${table[id].cnt}/${table[id].num})`;
+          table[id].cnt ++;
+        }
+      });
+      /* bind quotable IDs */
+      hoverbox.bindIdReference(thread);
     });
-    IDs.forEach(idElement => {
-      const id = idElement.dataset.id;
-      if(table[id].num === 1) {
-        idElement.className = idElement.className.replace(/\s*quotable\s*/g, '');
-      } else if(table[id].num >= 2) {
-        if(table[id].num >= 3)
-          idElement.className += ` id_${Math.floor(table[id].num / 3) * 3}`;
-        idElement.innerText = idElement.innerText + `(${table[id].cnt}/${table[id].num})`;
-        table[id].cnt ++;
-      }
-    });
-  });
+  };
+  bindIdReference();
 });
 
 class HoverBox {
@@ -135,6 +142,21 @@ class HoverBox {
     const self = this;
     element.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
     element.addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive }));
+  }
+  bindIdReference(element) {
+    /* element: A DOM that contains more than 1 span.id.quotable element (maybe thread or hoverBox) */
+    const self = this;
+    const idElements = getQueriesArray('span.id.quotable', element);
+    if(idElements.length > 0) {
+      const mainCss = '.thread header[data-type="main"]';
+      const replyCss = '.replyBox header[data-type="reply"]';
+      idElements.forEach(idElement => {
+        const id = idElement.dataset.id;
+        const $articles = $(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
+        idElement.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: idElement, recursive: false, articles: $articles }));
+        idElement.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: idElement, recursive: false }));
+      });
+    }
   }
   mouseLeaveHoverBox({ element, recursive }) {
     const mouseLeaveEvt = (self => {
@@ -176,32 +198,63 @@ class HoverBox {
             });
           }
         }
-      }
+      };
     })(this);
     return mouseLeaveEvt;
   }
-  mouseEnterHoverBox({ element, recursive }) {
-    /* 用閉包將 this 綁定至 self 變數中 */
+  mouseEnterHoverBox({ element, recursive, articles=null }) {
+    /* element: 事件觸發者(span元素), 
+     * recursive: 觸發者是否為 hoverBox 內的 span, 
+     * multiple: search by ID or replies, which may have multiple contents */
+
     const mouseEnterEvt = (self => {
+      /* 用閉包將 this 綁定至 self 變數中 */
       return evt => {
         evt.stopImmediatePropagation();
         const coord = [evt.clientX, evt.clientY];
         const targetNum = evt.target.dataset.num;
-        let parentElement = findParent(element, recursive ? /hoverBox/ : /thread/);
-        let [threadElement, reference] = [parentElement, null];
-        if(recursive) {
-          /* 由於 recursive 關係，hoverBox 之 parentElement 會是 hoverBox, 要找到對應 thread 上的元素才能進行 quote */
-          threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
-          reference = threadElement[0].dataset.number === targetNum ? threadElement[0] : threadElement.find(`*[data-number="${targetNum}"]`)[0];
-        } else
-          reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
-        // console.log({threadElement, reference, targetNum});
+        let parentElement = null;
+        let [threadElement, reference] = [null, null];
+        if(articles === null) {
+          /* 僅有單個元素會出現在 hoverBox 中，搜尋該串後複製、顯示 */
+          parentElement = findParent(element, recursive ? /hoverBox/ : /thread/);
+          threadElement = parentElement;
+          if(recursive) {
+            /* 由於 recursive 關係，hoverBox 之 parentElement 會是 hoverBox,
+             * 要找到對應 thread 上的元素才能進行 quote */
+            threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
+            reference = threadElement[0].dataset.number === targetNum ? threadElement[0] : threadElement.find(`*[data-number="${targetNum}"]`)[0];
+          } else
+            reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
+        } else {
+          /* hoverBox 會顯示多個文章，呼叫時已經將其包入 jQuery 物件中 */
+          reference = articles;
+          parentElement = findParent(articles[0], /thread/);
+          if(recursive) {
+            threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
+          } else {
+            threadElement = parentElement;
+          }
+        }
 
         if(reference !== null) {
-          /* If reference exists in current thread and there's no existing hoverBox about same reference, show hoverBox */
-          const clone = $(reference).addClass('quoted').clone(true).find('.replyBox').remove().end()[0];
+          /* If reference exists in current thread, show hoverBox */
+          //const clone = $(reference).addClass('quoted').clone(true).find('.replyBox').remove().end()[0];
+          let content = '';
+          if(articles === null)
+            content = $(reference).clone(true).find('.replyBox').remove().end()[0];
+          else {
+            reference.each((_, e) => {
+              /* e is span.id.quoted */
+              const isMain = e.parentElement.dataset.type === 'main';
+              let parent = isMain ? findParent(e, /thread/) : findParent(e, /replyBox/);
+              parent = isMain ? $(parent).clone(true).find('.replyBox').remove().end()[0] : parent;
+              content += parent.outerHTML;
+            });
+            content = { outerHTML: content };
+          }
           self.createHoverBox({
-            content: clone.outerHTML,
+            content: content.outerHTML,
             targetNum,
             coord,
             threadNum: recursive ? threadElement[0].dataset.number : threadElement.dataset.number,
