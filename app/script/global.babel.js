@@ -222,10 +222,10 @@ class HoverBox {
     lastChild.element.appendChild(hoverBox);
 
     /* computes offset XY after showing element */
-    const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : window.innerWidth - hoverBox.offsetWidth;
+    const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : coord[0] - hoverBox.offsetWidth;
     hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
     /* 必須先移動 X 來避免由於 X overflow 的 line break 改變 offsetHeight */
-    const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : window.innerHeight - hoverBox.offsetHeight;
+    const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : coord[1] - hoverBox.offsetHeight;
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
     /* recursively bind */
