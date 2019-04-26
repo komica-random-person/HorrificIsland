@@ -11,6 +11,9 @@ Version: 0.0.1
 3. 使用 `npm run start` 可以開啟 `localhost:9999` 伺服器
 4. 使用 `npm run dev` 可以開啟 `localhost:5000` 伺服器，並會偵測檔案改動來進行 live reload.
 
+# API SPEC
+* https://app.swaggerhub.com/apis-docs/komica-random-person/HorrificIsland/1.0.0#/
+
 # Todos
 ## 預計前端功能
 * 星號為需配合後端 API 之功能
@@ -64,14 +67,4 @@ Version: 0.0.1
     * related to thread's tag voting: once you shit yourself, you smell (1 day)
     - [ ] Thread ranking & filtering
 - [ ] Fucking Socket
-
-
-# API 格式
-
-:::warning
-還沒有實作
-:::
-
-1. 到 https://editor.swagger.io/
-2. 複製 https://github.com/komica-random-person/HorrificIsland/blob/master/api_SPEC.json 中的內容並貼上
 
