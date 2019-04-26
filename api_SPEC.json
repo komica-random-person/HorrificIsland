@@ -1,0 +1,481 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "HorrificIsland API",
+    "description": " API SPEC of HorrificIsland [https://h-island.herokuapp.com/](https://h-island.herokuapp.com/). Github: [https://github.com/komica-random-person/HorrificIsland](https://github.com/komica-random-person/HorrificIsland)",
+    "version": "1.0.0"
+  },
+  "externalDocs": {
+    "description": "Find out more about Swagger",
+    "url": "http://swagger.io"
+  },
+  "servers": [
+    {
+      "url": "https://h-island.herokuapp.com/api/"
+    },
+    {
+      "url": "http://h-island.herokuapp.com/api/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "article",
+      "description": "Everything about articles"
+    },
+    {
+      "name": "thread",
+      "description": "Everything about threads"
+    }
+  ],
+  "paths": {
+    "/article": {
+      "post": {
+        "tags": [
+          "article"
+        ],
+        "summary": "Add a new article",
+        "operationId": "addArticle",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArticlePost"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/thread/list": {
+      "get": {
+        "tags": [
+          "thread"
+        ],
+        "summary": "Get multiple threads.",
+        "parameters": [
+          {
+            "name": "num",
+            "in": "query",
+            "description": "Should be smaller than 500",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "The value should be a thread number",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ThreadResponse"
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/thread/{threadNumber}": {
+      "get": {
+        "tags": [
+          "thread"
+        ],
+        "summary": "Get an existing thread",
+        "operationId": "getThread",
+        "parameters": [
+          {
+            "name": "threadNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation, return a thread.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "article": {
+                      "$ref": "#/components/schemas/ThreadResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/article/{articleNumber}": {
+      "delete": {
+        "tags": [
+          "article"
+        ],
+        "summary": "Remove an existing article",
+        "operationId": "delArticle",
+        "parameters": [
+          {
+            "name": "articleNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/article/comment/": {
+      "post": {
+        "tags": [
+          "article"
+        ],
+        "summary": "Post a comment to an article.",
+        "operationId": "postComment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "articleNumber": {
+                    "type": "string",
+                    "description": "The number of the replying article"
+                  },
+                  "content": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "article"
+        ],
+        "summary": "Remove a comment from article.",
+        "operationId": "removeComment",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "commentId": {
+                    "type": "integer",
+                    "description": "UUID of comment"
+                  },
+                  "articleNumber": {
+                    "type": "integer",
+                    "description": "Number of article to delete from"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/article/comment/list/{articleNumber}": {
+      "get": {
+        "tags": [
+          "article"
+        ],
+        "summary": "Get comments from existing article",
+        "operationId": "getComment",
+        "parameters": [
+          {
+            "name": "articleNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "comments": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Comment"
+                      }
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Comment": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "approve": {
+            "type": "integer"
+          },
+          "disapprove": {
+            "type": "integer"
+          }
+        }
+      },
+      "Article": {
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "description": "盡量不要跟資料結構名稱重複，post 代表 thread-starter",
+            "example": "post",
+            "enum": [
+              "post",
+              "reply"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "number": {
+            "type": "integer",
+            "description": "Number of the thread",
+            "format": "int64",
+            "example": 12345678
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of article.",
+            "example": "今天我生日ㄛ"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Tag"
+            }
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          }
+        }
+      },
+      "ArticlePost": {
+        "required": [
+          "allowComment",
+          "content",
+          "documentType",
+          "tags"
+        ],
+        "type": "object",
+        "properties": {
+          "documentType": {
+            "type": "string",
+            "description": "盡量不要跟資料結構名稱重複，post 代表 thread-starter",
+            "example": "post",
+            "enum": [
+              "post",
+              "reply"
+            ]
+          },
+          "mainNumber": {
+            "type": "integer",
+            "description": "Number of reference thread (up to 8 digits). Notably, if article is a thread-starter, send -1",
+            "format": "int64",
+            "example": -1
+          },
+          "content": {
+            "type": "string",
+            "description": "Content of article.",
+            "example": "今天我生日ㄛ"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "image": {
+            "type": "object",
+            "properties": {
+              "file": {
+                "type": "string",
+                "description": "Should be a base64 string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          },
+          "allowComment": {
+            "type": "boolean",
+            "description": "Whether this thread can have comment over articles.",
+            "example": true
+          }
+        }
+      },
+      "Tag": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "approve": {
+            "type": "integer"
+          },
+          "disapprove": {
+            "type": "integer"
+          }
+        }
+      },
+      "ThreadResponse": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Article"
+        }
+      },
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "type": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
