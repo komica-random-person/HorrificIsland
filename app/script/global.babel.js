@@ -205,7 +205,7 @@ class HoverBox {
   mouseEnterHoverBox({ element, recursive, articles=null }) {
     /* element: 事件觸發者(span元素), 
      * recursive: 觸發者是否為 hoverBox 內的 span, 
-     * multiple: search by ID or replies, which may have multiple contents */
+     * articles: search by ID or replies, which may have multiple contents */
 
     const mouseEnterEvt = (self => {
       /* 用閉包將 this 綁定至 self 變數中 */
@@ -248,7 +248,7 @@ class HoverBox {
               /* e is span.id.quoted */
               const isMain = e.parentElement.dataset.type === 'main';
               let parent = isMain ? findParent(e, /thread/) : findParent(e, /replyBox/);
-              parent = isMain ? $(parent).clone(true).find('.replyBox').remove().end()[0] : parent;
+              parent = isMain ? $(parent).clone(true).removeClass('col-xs-12').find('.replyBox').remove().end()[0] : parent;
               content += parent.outerHTML;
             });
             content = { outerHTML: content };
