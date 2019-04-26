@@ -25,6 +25,10 @@
     {
       "name": "thread",
       "description": "Everything about threads"
+    },
+    {
+      "name": "user",
+      "description": "Everything about users"
     }
   ],
   "paths": {
@@ -56,53 +60,9 @@
               }
             }
           },
-          "405": {
-            "description": "Invalid input",
+          "403": {
+            "description": "Forbidden. Invalid user ID.",
             "content": {}
-          }
-        }
-      }
-    },
-    "/thread/list": {
-      "get": {
-        "tags": [
-          "thread"
-        ],
-        "summary": "Get multiple threads.",
-        "parameters": [
-          {
-            "name": "num",
-            "in": "query",
-            "description": "Should be smaller than 500",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "from",
-            "in": "query",
-            "description": "The value should be a thread number",
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ThreadResponse"
-                  }
-                }
-              }
-            }
           },
           "405": {
             "description": "Invalid input",
@@ -111,58 +71,7 @@
         }
       }
     },
-    "/thread/{threadNumber}": {
-      "get": {
-        "tags": [
-          "thread"
-        ],
-        "summary": "Get an existing thread",
-        "operationId": "getThread",
-        "parameters": [
-          {
-            "name": "threadNumber",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation, return a thread.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "code": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "type": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "article": {
-                      "$ref": "#/components/schemas/ThreadResponse"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "405": {
-            "description": "Invalid input",
-            "content": {}
-          }
-        }
-      }
-    },
-    "/article/{articleNumber}": {
+    "/article/${articleNumber}": {
       "delete": {
         "tags": [
           "article"
@@ -174,6 +83,16 @@
             "name": "articleNumber",
             "in": "path",
             "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "header",
+            "required": true,
+            "description": "The user ID stored in client's cookie",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -190,6 +109,10 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. User ID not matched.",
+            "content": {}
           },
           "405": {
             "description": "Invalid input",
@@ -217,6 +140,9 @@
                   },
                   "content": {
                     "type": "string"
+                  },
+                  "userId": {
+                    "type": "string"
                   }
                 }
               }
@@ -234,35 +160,53 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. Invalid user ID.",
+            "content": {}
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
           }
         }
-      },
+      }
+    },
+    "/article/comment/${commentId}": {
       "delete": {
         "tags": [
           "article"
         ],
         "summary": "Remove a comment from article.",
         "operationId": "removeComment",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "commentId": {
-                    "type": "integer",
-                    "description": "UUID of comment"
-                  },
-                  "articleNumber": {
-                    "type": "integer",
-                    "description": "Number of article to delete from"
-                  }
-                }
-              }
+        "parameters": [
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "required": true
-        },
+          {
+            "name": "userId",
+            "in": "header",
+            "required": true,
+            "description": "The user ID stored in client's cookie",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "articleId",
+            "in": "header",
+            "required": true,
+            "description": "The user ID stored in client's cookie",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "successful operation",
@@ -273,11 +217,19 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Forbidden. User ID not matched.",
+            "content": {}
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
           }
         }
       }
     },
-    "/article/comment/list/{articleNumber}": {
+    "/article/comment/list/${articleNumber}": {
       "get": {
         "tags": [
           "article"
@@ -329,6 +281,184 @@
           }
         }
       }
+    },
+    "/thread/list": {
+      "get": {
+        "tags": [
+          "thread"
+        ],
+        "summary": "Get multiple threads.",
+        "parameters": [
+          {
+            "name": "num",
+            "in": "query",
+            "description": "Should be smaller than 500",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "The value should be a thread number.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ThreadResponse"
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/thread/${threadNumber}": {
+      "get": {
+        "tags": [
+          "thread"
+        ],
+        "summary": "Get an existing thread",
+        "operationId": "getThread",
+        "parameters": [
+          {
+            "name": "threadNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation, return a thread.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "article": {
+                      "$ref": "#/components/schemas/ThreadResponse"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/user": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "User registration.",
+        "operationId": "registerUser",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "userId",
+                  "account",
+                  "password"
+                ],
+                "properties": {
+                  "userId": {
+                    "type": "string"
+                  },
+                  "account": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          },
+          "406": {
+            "description": "Multiple registration over same userId"
+          }
+        }
+      }
+    },
+    "/user/id": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get userId",
+        "operationId": "getUserId",
+        "responses": {
+          "200": {
+            "description": "Successfully authenticated. The user ID is returned in a cookie named `userId`.\n",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "userId=\"b846f30e-2fdc-241f-700e-dce2409315ac\"; Path=/"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Invalid input",
+            "content": {}
+          }
+        }
+      }
     }
   },
   "components": {
@@ -336,7 +466,7 @@
       "Comment": {
         "type": "object",
         "properties": {
-          "name": {
+          "content": {
             "type": "string"
           },
           "approve": {
@@ -404,6 +534,10 @@
               "post",
               "reply"
             ]
+          },
+          "userId": {
+            "type": "string",
+            "description": "發文者的 userid"
           },
           "mainNumber": {
             "type": "integer",
