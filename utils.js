@@ -37,7 +37,7 @@ module.exports = app => {
   app.set('getMainContent', cb => {
     const currentTime = Date.now();
     const prevTime = app.get('time');
-    const cacheSecond = process.env.NODE_ENV === 'dev' ? 60 * 60 : 60 * 2;
+    const cacheSecond = process.env.NODE_ENV === 'dev' ? 60 * 180 : 60 * 2;
     if(prevTime === undefined || currentTime - prevTime > 1000 * cacheSecond) {
       /* if currentTime - prevTime > threshold, refresh the content */
       app.set('time', currentTime);
