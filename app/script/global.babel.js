@@ -143,18 +143,19 @@ class HoverBox {
     element.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
     element.addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive }));
   }
-  bindIdReference(element) {
-    /* element: A DOM that contains more than 1 span.id.quotable element (maybe thread or hoverBox) */
+  bindIdReference(element, recursive=false) {
+    /* element: thread element or hoverBox element, depends on recursive */
     const self = this;
     const idElements = getQueriesArray('span.id.quotable', element);
+    const thread = recursive ? getQuery(`.container > article[data-number="${element.dataset.number}"]`) : element;
     if(idElements.length > 0) {
-      const mainCss = '.thread header[data-type="main"]';
+      const mainCss = 'header[data-type="main"]';
       const replyCss = '.replyBox header[data-type="reply"]';
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
-        const $articles = $(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
-        idElement.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: idElement, recursive: false, articles: $articles }));
-        idElement.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: idElement, recursive: false }));
+        const $articles = $(thread).find(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
+        idElement.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
+        idElement.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: idElement, recursive }));
       });
     }
   }
@@ -231,7 +232,7 @@ class HoverBox {
           reference = articles;
           parentElement = findParent(articles[0], /thread/);
           if(recursive) {
-            threadElement = $(`article[data-number="${parentElement.dataset.number}"]`);
+            threadElement = $(`.container > article[data-number="${parentElement.dataset.number}"]`);
           } else {
             threadElement = parentElement;
           }
@@ -292,11 +293,14 @@ class HoverBox {
     hoverBox.dataset.origin = targetNum;
 
     let lastChild = { element: self.e };
+    let zindex = 1;
     if(self.showList[threadNum] !== undefined) {
       lastChild = self.showList[threadNum].lastChild;
-      lastChild.child = new ElementTree(hoverBox, lastChild, null);
+      zindex = lastChild.zindex + 1;
+      lastChild.child = new ElementTree(hoverBox, lastChild, null, zindex);
     } else
       self.showList[threadNum] = new ElementTree(hoverBox, null, null);
+    hoverBox.style.zIndex = zindex;
     lastChild.element.appendChild(hoverBox);
 
     /* computes offset XY after showing element */
@@ -307,18 +311,28 @@ class HoverBox {
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
     /* recursively bind */
-    $(hoverBox).find('.quote').each((index, element) => self.bindQuoteHoverEvent(element, true)).end()
-      .find('p.quotedList').each((index, element) => self.bindQuotedListBox(element, true));
+    const $hoverBox = $(hoverBox).find('.quote').each((index, element) => self.bindQuoteHoverEvent(element, true)).end()
+      .find('p.quotedList').each((index, element) => self.bindQuotedListBox(element, true)).end();
+
+    /* If hoverBox is referenced from id, do not bind id */
+    if(content.match(/id quotable/g) !== null && content.match(/id quotable/g).length > 1) {
+      $hoverBox.mCustomScrollbar({
+        scrollInertia: 0,
+      });
+    } else {
+      self.bindIdReference(hoverBox, true);
+    }
   }
   mergeContent(...contents) {
     return `<section class="contentSection">${contents.join('')}</section>`;
   }
 }
 class ElementTree {
-  constructor(element, parent, child) {
+  constructor(element, parent, child, zindex=1) {
     this.element = element;
     this.parent = parent;
     this.child = child;
+    this.zindex = zindex;
   }
   get lastChild() {
     let tree = this;

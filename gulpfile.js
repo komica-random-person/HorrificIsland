@@ -6,6 +6,7 @@ const del = require('del');
 const nodemon = require('gulp-nodemon');
 const uglify = require('gulp-uglify');
 const noop = require('gulp-noop');
+const concat = require('gulp-concat');
 
 sass.compiler = require('node-sass');
 
@@ -15,19 +16,25 @@ const clean = cb => {
   /* Since del returns a promise, resolve it with additional func */
   del(['dist/**/*']).then(() => cb());
 };
-const util_sass = cb => {
+const util_style = cb => {
   gulp.src('./app/style/*.sass')
     .pipe(sass().on('error', sass.logError))
     .pipe(gulp.dest('dist/style/'));
+  gulp.src('./app/style/*.css')
+    .pipe(concat('vendor.css'))
+    .pipe(gulp.dest('dist/style/'));
   cb();
 };
-const util_babel = cb => {
+const util_script = cb => {
   gulp.src('app/script/*.babel.js')
     .pipe(babel({
       presets: ['@babel/preset-env']
     }))
     .on('error', err => console.log(err.toString()))
     .pipe(process.env.NODE_ENV !== 'development' ? uglify() : noop())
+    .pipe(gulp.dest('dist/script/'));
+  gulp.src('app/script/*.min.js')
+    .pipe(concat('vendor.js'))
     .pipe(gulp.dest('dist/script/'));
   cb();
 };
@@ -37,13 +44,13 @@ const util_static = cb => {
   cb();
 };
 const build_utils = () => {
-  return gulp.parallel(util_sass, util_babel, util_static);
+  return gulp.parallel(util_style, util_script, util_static);
 };
 
 /* Dev */
 const watch = cb => {
-  gulp.watch('app/script/*.babel.js', util_babel);
-  gulp.watch('app/style/*.sass', util_sass);
+  gulp.watch('app/script/*.js', util_script);
+  gulp.watch('app/style/*', util_style);
   gulp.watch('app/static/*', util_static);
   cb();
 };
