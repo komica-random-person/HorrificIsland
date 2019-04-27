@@ -12,7 +12,7 @@ const findParent = (element, pattern) => {
 
 const showImg = (imgContainer) => {
   /* This function is for onclick event on IMG tag.
-   * 1. determine whether element is zoomed in by attribute: data-status
+   * 1. determine whether element is zoomed in by element attribute: data-status
    * 2. check the file format, if is webm, create video element and insert to its parent */
   const e = imgContainer;
   const zoomed = e.dataset.status === 'yes';
@@ -40,25 +40,26 @@ const showImg = (imgContainer) => {
 };
 
 $(() => {
-  /* hover box */
+  /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
   const hoverbox = new HoverBox();
   const updateQuote = () => {
-    /* Scan every existing content and replace ">>\d{8}" with span.quote */
     $('p.content').each((_, p) => {
+      /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
         const thread = findParent(p, /thread/);
         const match = p.innerText.match(/>>\d{8}\s*/g);
+        /* match 為所有比對到的字串之陣列, _match 則為每個比對到的字串 (如 ">>12345678") */
         match.forEach(_match => {
-          /* Since split can't detect \n, slice the \n */
+          // 偵測是否有換行符號, 若有則將其消去
           _match = _match.slice(_match.length - 1).match(/\s/) === null ? _match :  _match.replace(/\s/g, '');
           const num = _match.slice(2);
-          if(getQuery(`.quotable[data-num="${num}"]`, thread) !== null)
-            p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
-          else
-            p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote missing" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
-          /* add number to quoted article */
-          const quotedArticle = $(`*[data-number="${num}"]`).addClass('quotedArticle');
-          quotedArticle.each((index, ele) => {
+          /* 從 thread 物件中找尋引用的文章是否存在，若不存在則加入 missing 的類別 */
+          const refExist = getQuery(`.quotable[data-num="${num}"]`, thread) !== null;
+          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote ${refExist ? '' : 'missing'}" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
+          /* Add number to quoted article for css to show quotedList */
+          const $quotedArticle = $(`*[data-number="${num}"]`).addClass('quotedArticle');
+          $quotedArticle.each((index, ele) => {
+            /* 在被引用文章的串中找到引用者的編號, 將其加入 quotedList 中顯示，並加入 quotedList 的 data-quotefrom 屬性中 */
             const quotedList = getQuery('.quotedList', ele);
             const quoter = findParent(p, /replyBox/);
             const quotedNumElement = quotedList.querySelector('.quotedNum');
@@ -72,7 +73,7 @@ $(() => {
           });
         });
       }
-      /* change the color of quote text */
+      /* Change the color of quoted text */
       if(p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/) !== null) {
         /* REGEX 說明:
          * (1) (?: $pattern1 | $pattern2) 代表 $pattern1 跟 $pattern2 其中一個成立即可
@@ -90,12 +91,12 @@ $(() => {
   };
   updateQuote();
 
-  /* Bind .quote with hoverbox */
+  /* 引用類相關的 hoverBox: 包括引用別人、被引用、被引用之列表 */
   const bindHoverBox = () => {
-    $('.quote').each((index, element) => {
+    $('.quote').not('.missing').each((index, element) => {
       hoverbox.bindQuoteHoverEvent(element);
     });
-    $('.quotedArticle p.quotedList').each((index, element) => {
+    $('.quotedArticle .mainContent p.quotedList, .replyBox.quotedArticle p.quotedList').each((index, element) => {
       hoverbox.bindQuotedListBox(element);
     });
   };
@@ -144,7 +145,9 @@ class HoverBox {
     element.addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive }));
   }
   bindIdReference(element, recursive=false) {
-    /* element: thread element or hoverBox element, depends on recursive */
+    /* element: thread element or hoverBox element, depends on recursive
+     *  運作：由於 recursive 時 element 為 hoverBox, 此時需先找到 thread, 透過 thread 再找到該 id 發言的內容.
+     * idElements: 要綁入事件的span.id, 因此時接對 element 變數查找 */
     const self = this;
     const idElements = getQueriesArray('span.id.quotable', element);
     const thread = recursive ? getQuery(`.container > article[data-number="${element.dataset.number}"]`) : element;
@@ -228,14 +231,10 @@ class HoverBox {
           } else
             reference = threadElement.dataset.number === targetNum ? threadElement : getQuery(`.replyBox[data-number="${targetNum}"]`, threadElement);
         } else {
-          /* hoverBox 會顯示多個文章，呼叫時已經將其包入 jQuery 物件中 */
+          /* hoverBox 會顯示多個文章，文章都在 articles 中存為 jQuery 的格式 */
           reference = articles;
           parentElement = findParent(articles[0], /thread/);
-          if(recursive) {
-            threadElement = $(`.container > article[data-number="${parentElement.dataset.number}"]`);
-          } else {
-            threadElement = parentElement;
-          }
+          threadElement = recursive ? $(`.container > article[data-number="${parentElement.dataset.number}"]`) : parentElement;
         }
 
         if(reference !== null) {
@@ -268,13 +267,25 @@ class HoverBox {
     return mouseEnterEvt;
   }
   bindQuotedListBox(element, recursive=false) {
-    /* Input is p.quotedList  */
+    /* element: p.quotedList */
     const self = this;
     const $quotedElement = $(element).find('.quoted');
     $quotedElement.each((index, e) => {
+      /* 綁定個別的 quoted */
       e.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: e, recursive }));
       e.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: e, recursive }));
     });
+
+    /* 綁定 replies, 一樣透過 recursive 判斷是否要回到 .container 找到 thread */
+    const quotedFrom = element.dataset.quotedfrom.split(', ');
+    const thread = recursive ? findParent(element, /hoverBox/) : findParent(element, /thread/);
+    const $thread = recursive ? $(`.container article[data-number="${thread.dataset.number}"]`) : $(thread);
+    const articles = [];
+    const queryString = quotedFrom.map(number => `span.num[data-num="${number}"]`).join(', ');
+    /* 這邊直接用 jQuery 跟 queryString 結合來一次選所有文章 */
+    const $articles = $thread.find(queryString);
+    element.children[0].addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
+    element.children[0].addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
     const self = this;
@@ -311,8 +322,8 @@ class HoverBox {
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
     /* recursively bind */
-    const $hoverBox = $(hoverBox).find('.quote').each((index, element) => self.bindQuoteHoverEvent(element, true)).end()
-      .find('p.quotedList').each((index, element) => self.bindQuotedListBox(element, true)).end();
+    const $hoverBox = $(hoverBox).find('.quote').not('.missing').each((index, element) => self.bindQuoteHoverEvent(element, true)).end().end();
+    $hoverBox.find('.replyBox.quotedArticle p.quotedList, .mainContent p.quotedList').each((index, element) => self.bindQuotedListBox(element, true));
 
     /* If hoverBox is referenced from id, do not bind id */
     if(content.match(/id quotable/g) !== null && content.match(/id quotable/g).length > 1) {
