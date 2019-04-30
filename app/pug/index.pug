@@ -75,6 +75,8 @@ mixin postForm(labelText, id, placeholder, type)
         input(id=id, placeholder=placeholder, type=type, maxlength='100')
       else
         textarea(id=id, placeholder=placeholder)
+    if block
+      block
 
 div.container
   header.pageTitle
@@ -83,13 +85,21 @@ div.container
       a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
       | )
 
-  //- section.postContainer
-  //-   div.postTable
-  //-     h2 這邊之後再改幹
-  //-     +postForm('名稱', 'postName', '欲顯示之名稱', 'text')
-  //-     +postForm('標題', 'postTitle', '輸入標題', 'text')
-  //-     +postForm('內文', 'postContent', '無本文', 'textarea')
-  //-     +postForm('附加圖檔', 'postImg', '', 'file')
+  //- postArticle
+  section.postContainer
+    div.postTable
+      +postForm('名稱', 'postName', '名無し', 'text')
+      +postForm('標題', 'postTitle', '無題', 'text')
+      +postForm('', 'postContent', '想聊些什麼？', 'textarea')
+        section.controlPannel
+          div.function.active
+            i.fas.fa-file-image
+          div.function
+            i.far.fa-grin-squint
+          div.function
+            i.fas.fa-torah
+          section.image
+            input(type='input', placeholder='請輸入圖片/影片之網址')
 
   each discussion in pageContent
     +article(discussion)

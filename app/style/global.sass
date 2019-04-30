@@ -20,14 +20,48 @@ a.link
         label
           h4
             font-size: 1em
-          input
+          input[type=text]
+            padding: .15em
             color: rgba(96, 96, 96, 1)
             display: inline-block
             width: 25em
+            border-radius: 2px
           textarea
             vertical-align: top
             color: rgba(96, 96, 96, 1)
-            width: 25em
+            width: 28em
+            padding: 5px
+            min-height: 5em
+            border-top-left-radius: 3px
+            border-top-right-radius: 3px
+            &:focus
+              outline: none
+              border-color: green
+        &:last-child
+          display: inline-block
+          position: relative
+          label
+              margin-bottom: 0
+        section.controlPannel
+          text-align: left
+          background: rgba(0, 0, 0, .6)
+          padding: 5px
+          border-bottom-left-radius: 3px
+          border-bottom-right-radius: 3px
+          div.function
+            padding: 3px
+            display: inline-block
+            margin-right: 5px
+            cursor: pointer
+            i
+              font-size: 1.3em
+            &:hover
+              color: white
+            &.active i
+              color: #FF8B2C
+          section.image
+            input
+              width: 100%
 
 article.thread, #hoverBox
   margin-bottom: .7em
