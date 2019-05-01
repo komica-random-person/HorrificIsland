@@ -81,7 +81,7 @@ mixin postForm(labelText, id, placeholder, type)
 div.container
   header.pageTitle
     h1 Horrific Island?
-    h2 (目前僅有爬 K 島之功能，API尚未搭建 Github:
+    h2 (目前僅有爬 K 島之功能，API尚未搭建。 Github:
       a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
       | )
 
@@ -104,10 +104,11 @@ div.container
           div.function
             i.fas.fa-torah
             span.tooltips 開啟複製文庫
-          section.hidden-func.image
-            input(id='imgurl', type='text', placeholder='請輸入圖片/影片之網址')
           section.hidden-func.hashtag
             input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔')
+          section.hidden-func.image
+            input(id='imgurl', type='text', placeholder='請輸入圖片/影片之網址')
+            input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
       section.submission
         section.addition
           label

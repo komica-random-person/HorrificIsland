@@ -38,7 +38,7 @@ a.link
             &:focus
               outline: none
               border-color: green
-        &:last-child
+        &:nth-last-child(2)
           display: inline-block
           position: relative
           label
@@ -86,9 +86,13 @@ a.link
             color: rgba(96, 96, 96, 1)
             display: inline-block
             border-radius: 2px
+          input#imgfile
+            margin: .3em 0
+            display: block
       section.submission
         display: flex
         margin-top: 5px
+        padding: 0 .3em
         section.addition
           display: inline-flex
           text-align: center
