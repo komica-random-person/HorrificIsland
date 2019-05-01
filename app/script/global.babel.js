@@ -9,7 +9,6 @@ const findParent = (element, pattern) => {
     element = element.parentElement;
   return element.parentElement === null ? null : element;
 };
-const apiUrl = 'http://localhost:8888';
 
 const showImg = (imgContainer) => {
   /* This function is for onclick event on IMG tag.

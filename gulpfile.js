@@ -31,6 +31,7 @@ const util_script = cb => {
       presets: ['@babel/preset-env']
     }))
     .on('error', err => console.log(err.toString()))
+    .pipe(concat('horrific.js'))
     .pipe(process.env.NODE_ENV !== 'development' ? uglify() : noop())
     .pipe(gulp.dest('dist/script/'));
   gulp.src('app/script/*.min.js')
