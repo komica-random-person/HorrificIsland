@@ -13,9 +13,10 @@ a.link
       font-weight: bold
   .postContainer
     border-bottom: 3px solid rgba(255, 255, 255, .7)
+    text-align: center
     .postTable
-      text-align: center
       padding: 1em 0
+      display: inline-block
       .postInfo
         label
           h4
@@ -42,26 +43,74 @@ a.link
           position: relative
           label
               margin-bottom: 0
-        section.controlPannel
-          text-align: left
-          background: rgba(0, 0, 0, .6)
-          padding: 5px
-          border-bottom-left-radius: 3px
-          border-bottom-right-radius: 3px
-          div.function
-            padding: 3px
+      section.controlPannel
+        text-align: left
+        background: rgba(0, 0, 0, .6)
+        padding: 5px
+        border-bottom-left-radius: 3px
+        border-bottom-right-radius: 3px
+        div.function
+          padding: 3px
+          display: inline-block
+          margin-right: 5px
+          cursor: pointer
+          i
+            font-size: 1.3em
+          &:hover
+            color: white
+          &.active i
+            color: #FF8B2C
+          &.active:hover i
+            color: #ff7300
+        section.image
+          input
+            width: 100%
+            padding: .15em
+            color: rgba(96, 96, 96, 1)
             display: inline-block
-            margin-right: 5px
-            cursor: pointer
-            i
-              font-size: 1.3em
+            border-radius: 2px
+      section.submission
+        display: flex
+        margin-top: 5px
+        section.addition
+          display: inline-flex
+          text-align: center
+          justify-content: center
+          margin-right: 5px
+          .btn
+            color: white
+            font-size: 1.15em
+          .btn-on
+            background-color: #449d44
+            border-color: #398439
             &:hover
-              color: white
-            &.active i
-              color: #FF8B2C
-          section.image
-            input
-              width: 100%
+              background-color: #307d30
+              border-color: #1b4e1b
+          .btn-off
+            background-color: #c9302c
+            border-color: #ac2925
+            &:hover
+              background-color: #ad221e
+              border-color: #7b1511
+          input[type=checkbox]
+            display: none
+            & ~ .btn
+              display: inline-block
+            & + .btn
+              display: none
+            &:checked
+              & ~ .btn
+                display: none
+              & + .btn
+                display: inline-block
+        #submit
+          display: inline-flex
+          text-align: center
+          min-width: 30%
+          flex-direction: row
+          justify-content: center
+          flex-grow: 1
+          margin-bottom: 5px
 
 article.thread, #hoverBox
   margin-bottom: .7em

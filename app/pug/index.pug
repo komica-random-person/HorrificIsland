@@ -68,7 +68,7 @@ mixin articleHeader(info, t)
       a.link 回覆
 
 mixin postForm(labelText, id, placeholder, type)
-  section.postInfo
+  section.postInfo(data-id=id)
     label
       h4.label= labelText
       if type == 'text' || type == 'file'
@@ -87,7 +87,7 @@ div.container
 
   //- postArticle
   section.postContainer
-    div.postTable
+    form.postTable
       +postForm('名稱', 'postName', '名無し', 'text')
       +postForm('標題', 'postTitle', '無題', 'text')
       +postForm('', 'postContent', '想聊些什麼？', 'textarea')
@@ -99,7 +99,14 @@ div.container
           div.function
             i.fas.fa-torah
           section.image
-            input(type='input', placeholder='請輸入圖片/影片之網址')
+            input(type='text', placeholder='請輸入圖片/影片之網址')
+      section.submission
+        section.addition
+          label
+            input(type='checkbox', id='allowComment', checked)
+            div.btn.btn-on 留言: 開
+            div.btn.btn-off 留言: 關
+        div#submit.btn.btn-default 開串！
 
   each discussion in pageContent
     +article(discussion)
