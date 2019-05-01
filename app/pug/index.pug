@@ -72,7 +72,7 @@ mixin postForm(labelText, id, placeholder, type)
     label
       h4.label= labelText
       if type == 'text' || type == 'file'
-        input(id=id, placeholder=placeholder, type=type, maxlength='100')
+        input(id=id, placeholder=placeholder, type=type, maxlength='100', autocomplete='off')
       else
         textarea(id=id, placeholder=placeholder)
     if block
@@ -92,22 +92,34 @@ div.container
       +postForm('標題', 'postTitle', '無題', 'text')
       +postForm('', 'postContent', '想聊些什麼？', 'textarea')
         section.controlPannel
-          div.function.active
-            i.fas.fa-file-image
+          div.function
+            label
+              input(type='checkbox', name='func', data-target='image')
+              i.fas.fa-file-image
+              i.fas.fa-file-image.on
             span.tooltips 上傳圖片/使用網址附加圖片
           div.function
-            i.fas.fa-hashtag
+            label
+              input(type='checkbox', name='func', data-target='hashtag')
+              i.fas.fa-hashtag
+              i.fas.fa-hashtag.on
             span.tooltips 將串加入 hashtags
           div.function
-            i.far.fa-grin-squint
+            label
+              input(type='checkbox', name='func')
+              i.far.fa-grin-squint
+              i.far.fa-grin-squint.on
             span.tooltips 開啟顏文字庫
           div.function
-            i.fas.fa-torah
+            label
+              input(type='checkbox', name='func')
+              i.fas.fa-torah
+              i.fas.fa-torah.on
             span.tooltips 開啟複製文庫
           section.hidden-func.hashtag
-            input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔')
+            input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔', autocomplete='off')
           section.hidden-func.image
-            input(id='imgurl', type='text', placeholder='請輸入圖片/影片之網址')
+            input(id='imgurl', type='text', placeholder='輸入圖片/影片之網址或拖曳圖片檔案到此', autocomplete='off')
             input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
       section.submission
         section.addition

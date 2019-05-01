@@ -53,14 +53,9 @@ a.link
           padding: 3px
           display: inline-block
           margin-right: 5px
-          cursor: pointer
           position: relative
-          i
-            font-size: 1.3em
-          &.active i
-            color: #FF8B2C
-          &.active:hover i
-            color: #ff7300
+          label
+            cursor: pointer
           span.tooltips
             display: none
           &:hover
@@ -69,17 +64,39 @@ a.link
             span.tooltips
               display: block
               padding: .5em
-              background: rgba(0, 0, 0, .95)
+              background: rgb(0, 0, 0)
               position: absolute
-              bottom: 0
+              top: 0
               left: 50%
-              transform: translate(-50%, 100%)
+              transform: translate(-50%, -100%)
               text-align: center
               white-space: nowrap
               font-weight: bold
+              user-select: none
+              border-radius: 5px
           &.active span.tooltips
             display: none
+          i
+            font-size: 1.3em
+            &.on
+              color: #FF8B2C
+            &.on:hover
+              color: #ff7300
+          input
+            display: none
+            & ~ i
+              display: none
+            & + i
+              display: inline
+            &:checked
+              & ~ i
+                display: inline
+              & + i
+                display: none
         section.hidden-func
+          display: none
+          &.active
+            display: block
           input
             width: 100%
             padding: .15em
@@ -87,8 +104,7 @@ a.link
             display: inline-block
             border-radius: 2px
           input#imgfile
-            margin: .3em 0
-            display: block
+            display: none
       section.submission
         display: flex
         margin-top: 5px

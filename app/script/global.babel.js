@@ -132,6 +132,20 @@ $(() => {
     });
   };
   bindIdReference();
+
+  /* 貼文時的輔助選單 */
+  $('input[name="func"]').on('click', evt => {
+    /* Reset all */
+    $('input[name="func"]:checked').prop('checked', false);
+    $('.hidden-func').removeClass('active');
+    /* set selected function as activate */
+    const target = evt.target;
+    target.checked = true;
+    const targetCss = `.hidden-func.${target.dataset.target}`;
+    const targetElement = getQuery(targetCss);
+    if(targetElement !== null)
+      targetElement.className += ' active';
+  });
 });
 
 class HoverBox {
