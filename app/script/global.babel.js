@@ -277,15 +277,17 @@ class HoverBox {
     });
 
     /* 綁定 replies, 一樣透過 recursive 判斷是否要回到 .container 找到 thread */
-    const quotedFrom = element.dataset.quotedfrom.split(', ');
-    const thread = recursive ? findParent(element, /hoverBox/) : findParent(element, /thread/);
-    const $thread = recursive ? $(`.container article[data-number="${thread.dataset.number}"]`) : $(thread);
-    const articles = [];
-    const queryString = quotedFrom.map(number => `span.num[data-num="${number}"]`).join(', ');
-    /* 這邊直接用 jQuery 跟 queryString 結合來一次選所有文章 */
-    const $articles = $thread.find(queryString);
-    element.children[0].addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
-    element.children[0].addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
+    if(element.dataset.quotedfrom !== undefined) {
+      const quotedFrom = element.dataset.quotedfrom.split(', ');
+      const thread = recursive ? findParent(element, /hoverBox/) : findParent(element, /thread/);
+      const $thread = recursive ? $(`.container article[data-number="${thread.dataset.number}"]`) : $(thread);
+      const articles = [];
+      const queryString = quotedFrom.map(number => `span.num[data-num="${number}"]`).join(', ');
+      /* 這邊直接用 jQuery 跟 queryString 結合來一次選所有文章 */
+      const $articles = $thread.find(queryString);
+      element.children[0].addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
+      element.children[0].addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
+    }
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
     const self = this;
