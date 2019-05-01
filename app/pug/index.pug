@@ -68,28 +68,66 @@ mixin articleHeader(info, t)
       a.link 回覆
 
 mixin postForm(labelText, id, placeholder, type)
-  section.postInfo
+  section.postInfo(data-id=id)
     label
       h4.label= labelText
       if type == 'text' || type == 'file'
-        input(id=id, placeholder=placeholder, type=type, maxlength='100')
+        input(id=id, placeholder=placeholder, type=type, maxlength='100', autocomplete='off')
       else
         textarea(id=id, placeholder=placeholder)
+    if block
+      block
 
 div.container
   header.pageTitle
     h1 Horrific Island?
-    h2 (目前僅有爬 K 島之功能，API尚未搭建 Github:
+    h2 (目前僅有爬 K 島之功能，API尚未搭建。 Github:
       a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
       | )
 
-  //- section.postContainer
-  //-   div.postTable
-  //-     h2 這邊之後再改幹
-  //-     +postForm('名稱', 'postName', '欲顯示之名稱', 'text')
-  //-     +postForm('標題', 'postTitle', '輸入標題', 'text')
-  //-     +postForm('內文', 'postContent', '無本文', 'textarea')
-  //-     +postForm('附加圖檔', 'postImg', '', 'file')
+  //- postArticle
+  section.postContainer
+    form#postTable.postTable
+      +postForm('名稱', 'postName', '名無し', 'text')
+      +postForm('標題', 'postTitle', '無題', 'text')
+      +postForm('', 'postContent', '想聊些什麼？', 'textarea')
+        section.controlPannel
+          div.function
+            label
+              input(type='checkbox', name='func', data-target='image')
+              i.fas.fa-file-image
+              i.fas.fa-file-image.on
+            span.tooltips 上傳圖片/使用網址附加圖片
+          div.function
+            label
+              input(type='checkbox', name='func', data-target='hashtag')
+              i.fas.fa-hashtag
+              i.fas.fa-hashtag.on
+            span.tooltips 將串加入 hashtags
+          div.function
+            label
+              input(type='checkbox', name='func')
+              i.far.fa-grin-squint
+              i.far.fa-grin-squint.on
+            span.tooltips 開啟顏文字庫
+          div.function
+            label
+              input(type='checkbox', name='func')
+              i.fas.fa-torah
+              i.fas.fa-torah.on
+            span.tooltips 開啟複製文庫
+          section.hidden-func.hashtag
+            input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔', autocomplete='off')
+          section.hidden-func.image
+            input(id='imgurl', type='text', placeholder='輸入圖片/影片之網址或拖曳圖片檔案到此', autocomplete='off')
+            input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
+      section.submission
+        section.addition
+          label
+            input(type='checkbox', id='allowComment', checked)
+            div.btn.btn-on 留言: 開
+            div.btn.btn-off 留言: 關
+        div#submit.btn.btn-default 開串！
 
   each discussion in pageContent
     +article(discussion)

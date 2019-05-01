@@ -86,7 +86,7 @@ $(() => {
       }
       /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
        * 之後有推播，前端 append 可能要注意這部份 */
-      p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+?)([\s|\<|\^|\@])/g, '<a class="link" href="$1">$1</a>$2');
+      p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+?)([\s|\<|\^|\@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
     });
   };
   updateQuote();
@@ -132,6 +132,20 @@ $(() => {
     });
   };
   bindIdReference();
+
+  /* 貼文時的輔助選單 */
+  $('input[name="func"]').on('click', evt => {
+    /* Reset all */
+    $('input[name="func"]:checked').prop('checked', false);
+    $('.hidden-func').removeClass('active');
+    /* set selected function as activate */
+    const target = evt.target;
+    target.checked = true;
+    const targetCss = `.hidden-func.${target.dataset.target}`;
+    const targetElement = getQuery(targetCss);
+    if(targetElement !== null)
+      targetElement.className += ' active';
+  });
 });
 
 class HoverBox {

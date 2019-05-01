@@ -13,21 +13,141 @@ a.link
       font-weight: bold
   .postContainer
     border-bottom: 3px solid rgba(255, 255, 255, .7)
+    text-align: center
     .postTable
-      text-align: center
       padding: 1em 0
+      display: inline-block
       .postInfo
         label
           h4
             font-size: 1em
-          input
+          input[type=text]
+            padding: .15em
             color: rgba(96, 96, 96, 1)
             display: inline-block
             width: 25em
+            border-radius: 2px
           textarea
             vertical-align: top
             color: rgba(96, 96, 96, 1)
-            width: 25em
+            width: 28em
+            padding: 5px
+            min-height: 5em
+            border-top-left-radius: 3px
+            border-top-right-radius: 3px
+            &:focus
+              outline: none
+              border-color: green
+        &:nth-last-child(2)
+          display: inline-block
+          position: relative
+          label
+              margin-bottom: 0
+      section.controlPannel
+        text-align: left
+        background: rgba(0, 0, 0, .6)
+        padding: 5px
+        border-bottom-left-radius: 3px
+        border-bottom-right-radius: 3px
+        div.function
+          padding: 3px
+          display: inline-block
+          margin-right: 5px
+          position: relative
+          label
+            cursor: pointer
+          span.tooltips
+            display: none
+          &:hover
+            i
+              color: white
+            span.tooltips
+              display: block
+              padding: .5em
+              background: rgb(0, 0, 0)
+              position: absolute
+              top: 0
+              left: 50%
+              transform: translate(-50%, -100%)
+              text-align: center
+              white-space: nowrap
+              font-weight: bold
+              user-select: none
+              border-radius: 5px
+          &.active span.tooltips
+            display: none
+          i
+            font-size: 1.3em
+            &.on
+              color: #FF8B2C
+            &.on:hover
+              color: #ff7300
+          input
+            display: none
+            & ~ i
+              display: none
+            & + i
+              display: inline
+            &:checked
+              & ~ i
+                display: inline
+              & + i
+                display: none
+        section.hidden-func
+          display: none
+          &.active
+            display: block
+          input
+            width: 100%
+            padding: .15em
+            color: rgba(96, 96, 96, 1)
+            display: inline-block
+            border-radius: 2px
+          input#imgfile
+            display: none
+      section.submission
+        display: flex
+        margin-top: 5px
+        padding: 0 .3em
+        section.addition
+          display: inline-flex
+          text-align: center
+          justify-content: center
+          margin-right: 5px
+          .btn
+            color: white
+            font-size: 1.15em
+          .btn-on
+            background-color: #449d44
+            border-color: #398439
+            &:hover
+              background-color: #307d30
+              border-color: #1b4e1b
+          .btn-off
+            background-color: #c9302c
+            border-color: #ac2925
+            &:hover
+              background-color: #ad221e
+              border-color: #7b1511
+          input[type=checkbox]
+            display: none
+            & ~ .btn
+              display: inline-block
+            & + .btn
+              display: none
+            &:checked
+              & ~ .btn
+                display: none
+              & + .btn
+                display: inline-block
+        #submit
+          display: inline-flex
+          text-align: center
+          min-width: 30%
+          flex-direction: row
+          justify-content: center
+          flex-grow: 1
+          margin-bottom: 5px
 
 article.thread, #hoverBox
   margin-bottom: .7em
