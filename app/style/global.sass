@@ -54,15 +54,32 @@ a.link
           display: inline-block
           margin-right: 5px
           cursor: pointer
+          position: relative
           i
             font-size: 1.3em
-          &:hover
-            color: white
           &.active i
             color: #FF8B2C
           &.active:hover i
             color: #ff7300
-        section.image
+          span.tooltips
+            display: none
+          &:hover
+            i
+              color: white
+            span.tooltips
+              display: block
+              padding: .5em
+              background: rgba(0, 0, 0, .95)
+              position: absolute
+              bottom: 0
+              left: 50%
+              transform: translate(-50%, 100%)
+              text-align: center
+              white-space: nowrap
+              font-weight: bold
+          &.active span.tooltips
+            display: none
+        section.hidden-func
           input
             width: 100%
             padding: .15em
