@@ -23,10 +23,10 @@ $(() => {
       data.append('imgfile', imgfile[0]);
 
     /* check if the post is OK */
-    if(postData.content === null && postData.imgurl === null && imgfile.length === 0) {
+    if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
       postError('NoContent');
     } else {
-      postFormAPI('article', data, reponse => {
+      postFormAPI('article', data, response => {
         console.log(response)
       });
     }
@@ -49,8 +49,7 @@ $(() => {
       success: (_data, textStatus, jqXHR) => {
         console.log(func);
         console.log(_data);
-        console.log(jqXHR);
-        callback(_data, textStatus, jqXHR);
+        callback(_data);
       },
       timeout: 20000,
       error: (jqXHR, textStatus, errorThrown) => {
