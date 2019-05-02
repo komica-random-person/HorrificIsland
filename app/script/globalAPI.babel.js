@@ -34,7 +34,9 @@ $(() => {
   getID('submit').addEventListener('click', postArticle);
 
   const getHeader = () => {
-    "X-user-id": $.cookie('keygen')
+    const header = {};
+    header["X-user-id"] = $.cookie('keygen');
+    return header;
   };
   const postFormAPI = (func, data, callback) => {
     $.ajax({
