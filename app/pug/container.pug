@@ -8,6 +8,13 @@ html
     link(rel='stylesheet', href='/style/global.css')
     meta(name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1')
     meta(name='google-site-verification', content='-zCDyzoF6-mYQbAlBhQfbrScpqhUQ6IA0Bf4FE4W64c')
+    script(async, src='https://www.googletagmanager.com/gtag/js?id=UA-139404686-1')
+    script.
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-139404686-1');
   body
     main.clearfix !{content}
     script(src='/script/horrific.js')
