@@ -14,6 +14,7 @@ $(() => {
       imageurl: getID('imgurl').value || null,
       tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
       allowComment: getID('allowComment').value === 'on',
+      documentType: evt.target.dataset.type === 'reply' ? 'reply' : 'post',
     };
     const data = new FormData();
     for(let k in postData)
@@ -21,6 +22,8 @@ $(() => {
     const imgfile = getID('imgfile').files;
     if(imgfile.length > 0)
       data.append('imgfile', imgfile[0]);
+    else
+      data.append('imgfile', null);
 
     /* check if the post is OK */
     if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
