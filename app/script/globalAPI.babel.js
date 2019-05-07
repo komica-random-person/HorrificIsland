@@ -76,8 +76,10 @@ $(() => {
         q.querySelector('#submit').dataset.type = 'reply';
         getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
         article.appendChild(q);
-      } else
+      } else {
         q = getQuery('.quickPostTable');
+        q.className = q.className.replace(/\s*hidden\s*/g, ' ');
+      }
 
       q.querySelector('textarea').value += `>>${targetNum}\n`;
       /* 設定位置 */
@@ -113,6 +115,9 @@ $(() => {
         }
       };
       /* 綁定結束事件 */
+      q.querySelector('.exit').addEventListener('click', () => {
+        q.className += ' hidden';
+      });
     });
   });
 

@@ -14,14 +14,24 @@ a.link
   .postContainer
     border-bottom: 3px solid rgba(255, 255, 255, .7)
     text-align: center
+    .exit
+      display: none
+      position: absolute
+      top: 0
+      right: 0
+      .btn
+        padding: 0 .17em
+        font-size: 12pt
     &.quickPostTable
       border: 3px solid rgba(255, 255, 255, .7)
-      padding: .5em 1em
+      padding: .75em 1em .1em 1em
       border-radius: .3em
       box-shadow: 0 .3em 1em rgba(0,0,0,0.75)
       background: #282A2E
       z-index: 1
       cursor: move
+      .exit
+        display: inline-block
     .postTable
       padding: 1em 0
       display: inline-block
