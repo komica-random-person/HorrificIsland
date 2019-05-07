@@ -88,6 +88,9 @@ div.container
   //- postArticle
   section.postContainer
     form#postTable.postTable
+      section.exit
+        div.btn.btn-danger
+          i.fas.fa-times-circle
       +postForm('名稱', 'postName', '名無し', 'text')
       +postForm('標題', 'postTitle', '無題', 'text')
       +postForm('', 'postContent', '想聊些什麼？', 'textarea')
