@@ -146,6 +146,27 @@ $(() => {
     if(targetElement !== null)
       targetElement.className += ' active';
   });
+  /* 點按文章編號時的快速回復 */
+  $('span.num a.quotable').each((index, element) => {
+    const article = findParent(element, 'thread');
+    element.addEventListener('click', evt => {
+      const mainNumber = article.dataset.number;
+      const targetNum = element.dataset.num;
+      const quickPostHTML = getID('postTable').outerHTML;
+      const q = document.createElement('div');
+      q.className = 'quickPostTable postContainer';
+      q.innerHTML = quickPostHTML;
+      q.querySelector('#submit').innerText = '回復';
+      q.querySelector('textarea').value = `>>${targetNum}\n`;
+      getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
+      const coord = [evt.clientX, evt.clientY];
+      q.style.position = 'fixed';
+      q.style.top = coord[1] + 'px';
+      q.style.left = coord[0] + 'px';
+      article.appendChild(q);
+      q.querySelector('textarea').focus();
+    });
+  });
 });
 
 class HoverBox {

@@ -14,6 +14,14 @@ a.link
   .postContainer
     border-bottom: 3px solid rgba(255, 255, 255, .7)
     text-align: center
+    &.quickPostTable
+      border: 3px solid rgba(255, 255, 255, .7)
+      padding: 1em
+      border-radius: .3em
+      box-shadow: 0 .3em 1em rgba(0,0,0,0.75)
+      background: #282A2E
+      z-index: 1
+      cursor: move
     .postTable
       padding: 1em 0
       display: inline-block
@@ -154,6 +162,7 @@ article.thread, #hoverBox
   padding-left: 0
   padding-bottom: 1.4em
   border-bottom: 2px solid rgba(255, 255, 255, .7)
+  position: relative
   header.imgInfo h4, section.imgInfo h4
     font-size: .85em
     margin: .5em 0
