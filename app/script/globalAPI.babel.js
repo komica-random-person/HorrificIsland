@@ -6,6 +6,7 @@ $(() => {
   
   };
   const postArticle = evt => {
+    evt.stopImmediatePropagation();
     const tags = getID('hashtags').value || null;
     const postData = {
       name: getID('postName').value || null,
@@ -36,6 +37,81 @@ $(() => {
   };
   getID('submit').addEventListener('click', postArticle);
 
+
+  /* 貼文時的輔助選單 */
+  const bindPostSupplement = (mainElement=document) => {
+    $(mainElement).find('input[name="func"]').on('click', evt => {
+      /* Reset all */
+      $(mainElement).find('input[name="func"]:checked').prop('checked', false);
+      $(mainElement).find('.hidden-func').removeClass('active');
+      /* set selected function as activate */
+      const target = evt.target;
+      target.checked = true;
+      const targetCss = `.hidden-func.${target.dataset.target}`;
+      const targetElement = getQuery(targetCss, mainElement);
+      if(targetElement !== null)
+        targetElement.className += ' active';
+    });
+  };
+  bindPostSupplement();
+
+  /* 點按文章編號時的快速回復 */
+  $('span.num a.quotable').each((index, element) => {
+    const article = findParent(element, 'thread');
+    element.addEventListener('click', evt => {
+      evt.stopImmediatePropagation();
+      const mainNumber = article.dataset.number;
+      const targetNum = element.dataset.num;
+      const quickPostHTML = getID('postTable').outerHTML;
+      const q = document.createElement('div');
+      q.className = 'quickPostTable postContainer';
+      q.innerHTML = quickPostHTML;
+
+      /* 綁定功能 */
+      bindPostSupplement(q);
+      /* 整理版面 */
+      q.querySelector('#submit').innerText = '回復';
+      q.querySelector('#submit').dataset.type = 'reply';
+      q.querySelector('textarea').value = `>>${targetNum}\n`;
+      getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
+      /* 設定位置 */
+      const coord = [evt.clientX, evt.clientY];
+      q.style.position = 'fixed';
+      q.style.top = coord[1] + 'px';
+      q.style.left = coord[0] + 'px';
+      article.appendChild(q);
+      q.querySelector('textarea').focus();
+
+      /* 綁定拖曳事件 */
+      q.onmousedown = _evt => {
+        evt.stopImmediatePropagation();
+        const target = _evt.target;
+        const key = ['div', 'section', 'form'];
+        const offsetX = _evt.clientX - Number(q.style.left.split('p')[0]);
+        const offsetY = _evt.clientY - Number(q.style.top.split('p')[0]);
+        if(key.indexOf(target.tagName.toLowerCase()) !== -1 && target.id !== 'submit') {
+          const move = mEvt => {
+            const top = -offsetY + mEvt.clientY;
+            const left = -offsetX + mEvt.clientX;
+            q.style.top = `${top}px`;
+            q.style.left = `${left}px`;
+          };
+          q.addEventListener('mousemove', move);
+          const unbind = e => {
+            e.stopImmediatePropagation();
+            q.removeEventListener('mousemove', move);
+            q.onmouseup = null;
+            q.onmouseleave = null;
+          };
+          q.onmouseup = unbind;
+          q.onmouseleave = unbind;
+        }
+      };
+      /* 綁定結束事件 */
+    });
+  });
+
+  /* API 使用之 function */
   const getHeader = () => {
     const header = {};
     header["X-user-id"] = $.cookie('keygen');
