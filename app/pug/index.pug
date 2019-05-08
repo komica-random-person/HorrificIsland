@@ -1,9 +1,9 @@
 - var imgBase = 'http://ram.komica2.net/00/src/';
 - var imgThumBase = 'http://ram.komica2.net/00/thumb/'
-mixin article(data)
+mixin article(data, articleType)
   - var head = data.Head;
   - var body = data.Bodies;
-  article.thread.col-xs-12.clearfix(id=head.No , data-number=head.No)
+  article.thread.col-xs-12.clearfix(id=head.No , data-number=head.No, data-articletype=articleType)
     form
       if head.Picture
         //- show image information if image exists
@@ -16,7 +16,7 @@ mixin article(data)
           - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg')
           a.imgContainer(onclick='showImg(this)', data-ori=imgBase + head.Picture, data-thumb=imgThumBase + picName)
             img(src=imgThumBase + picName)
-        +articleHeader(head, 'main')
+        +articleHeader(head, 'main', articleType)
         section.mainContent
           p.content
             //- replace \n with <br>
@@ -29,11 +29,11 @@ mixin article(data)
               span.quotedNum 0
               | ):
         each reply in body
-          +replyBox(reply)
+          +replyBox(reply, articleType)
 
-mixin replyBox(reply)
+mixin replyBox(reply, articleType)
   section.replyBox.clearfix(id=reply.No, data-number=reply.No)
-    +articleHeader(reply, 'reply')
+    +articleHeader(reply, 'reply', articleType)
     if reply.Picture
       section.col-xs-12.imgInfo
         h4.info= '檔名: '
@@ -52,8 +52,10 @@ mixin replyBox(reply)
         span.quotedNum 0
         | ):
 
-mixin articleHeader(info, t)
+mixin articleHeader(info, t, type)
+  - var typeString = { komica: '【Komica】'}
   header(data-type=t)
+    span.articleType= typeString[type]
     if info.Title != ''
       span.title= info.Title
     span.name= info.Name
@@ -62,8 +64,9 @@ mixin articleHeader(info, t)
     span.id.quotable(data-quotetype= 'id', data-id= info.Id)= 'ID:' + info.Id
     span.num(data-num= info.No)
       a.link.quotable(data-quotetype= 'num', data-num= info.No)= 'No.' + info.No
-    span.del
-      a.link 刪除
+    if type != 'komica'
+      span.del
+        a.link 刪除
     span.res
       a.link 回覆
 
@@ -132,8 +135,8 @@ div.container
             div.btn.btn-off 留言: 關
         div#submit.btn.btn-default 開串！
 
-  each discussion in pageContent
-    +article(discussion)
+  each discussion in pageContent.komica
+    +article(discussion, 'komica')
 
   section#hoverBox.hoverBox
 

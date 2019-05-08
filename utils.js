@@ -36,15 +36,15 @@ module.exports = app => {
 
   app.set('getMainContent', cb => {
     const currentTime = Date.now();
-    const prevTime = app.get('time');
+    const prevTime = app.get('komica-time');
     const cacheSecond = process.env.NODE_ENV === 'dev' ? 60 * 180 : 60 * 2;
     if(prevTime === undefined || currentTime - prevTime > 1000 * cacheSecond) {
       /* if currentTime - prevTime > threshold, refresh the content */
-      app.set('time', currentTime);
+      app.set('komica-time', currentTime);
       const request = require('request');
       request('https://homu.homu-api.com/page/0', (error, res, body) => {
         if (res.statusCode === 200) {
-          app.set('content', body);
+          app.set('komica-content', body);
           cb({
             status: 1,
             content: body,
@@ -53,7 +53,7 @@ module.exports = app => {
         } else {
           cb({
             status: false,
-            content: app.get('content'),
+            content: app.get('komica-content'),
             refresh: false
           });
         }
@@ -62,7 +62,7 @@ module.exports = app => {
       /* Had refreshed recently, directly send old content */
       cb({
         status: 1,
-        content: app.get('content'),
+        content: app.get('komica-content'),
         refresh: false,
       });
     }

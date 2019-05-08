@@ -16,7 +16,9 @@ module.exports = app => {
           name: 'index',
           title: 'Index',
           description: 'index',
-          pageContent: JSON.parse(content.content)
+          pageContent: {
+            komica: JSON.parse(content.content),
+          }
       };
       const renderedContent = req.app.get('render')(pageInfo);
       res.send(renderedContent);
