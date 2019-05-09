@@ -8,9 +8,11 @@ $(() => {
   const postArticle = evt => {
     evt.stopImmediatePropagation();
     const tags = getID('hashtags').value || null;
+    const d = new Date();
     const postData = {
       name: getID('postName').value || null,
       title: getID('postTitle').value || null,
+      time: d.toUTCString(),
       content: getID('postContent').value || null,
       imageurl: getID('imgurl').value || null,
       tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
@@ -142,10 +144,8 @@ $(() => {
       },
       timeout: 20000,
       error: (jqXHR, textStatus, errorThrown) => {
-        console.log('error at:' + func);
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
+        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
       },
     });
   };
@@ -164,10 +164,8 @@ $(() => {
       },
       timeout: 20000,
       error: (jqXHR, textStatus, errorThrown) => {
-        console.log('error at:' + func);
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
+        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
       },
     });
   };
@@ -182,10 +180,8 @@ $(() => {
         callback(data, textStatus, jqXHR);
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        console.log('error at:' + func);
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
+        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
       },
     });
   };
