@@ -225,6 +225,7 @@ article.thread, #hoverBox
         max-height: 500px
         display: inline-block
         padding-right: 10px
+        padding-bottom: 3px
         margin-right: 5px
       &.zoomed
         display: table
@@ -239,7 +240,7 @@ article.thread, #hoverBox
       padding: .9em 1em 1em 1.8em
       text-align: justify
       margin: 0
-      font-size: 1.15em
+      font-size: 1.05em
       word-break: break-all
   .quotable, .quote, .quotedList
     color: #81A2BE
@@ -265,6 +266,8 @@ article.thread, #hoverBox
   .replyBox.quotedArticle, &.quotedArticle .mainContent
     p.quotedList
       display: inline-block
+  .replyBox header span.res
+    display: none
 .replyBox
   background: #282A2E
   padding: .2em .5em

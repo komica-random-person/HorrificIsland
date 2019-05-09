@@ -96,6 +96,25 @@ $(() => {
       /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
        * 之後有推播，前端 append 可能要注意這部份 */
       p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+?)([\s|\<|\^|\@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
+
+      /* 將超過固定高度的元素隱藏，並綁定按鈕來顯示 */
+      const offset = 200;
+      let flag = false;
+      if(p.offsetHeight > offset) {
+        let height = 0;
+        Array.prototype.slice.apply(p.children).forEach(e => {
+          const eHeight = e.offsetHeight + 4;
+          if(height + eHeight < offset)
+            height += eHeight
+          else {
+            if(!flag) {
+            
+            }
+            p.style.height = `${height}px`;
+            e.className += ' hidden';
+          }
+        });
+      }
     });
   };
   updateQuote();

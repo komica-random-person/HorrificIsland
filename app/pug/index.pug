@@ -22,7 +22,7 @@ mixin article(data, articleType)
             //- replace \n with <br>
             - var split = head.Content.split('\n')
             each text in split
-              | #{text}
+              span= text
               br
           p.quotedList
             span.text Replies(
@@ -45,7 +45,7 @@ mixin replyBox(reply, articleType)
     - var split = reply.Content.split('\n')
     p.content
       each text in split
-        | #{text}
+        span= text
         br
     p.quotedList
       span.text Replies(
@@ -68,7 +68,9 @@ mixin articleHeader(info, t, type)
       span.del
         a.link 刪除
     span.res
+      | [
       a.link 回覆
+      | ]
 
 mixin postForm(labelText, id, placeholder, type)
   section.postInfo(data-id=id)
