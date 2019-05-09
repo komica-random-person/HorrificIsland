@@ -35,6 +35,15 @@ const showImg = (imgContainer) => {
       video.controls = true;
       e.appendChild(video);
       e.className += ' video';
+      /* Stop video playing after element is not visible on screen */
+      const scrollEvent = () => {
+        const position = e.getBoundingClientRect();
+        if(position.top > window.innerHeight || position.bottom < -1 * e.children[0].offsetHeight) {
+          video.pause();
+          window.removeEventListener('scroll', scrollEvent);
+        }
+      };
+      window.addEventListener('scroll', scrollEvent);
     }
   }
 };
