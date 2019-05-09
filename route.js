@@ -20,8 +20,12 @@ module.exports = app => {
             komica: JSON.parse(content.content),
           }
       };
-      const renderedContent = req.app.get('render')(pageInfo);
-      res.send(renderedContent);
+      const userid = req.cookies.keygen;
+      req.app.get('getHIContent')(userid, result => {
+        pageInfo.pageContent.HIsland = JSON.parse(result.body);
+        const renderedContent = req.app.get('render')(pageInfo);
+        res.send(renderedContent);
+      });
     });
   });
 };

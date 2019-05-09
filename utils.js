@@ -34,14 +34,33 @@ module.exports = app => {
     return r_array;
   });
 
+  const request = require('request');
+  const APIURL = 'http://localhost:8888/';
+
+  app.set('getHIContent', (userid, cb) => {
+    const url = `${APIURL}article/list/`;
+    const headers = { 'X-user-id': userid };
+    request({ url, headers }, (err, res, body) => {
+      if(res.statusCode === 200) {
+        app.set('HIsland-content');
+        cb({ err, body });
+      } else {
+        if(app.get('HIsland-content') === undefined)
+          cb({ err, res: res.statusCode });
+        else
+          cb({ err, body: app.get('HIsland-content') });
+      }
+    });
+  });
+
   app.set('getMainContent', cb => {
     const currentTime = Date.now();
     const prevTime = app.get('komica-time');
     const cacheSecond = process.env.NODE_ENV === 'dev' ? 60 * 180 : 60 * 2;
+
     if(prevTime === undefined || currentTime - prevTime > 1000 * cacheSecond) {
       /* if currentTime - prevTime > threshold, refresh the content */
       app.set('komica-time', currentTime);
-      const request = require('request');
       request('https://homu.homu-api.com/page/0', (error, res, body) => {
         if (res.statusCode === 200) {
           app.set('komica-content', body);
