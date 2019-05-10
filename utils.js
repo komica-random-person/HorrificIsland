@@ -5,6 +5,7 @@ module.exports = app => {
     /* 1. render page with pugInfo
        2. render container with page */
     const page = { basedir: './app/pug' };
+    console.log(pageInfo)
     for(var k in pageInfo)
       page[k] = pageInfo[k];
     page.content = pug.renderFile(`./app/pug/${pageInfo.name}.pug`, pageInfo);
@@ -53,6 +54,31 @@ module.exports = app => {
     });
   });
 
+  const homu2hisland = datas => {
+    datas = JSON.parse(datas).map(data => {
+      const imgBase = 'http://ram.komica2.net/00/src/';
+      const imgThumb = 'http://ram.komica2.net/00/thumb/';
+      const convert = article => {
+        const { Title: title, Name: name, Id: id, No: number, Content: content } = article;
+        const withImg = article.Picture !== undefined;
+        return {
+          title, name, id, number, content, mainNumber: number,
+          time: (new Date(article.Date + ' ' + article.Time)).toUTCString(),
+          image: {
+            url: !withImg ? null : imgBase + article.Picture,
+            thumb: !withImg ? null : `${imgThumb}${article.Picture.replace(/^(.+?)\..+$/, '$1s.jpg')}`
+          }
+        };
+      };
+      data.post = convert(data.Head);
+      data.replies = data.Bodies.map(e => convert(e));
+      delete data.Head;
+      delete data.Bodies;
+      return data;
+    });
+    return datas;
+  };
+
   app.set('getMainContent', cb => {
     const currentTime = Date.now();
     const prevTime = app.get('komica-time');
@@ -63,6 +89,7 @@ module.exports = app => {
       app.set('komica-time', currentTime);
       request('https://homu.homu-api.com/page/0', (error, res, body) => {
         if (res.statusCode === 200) {
+          body = homu2hisland(body);
           app.set('komica-content', body);
           cb({
             status: 1,

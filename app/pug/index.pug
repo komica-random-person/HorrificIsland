@@ -1,26 +1,23 @@
-- var imgBase = 'http://ram.komica2.net/00/src/';
-- var imgThumBase = 'http://ram.komica2.net/00/thumb/'
 mixin article(data, articleType)
-  - var head = data.Head;
-  - var body = data.Bodies;
-  article.thread.col-xs-12.clearfix(id=head.No , data-number=head.No, data-articletype=articleType)
+  - var post = data.post;
+  - var replies = data.replies;
+  article.thread.col-xs-12.clearfix(id=post.number , data-number=post.number, data-articletype=articleType)
     form
-      if head.Picture
+      if post.image.url
         //- show image information if image exists
         header.col-xs-12.imgInfo
           h4.info= '檔名: '
-            a.link(href=imgBase + head.Picture, target='_blank')= head.Picture
+            - var s = post.image.url.split('/');
+            a.link(href=post.image.url, target='_blank')= s[s.length - 1]
       section.contentSection.col-xs-12
-        if head.Picture
-          //- show image if image exists, use REGEX to get image filename
-          - var picName = head.Picture.replace(/^(.+?)\..+$/, '$1s.jpg')
-          a.imgContainer(onclick='showImg(this)', data-ori=imgBase + head.Picture, data-thumb=imgThumBase + picName)
-            img(src=imgThumBase + picName)
-        +articleHeader(head, 'main', articleType)
+        if post.image.url
+          a.imgContainer(onclick='showImg(this)', data-ori=post.image.url, data-thumb=post.image.thumb)
+            img(src=post.image.thumb)
+        +articleHeader(post, 'main', articleType)
         section.mainContent
           p.content
             //- replace \n with <br>
-            - var split = head.Content.split('\n')
+            - var split = post.content.split('\n')
             each text in split
               span= text
               br
@@ -28,21 +25,21 @@ mixin article(data, articleType)
             span.text Replies(
               span.quotedNum 0
               | ):
-        each reply in body
+        each reply in replies
           +replyBox(reply, articleType)
 
 mixin replyBox(reply, articleType)
-  section.replyBox.clearfix(id=reply.No, data-number=reply.No)
+  section.replyBox.clearfix(id=reply.number, data-number=reply.number)
     +articleHeader(reply, 'reply', articleType)
-    if reply.Picture
+    if reply.image.url
       section.col-xs-12.imgInfo
         h4.info= '檔名: '
-          a.link(href=imgBase + reply.Picture, target='_blank')= reply.Picture
+          - var s = reply.image.url.split('/')
+          a.link(href=reply.image.url, target='_blank')= s[s.length - 1]
       //- there exist a ($filename)s.jpg file for each image, use Regex to get the url
-      - var picName = reply.Picture.replace(/^(.+?)\..+$/, '$1s.jpg');
-      a.imgContainer(onclick='showImg(this)', data-ori=imgBase + reply.Picture, data-thumb=imgThumBase + picName)
-        img(src=imgThumBase + picName)
-    - var split = reply.Content.split('\n')
+      a.imgContainer(onclick='showImg(this)', data-ori=reply.image.url, data-thumb=reply.image.thumb)
+        img(src=reply.image.thumb)
+    - var split = reply.content.split('\n')
     p.content
       each text in split
         span= text
@@ -53,17 +50,18 @@ mixin replyBox(reply, articleType)
         | ):
 
 mixin articleHeader(info, t, type)
-  - var typeString = { komica: '【Komica】'}
+  - var typeString = { komica: '【Komica】', hisland: '【H-Island】' }
   header(data-type=t)
     span.articleType= typeString[type]
     if info.Title != ''
-      span.title= info.Title
-    span.name= info.Name
-    span.date= info.Date
-    span.time= info.Time
-    span.id.quotable(data-quotetype= 'id', data-id= info.Id)= 'ID:' + info.Id
-    span.num(data-num= info.No)
-      a.link.quotable(data-quotetype= 'num', data-num= info.No)= 'No.' + info.No
+      span.title= info.title
+    span.name= info.name
+    - var time = new Date(info.time)
+    span.date= time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDate()
+    span.time= time.getHours() + ':' + time.getMinutes() + ':' + time.getMilliseconds()
+    span.id.quotable(data-quotetype= 'id', data-id= info.id)= 'ID:' + info.id
+    span.num(data-num= info.number)
+      a.link.quotable(data-quotetype= 'num', data-num= info.number)= 'No.' + info.number
     if type != 'komica'
       span.del
         a.link 刪除
@@ -137,6 +135,8 @@ div.container
             div.btn.btn-off 留言: 關
         div#submit.btn.btn-default 開串！
 
+  each discussion in pageContent.hisland
+    +article(discussion, 'hisland')
   each discussion in pageContent.komica
     +article(discussion, 'komica')
 

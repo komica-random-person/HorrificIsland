@@ -17,12 +17,12 @@ module.exports = app => {
           title: 'Index',
           description: 'index',
           pageContent: {
-            komica: JSON.parse(content.content),
+            komica: content.content,
           }
       };
       const userid = req.cookies.keygen;
       req.app.get('getHIContent')(userid, result => {
-        pageInfo.pageContent.HIsland = JSON.parse(result.body);
+        pageInfo.pageContent.hisland = JSON.parse(result.body);
         const renderedContent = req.app.get('render')(pageInfo);
         res.send(renderedContent);
       });
