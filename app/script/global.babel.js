@@ -103,14 +103,25 @@ $(() => {
       if(p.offsetHeight > offset) {
         let height = 0;
         Array.prototype.slice.apply(p.children).forEach(e => {
-          const eHeight = e.offsetHeight + 4;
-          if(height + eHeight < offset)
+          /* br element have offsetHeight=0, but in browser it have 4 px height */
+          const eHeight = e.offsetHeight > 0 ? e.offsetHeight : 4;
+          if(height + eHeight <= offset && !flag)
             height += eHeight
           else {
             if(!flag) {
-            
+              /* Create show button when its not created */
+              const showButton = document.createElement('span');
+              showButton.className = 'link';
+              showButton.innerText = '展開文章...';
+              p.appendChild(showButton);
+              showButton.addEventListener('click', () => {
+                $(p).addClass('show').find('.hidden').removeClass('hidden');
+                p.removeChild(showButton);
+                p.style.height = '';
+              });
+              flag = true;
+              p.style.height = `${height + showButton.offsetHeight * 2}px`;
             }
-            p.style.height = `${height}px`;
             e.className += ' hidden';
           }
         });
