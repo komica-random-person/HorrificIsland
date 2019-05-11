@@ -314,6 +314,48 @@ p.debug
 div.bar
   margin: 50px 0
   height: 5px
+#infoBox
+  position: fixed
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  background: #fff
+  color: #333
+  border-radius: 7px
+  z-index: 1
+  text-align: center
+  border: 1px solid #d1d5da
+  overflow: hidden
+  &.warning h2
+    color: #eea236
+  &.info h2
+    color: #46b8da
+  &.error h2
+    color: red
+  header, main
+    padding: .5em 2em
+  header
+    border-top-right-radius: 7px
+    border-top-left-radius: 7px
+    background: #f6f8fa
+    border-bottom: 1px solid #d1d5da
+  main
+    background: rgba(0, 0, 0, 0.04)
+    button
+      padding: .3em .5em
+  h2
+    margin: 5px 0
+  p
+    font-size: 14pt
+    margin: 1em 0
+#mask
+  width: 100vw
+  height: 100vh
+  background: rgba(50, 50, 50, .5)
+  position: fixed
+  top: 0
+  left: 0
+  cursor: pointer
 
 @media screen and (max-width: 600px)
   .container

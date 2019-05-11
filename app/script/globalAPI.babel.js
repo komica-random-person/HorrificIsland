@@ -1,4 +1,4 @@
-/* global: getID, getQuery, getQueries, getQueriesArray, escape, findParent, $ */
+/* global: getID, getQuery, getQueries, getQueriesArray, escape, findParent, $, infoBox */
 const apiUrl = 'http://localhost:8888/';
 
 $(() => {
@@ -60,12 +60,21 @@ $(() => {
     </form>
 </article>`;
   };
-  const postError = errorCode => {
-  
+  const postError = error => {
+    infoBox({
+      header: `ERROR: code ${error.code}`,
+      content: error.message,
+      className: 'error',
+    });
   };
   const postArticle = evt => {
     evt.stopImmediatePropagation();
     const target = evt.target;
+    if(target.getAttribute('disabled') === 'true')
+      return;
+    target.setAttribute('disabled', true);
+    const tempString = target.innerText;
+    target.innerText = '傳送中...';
     const tags = getID('hashtags').value || null;
     const d = new Date();
     const postData = {
@@ -96,9 +105,11 @@ $(() => {
           const article = response.data;
           const html = getArticleHTML(article);
           $('main.articleContainer').prepend(html);
-        } else {
+          target.removeAttribute('disabled');
+          target.innerText = tempString;
+          $(findParent(target, 'postTable')).find('input, textarea').val('');
+        } else
           postError(response);
-        }
       });
     }
   };

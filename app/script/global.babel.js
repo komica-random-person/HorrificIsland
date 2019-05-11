@@ -48,6 +48,30 @@ const showImg = (imgContainer) => {
   }
 };
 
+const infoBox = options => {
+  const { header, className, content, button } = options;
+  const $infoBox = $('#infoBox').removeClass('hidden');
+  const $mask = $('#mask').removeClass('hidden');
+  $mask.one('click', () => { $mask.addClass('hidden'); $infoBox.addClass('hidden') });
+
+  const $header = $infoBox.find('header h2').text(header).end();
+  $header[0].className = className || '';
+  $infoBox.find('main p').text(content);
+
+  const $button = $infoBox.find('button');
+  if(button !== undefined) {
+    const { content: btnContent, className: btnClassName, callback } = button;
+    $button.text(btnContent);
+    $button[0].className = 'btn';
+    $button.addClass(btnClassName || 'btn-default');
+    if(callback === undefined) {
+      $button.on('click', () => $mask.click());
+    } else
+      $button.on('click', callback);
+  } else
+    $button.addClass('hidden');
+};
+
 $(() => {
   /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
   const hoverbox = new HoverBox();
@@ -433,4 +457,6 @@ class ElementTree {
     return tree.element !== targetElement ? null : tree;
   }
 }
+
+
 
