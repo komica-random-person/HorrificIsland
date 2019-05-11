@@ -5,7 +5,6 @@ module.exports = app => {
     /* 1. render page with pugInfo
        2. render container with page */
     const page = { basedir: './app/pug' };
-    console.log(pageInfo)
     for(var k in pageInfo)
       page[k] = pageInfo[k];
     page.content = pug.renderFile(`./app/pug/${pageInfo.name}.pug`, pageInfo);
