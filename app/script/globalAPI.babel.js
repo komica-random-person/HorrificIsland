@@ -1,5 +1,5 @@
 /* global: getID, getQuery, getQueries, getQueriesArray, escape, findParent, $ */
-const apiUrl = 'http://localhost:8888/';
+const apiUrl = 'https://h-island-api.herokuapp.com/';
 
 $(() => {
   const postError = errorCode => {
