@@ -1,6 +1,8 @@
+- function formatNum(n) { return ('00000000' + n).split('').reverse().slice(0, 8).reverse().join(''); }
 mixin article(data, articleType)
   - var post = data.post;
   - var replies = data.replies;
+  - post.number = formatNum(post.number);
   article.thread.col-xs-12.clearfix(id=post.number , data-number=post.number, data-articletype=articleType)
     form
       if post.image.url
@@ -17,6 +19,7 @@ mixin article(data, articleType)
         section.mainContent
           p.content
             //- replace \n with <br>
+            - post.content = post.content || ''
             - var split = post.content.split('\n')
             each text in split
               span= text
@@ -29,6 +32,7 @@ mixin article(data, articleType)
           +replyBox(reply, articleType)
 
 mixin replyBox(reply, articleType)
+  - reply.number = formatNum(reply.number);
   section.replyBox.clearfix(id=reply.number, data-number=reply.number)
     +articleHeader(reply, 'reply', articleType)
     if reply.image.url
@@ -51,11 +55,12 @@ mixin replyBox(reply, articleType)
 
 mixin articleHeader(info, t, type)
   - var typeString = { komica: '【Komica】', hisland: '【H-Island】' }
+  - info.number = formatNum(info.number)
   header(data-type=t)
     span.articleType= typeString[type]
     if info.Title != ''
-      span.title= info.title
-    span.name= info.name
+      span.title= info.title || '無題'
+    span.name= info.name || '名無し'
     - var time = new Date(info.time)
     span.date= time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDate()
     span.time= time.getHours() + ':' + time.getMinutes() + ':' + time.getMilliseconds()
@@ -83,10 +88,11 @@ mixin postForm(labelText, id, placeholder, type)
 
 div.container
   header.pageTitle
-    h1 Horrific Island?
-    h2 (目前僅有爬 K 島之功能，API尚未搭建。 Github:
+    h1 Horrific Island
+    h2 (目前仍為測試版本，可能有許多BUG。 Github:
       a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
       | )
+    h2 H-island 的文章可能會被管理員全部刪除，請大家見諒
 
   //- postArticle
   section.postContainer
