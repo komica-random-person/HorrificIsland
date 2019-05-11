@@ -1,16 +1,86 @@
-/* global: getID, getQuery, getQueries, getQueriesArray, escape, findParent, $ */
+/* global: getID, getQuery, getQueries, getQueriesArray, escape, findParent, $, infoBox */
 const apiUrl = 'https://h-island-api.herokuapp.com/';
 
 $(() => {
-  const postError = errorCode => {
-  
+  const formatNum = (num, length=8) => {
+    let base = '';
+    for(let i = 0; i < length; i++) base += 0;
+    return (base + num).split('').reverse().slice(0, length).reverse().join('');
+  };
+  const getTimeString = (utcString) => {
+    const date = new Date(utcString);
+    const d = {
+      year: date.getFullYear(),
+      mon: formatNum(date.getMonth() + 1, 2),
+      date: formatNum(date.getDate(), 2),
+      hour: formatNum(date.getHours(), 2),
+      min: formatNum(date.getMinutes(), 2),
+      millisecond: formatNum(date.getMilliseconds(), 3)
+    };
+    return [`${d.year}/${d.mon}/${d.date}`, ` ${d.hour}:${d.min}:${d.millisecond}`];
+  };
+  const getImageContent = (imgData, type='header') => {
+    if(imgData.url === null) {
+      return '';
+    } else {
+      const s = imgData.url.split('/');
+      const content = type === 'header' ? 
+        `<header class="col-xs-12 imgInfo"><h4 class="info">檔名: <a class="link" href="${imgData.url}" target="_blank">${s[s.length - 1]}</a></h4></header>`
+        :
+        `<a class="imgContainer" onclick="showImg(this)" data-ori="${imgData.url}" data-thumb="${imgData.thumb}"><img src="${imgData.thumb}"></a>`;
+      return content;
+    }
+  };
+  const getArticleHTML = data => {
+    data.number = formatNum(data.number, 8);
+    data.title = data.title || '無題';
+    data.name = data.name || '名無し';
+    return `<article class="thread col-xs-12 clearfix" id="${data.number}" data-number="${data.number}" data-articletype="hisland">
+    <form>
+        ${getImageContent(data.image)}
+        <section class="contentSection col-xs-12">
+            <header data-type="main">
+              ${getImageContent(data.image, 'img')}
+              <span class="articleType">【H-Island】</span>
+              <span class="title">${escape(data.title)}</span>
+              <span class="name">${escape(data.name)}</span>
+              <span class="date">${getTimeString(data.time)[0]}</span>
+              <span class="time">${getTimeString(data.time)[1]}</span>
+              <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
+              <span class="num" data-num="${data.number}"><a class="link quotable" data-quotetype="num" data-num="${data.number}">No.${data.number}</a></span>
+              <span class="del"><a class="link">刪除</a></span>
+              <span class="res">[<a class="link">回覆</a>]</span>
+            </header>
+            <section class="mainContent">
+                <p class="content show" style="">${escape(data.content).split('\n').map(e => `<span>${e}</span>`).join('<br>')}</p>
+                <p class="quotedList"><span class="text">Replies(<span class="quotedNum">0</span>):</span>
+                </p>
+            </section>
+        </section>
+    </form>
+</article>`;
+  };
+  const postError = error => {
+    infoBox({
+      header: `ERROR: code ${error.code}`,
+      content: error.message,
+      className: 'error',
+    });
   };
   const postArticle = evt => {
     evt.stopImmediatePropagation();
+    const target = evt.target;
+    if(target.getAttribute('disabled') === 'true')
+      return;
+    target.setAttribute('disabled', true);
+    const tempString = target.innerText;
+    target.innerText = '傳送中...';
     const tags = getID('hashtags').value || null;
+    const d = new Date();
     const postData = {
       name: getID('postName').value || null,
       title: getID('postTitle').value || null,
+      time: d.toISOString(),
       content: getID('postContent').value || null,
       imageurl: getID('imgurl').value || null,
       tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
@@ -28,10 +98,18 @@ $(() => {
 
     /* check if the post is OK */
     if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
-      postError('NoContent');
+      postError({ code: -1, message: '內文和影像不得同時為空' });
     } else {
       postFormAPI('article', data, response => {
-        console.log(response)
+        if(response.code === 0) {
+          const article = response.data;
+          const html = getArticleHTML(article);
+          $('main.articleContainer').prepend(html);
+          target.removeAttribute('disabled');
+          target.innerText = tempString;
+          $(findParent(target, 'postTable')).find('input, textarea').val('');
+        } else
+          postError(response);
       });
     }
   };
@@ -142,10 +220,8 @@ $(() => {
       },
       timeout: 20000,
       error: (jqXHR, textStatus, errorThrown) => {
-        console.log('error at:' + func);
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
+        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
       },
     });
   };
@@ -164,10 +240,8 @@ $(() => {
       },
       timeout: 20000,
       error: (jqXHR, textStatus, errorThrown) => {
-        console.log('error at:' + func);
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
+        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
       },
     });
   };
@@ -182,10 +256,8 @@ $(() => {
         callback(data, textStatus, jqXHR);
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        console.log('error at:' + func);
-        console.log(jqXHR.status);
-        console.log(textStatus);
-        console.log(errorThrown);
+        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
       },
     });
   };

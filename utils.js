@@ -34,17 +34,62 @@ module.exports = app => {
     return r_array;
   });
 
+  const request = require('request');
+  const APIURL = 'https://h-island-api.herokuapp.com/';
+
+  app.set('getHIContent', (userid, cb) => {
+    const url = `${APIURL}article/list/`;
+    const headers = { 'X-user-id': userid };
+    request({ url, headers }, (err, res, body) => {
+      if(res.statusCode === 200) {
+        app.set('HIsland-content');
+        cb({ err, body });
+      } else {
+        if(app.get('HIsland-content') === undefined)
+          cb({ err, res: res.statusCode });
+        else
+          cb({ err, body: app.get('HIsland-content') });
+      }
+    });
+  });
+
+  const homu2hisland = datas => {
+    datas = JSON.parse(datas).map(data => {
+      const imgBase = 'http://ram.komica2.net/00/src/';
+      const imgThumb = 'http://ram.komica2.net/00/thumb/';
+      const convert = article => {
+        const { Title: title, Name: name, Id: id, No: number, Content: content } = article;
+        const withImg = article.Picture !== undefined;
+        return {
+          title, name, id, number, content, mainNumber: number,
+          time: (new Date(article.Date + ' ' + article.Time)).toUTCString(),
+          image: {
+            url: !withImg ? null : imgBase + article.Picture,
+            thumb: !withImg ? null : `${imgThumb}${article.Picture.replace(/^(.+?)\..+$/, '$1s.jpg')}`
+          }
+        };
+      };
+      data.post = convert(data.Head);
+      data.replies = data.Bodies.map(e => convert(e));
+      delete data.Head;
+      delete data.Bodies;
+      return data;
+    });
+    return datas;
+  };
+
   app.set('getMainContent', cb => {
     const currentTime = Date.now();
-    const prevTime = app.get('time');
+    const prevTime = app.get('komica-time');
     const cacheSecond = process.env.NODE_ENV === 'dev' ? 60 * 180 : 60 * 2;
+
     if(prevTime === undefined || currentTime - prevTime > 1000 * cacheSecond) {
       /* if currentTime - prevTime > threshold, refresh the content */
-      app.set('time', currentTime);
-      const request = require('request');
+      app.set('komica-time', currentTime);
       request('https://homu.homu-api.com/page/0', (error, res, body) => {
         if (res.statusCode === 200) {
-          app.set('content', body);
+          body = homu2hisland(body);
+          app.set('komica-content', body);
           cb({
             status: 1,
             content: body,
@@ -53,7 +98,7 @@ module.exports = app => {
         } else {
           cb({
             status: false,
-            content: app.get('content'),
+            content: app.get('komica-content'),
             refresh: false
           });
         }
@@ -62,7 +107,7 @@ module.exports = app => {
       /* Had refreshed recently, directly send old content */
       cb({
         status: 1,
-        content: app.get('content'),
+        content: app.get('komica-content'),
         refresh: false,
       });
     }

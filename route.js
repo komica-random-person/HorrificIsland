@@ -16,10 +16,16 @@ module.exports = app => {
           name: 'index',
           title: 'Index',
           description: 'index',
-          pageContent: JSON.parse(content.content)
+          pageContent: {
+            komica: content.content,
+          }
       };
-      const renderedContent = req.app.get('render')(pageInfo);
-      res.send(renderedContent);
+      const userid = req.cookies.keygen;
+      req.app.get('getHIContent')(userid, result => {
+        pageInfo.pageContent.hisland = JSON.parse(result.body);
+        const renderedContent = req.app.get('render')(pageInfo);
+        res.send(renderedContent);
+      });
     });
   });
 };

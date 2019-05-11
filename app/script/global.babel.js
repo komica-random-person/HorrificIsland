@@ -3,7 +3,7 @@ const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
 const getQueriesArray = (css, ele=document) => Array.prototype.slice.apply(getQueries(css, ele));
-const escape = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+const escape = s => s === null ? '' : s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 const findParent = (element, pattern) => {
   while(element.parentElement !== null && element.className.match(pattern) === null)
     element = element.parentElement;
@@ -35,8 +35,41 @@ const showImg = (imgContainer) => {
       video.controls = true;
       e.appendChild(video);
       e.className += ' video';
+      const scrollEvent = () => {
+        /* Stop video playing after element is not visible on screen */
+        const position = e.getBoundingClientRect();
+        if(position.top > window.innerHeight || position.bottom < -1 * e.children[0].offsetHeight) {
+          video.pause();
+          window.removeEventListener('scroll', scrollEvent);
+        }
+      };
+      window.addEventListener('scroll', scrollEvent);
     }
   }
+};
+
+const infoBox = options => {
+  const { header, className, content, button } = options;
+  const $infoBox = $('#infoBox').removeClass('hidden');
+  const $mask = $('#mask').removeClass('hidden');
+  $mask.one('click', () => { $mask.addClass('hidden'); $infoBox.addClass('hidden') });
+
+  const $header = $infoBox.find('header h2').text(header).end();
+  $header[0].className = className || '';
+  $infoBox.find('main p').text(content);
+
+  const $button = $infoBox.find('button');
+  if(button !== undefined) {
+    const { content: btnContent, className: btnClassName, callback } = button;
+    $button.text(btnContent);
+    $button[0].className = 'btn';
+    $button.addClass(btnClassName || 'btn-default');
+    if(callback === undefined) {
+      $button.on('click', () => $mask.click());
+    } else
+      $button.on('click', callback);
+  } else
+    $button.addClass('hidden');
 };
 
 $(() => {
@@ -87,6 +120,44 @@ $(() => {
       /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
        * 之後有推播，前端 append 可能要注意這部份 */
       p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+?)([\s|\<|\^|\@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
+
+      /* 將超過固定高度的元素隱藏，並綁定按鈕來顯示 */
+      const offset = 200;
+      let flag = false;
+      if(p.offsetHeight > offset) {
+        let height = 0;
+        Array.prototype.slice.apply(p.children).forEach(e => {
+          /* br element have offsetHeight=0, but in browser it have 4 px height */
+          const eHeight = e.offsetHeight > 0 ? e.offsetHeight : 4;
+          if(height + eHeight <= offset && !flag)
+            height += eHeight
+          else {
+            if(!flag) {
+              /* Create show button when its not created */
+              const br = document.createElement('br');
+              const showButton = document.createElement('span');
+              showButton.className = 'link';
+              showButton.innerText = '展開文章...';
+              p.appendChild(br);
+              p.appendChild(showButton);
+              showButton.addEventListener('click', () => {
+                $(p).addClass('show').find('.hidden').removeClass('hidden');
+                p.removeChild(showButton);
+                p.style.height = '';
+              });
+              /* 隱藏內容時若有多個 br 或沒內容的 span 會導致真正的高度和計算的不同 */
+              let prevEle = e.previousElementSibling;
+              while(prevEle !== null && prevEle.innerText === '') {
+                prevEle.className += ' hidden';
+                prevEle = prevEle.previousElementSibling;
+              }
+              flag = true;
+              p.style.height = `${height + showButton.offsetHeight * 2 + 4}px`;
+            }
+            e.className += ' hidden';
+          }
+        });
+      }
     });
   };
   updateQuote();
@@ -386,4 +457,6 @@ class ElementTree {
     return tree.element !== targetElement ? null : tree;
   }
 }
+
+
 

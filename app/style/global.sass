@@ -1,11 +1,13 @@
 body
   background: #1D1F21
   color: rgba(255, 255, 255, .8)
-a.link
+.link
   cursor: pointer
   color: #81A2BE
 
 .container
+  main.articleContainer
+    padding: 0
   header.pageTitle
     text-align: center
     border-bottom: 3px solid rgba(255, 255, 255, .7)
@@ -180,7 +182,7 @@ article.thread, #hoverBox
     header
       span
         display: inline-block
-        padding: 0 .3em
+        padding: .05em .3em
         vertical-align: top
         &.title
           color: #B294BB
@@ -200,6 +202,13 @@ article.thread, #hoverBox
           &.id_12
             color: #ff00eb
             text-shadow: 0 0 0.3em #ea0000
+        &.articleType
+          cursor: default
+          font-weight: bold
+          //background: #1c3334
+          //color: rgb(170, 170, 170)
+          padding: .05em 0
+          border-radius: 3px
     section
       display: table
       max-width: 100%
@@ -209,6 +218,9 @@ article.thread, #hoverBox
         display: block
         p.content
           padding: 0
+          max-height: 236px
+          &.show
+            max-height: unset
     .imgContainer
       cursor: pointer
       img
@@ -218,6 +230,7 @@ article.thread, #hoverBox
         max-height: 500px
         display: inline-block
         padding-right: 10px
+        padding-bottom: 3px
         margin-right: 5px
       &.zoomed
         display: table
@@ -232,7 +245,7 @@ article.thread, #hoverBox
       padding: .9em 1em 1em 1.8em
       text-align: justify
       margin: 0
-      font-size: 1.15em
+      font-size: 1.05em
       word-break: break-all
   .quotable, .quote, .quotedList
     color: #81A2BE
@@ -258,6 +271,8 @@ article.thread, #hoverBox
   .replyBox.quotedArticle, &.quotedArticle .mainContent
     p.quotedList
       display: inline-block
+  .replyBox header span.res
+    display: none
 .replyBox
   background: #282A2E
   padding: .2em .5em
@@ -299,6 +314,48 @@ p.debug
 div.bar
   margin: 50px 0
   height: 5px
+#infoBox
+  position: fixed
+  top: 50%
+  left: 50%
+  transform: translate(-50%, -50%)
+  background: #fff
+  color: #333
+  border-radius: 7px
+  z-index: 1
+  text-align: center
+  border: 1px solid #d1d5da
+  overflow: hidden
+  &.warning h2
+    color: #eea236
+  &.info h2
+    color: #46b8da
+  &.error h2
+    color: red
+  header, main
+    padding: .5em 2em
+  header
+    border-top-right-radius: 7px
+    border-top-left-radius: 7px
+    background: #f6f8fa
+    border-bottom: 1px solid #d1d5da
+  main
+    background: rgba(0, 0, 0, 0.04)
+    button
+      padding: .3em .5em
+  h2
+    margin: 5px 0
+  p
+    font-size: 14pt
+    margin: 1em 0
+#mask
+  width: 100vw
+  height: 100vh
+  background: rgba(50, 50, 50, .5)
+  position: fixed
+  top: 0
+  left: 0
+  cursor: pointer
 
 @media screen and (max-width: 600px)
   .container
@@ -317,4 +374,16 @@ div.bar
       p.content
         padding: .5em
         font-size: 1em
+    .postContainer
+      .postTable
+        width: 100%
+        .postInfo
+          width: 100%
+          font-size: .85em
+          label
+            width: 100%
+            input[type=text]
+              width: 70%
+            textarea
+              width: 100%
 
