@@ -3,7 +3,7 @@ const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
 const getQueriesArray = (css, ele=document) => Array.prototype.slice.apply(getQueries(css, ele));
-const escape = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+const escape = s => s === null ? '' : s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
 const findParent = (element, pattern) => {
   while(element.parentElement !== null && element.className.match(pattern) === null)
     element = element.parentElement;
@@ -35,8 +35,8 @@ const showImg = (imgContainer) => {
       video.controls = true;
       e.appendChild(video);
       e.className += ' video';
-      /* Stop video playing after element is not visible on screen */
       const scrollEvent = () => {
+        /* Stop video playing after element is not visible on screen */
         const position = e.getBoundingClientRect();
         if(position.top > window.innerHeight || position.bottom < -1 * e.children[0].offsetHeight) {
           video.pause();
@@ -121,7 +121,7 @@ $(() => {
                 p.removeChild(showButton);
                 p.style.height = '';
               });
-              /* 隱藏時若有多個 br 或沒內容的 span 會導致真正的高度和計算的不同 */
+              /* 隱藏內容時若有多個 br 或沒內容的 span 會導致真正的高度和計算的不同 */
               let prevEle = e.previousElementSibling;
               while(prevEle !== null && prevEle.innerText === '') {
                 prevEle.className += ' hidden';

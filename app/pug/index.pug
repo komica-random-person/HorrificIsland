@@ -1,4 +1,8 @@
-- function formatNum(n) { return ('00000000' + n).split('').reverse().slice(0, 8).reverse().join(''); }
+- function formatNum(n, length=8) {
+-   var base = '';
+-   for(var i = 0; i < length; i++) base += 0;
+-   return (base + n).split('').reverse().slice(0, length).reverse().join(''); 
+- }
 mixin article(data, articleType)
   - var post = data.post;
   - var replies = data.replies;
@@ -62,8 +66,8 @@ mixin articleHeader(info, t, type)
       span.title= info.title || '無題'
     span.name= info.name || '名無し'
     - var time = new Date(info.time)
-    span.date= time.getFullYear() + '/' + (time.getMonth() + 1) + '/' + time.getDate()
-    span.time= time.getHours() + ':' + time.getMinutes() + ':' + time.getMilliseconds()
+    span.date= time.getFullYear() + '/' + formatNum(time.getMonth() + 1, 2) + '/' + formatNum(time.getDate(), 2)
+    span.time= formatNum(time.getHours(), 2) + ':' + formatNum(time.getMinutes(), 2) + ':' + formatNum(time.getMilliseconds(), 3)
     span.id.quotable(data-quotetype= 'id', data-id= info.id)= 'ID:' + info.id
     span.num(data-num= info.number)
       a.link.quotable(data-quotetype= 'num', data-num= info.number)= 'No.' + info.number
@@ -141,10 +145,11 @@ div.container
             div.btn.btn-off 留言: 關
         div#submit.btn.btn-default 開串！
 
-  each discussion in pageContent.hisland
-    +article(discussion, 'hisland')
-  each discussion in pageContent.komica
-    +article(discussion, 'komica')
+  main.articleContainer.col-xs-12.clearfix
+    each discussion in pageContent.hisland
+      +article(discussion, 'hisland')
+    each discussion in pageContent.komica
+      +article(discussion, 'komica')
 
   section#hoverBox.hoverBox
 
