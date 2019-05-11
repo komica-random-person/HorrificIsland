@@ -110,17 +110,25 @@ $(() => {
           else {
             if(!flag) {
               /* Create show button when its not created */
+              const br = document.createElement('br');
               const showButton = document.createElement('span');
               showButton.className = 'link';
               showButton.innerText = '展開文章...';
+              p.appendChild(br);
               p.appendChild(showButton);
               showButton.addEventListener('click', () => {
                 $(p).addClass('show').find('.hidden').removeClass('hidden');
                 p.removeChild(showButton);
                 p.style.height = '';
               });
+              /* 隱藏時若有多個 br 或沒內容的 span 會導致真正的高度和計算的不同 */
+              let prevEle = e.previousElementSibling;
+              while(prevEle !== null && prevEle.innerText === '') {
+                prevEle.className += ' hidden';
+                prevEle = prevEle.previousElementSibling;
+              }
               flag = true;
-              p.style.height = `${height + showButton.offsetHeight * 2}px`;
+              p.style.height = `${height + showButton.offsetHeight * 2 + 4}px`;
             }
             e.className += ' hidden';
           }
