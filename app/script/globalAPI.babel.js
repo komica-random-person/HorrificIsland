@@ -31,6 +31,30 @@ $(() => {
       return content;
     }
   };
+  const getReplyHTML = data => {
+    let html = `<section class="replyBox clearfix" id="${formatNum(data.number, 8)}" data-number="${formatNum(data.number, 8)}">
+    <header data-type="reply">
+      <span class="articleType">【H-Island】</span>
+      <span class="name">${escape(data.name) || '名無し'}</span>
+      <span class="date">${getTimeString(data.time)[0]}</span>
+      <span class="time">${getTimeString(data.time)[1]}</span>
+      <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
+      <span class="num" data-num="${formatNum(data.number, 8)}"><a class="link quotable" data-quotetype="num" data-num="${formatNum(data.number, 8)}">No.${formatNum(data.number, 8)}</a></span>
+      <span class="del"><a class="link">刪除</a></span>
+      <span class="res">[<a class="link">回覆</a>]</span>
+    </header>`;
+    if(data.image.url !== null) {
+      const s = data.image.url.split('/');
+      html += `<section class="col-xs-12 imgInfo">
+        <h4 class="info">檔名: <a class="link" href="${data.image.url}" target="_blank">${s[s.length - 1]}</a></h4>
+    </section>
+    <a class="imgContainer" onclick="showImg(this)" data-ori="${data.image.url}" data-thumb="${data.image.thumb}"><img src="${data.image.thumb}"></a>`;
+    }
+    html +=`<p class="content">${escape(data.content).split('\n').map(e => `<span>${e}</span>`).join('<br>')}</p>
+    <p class="quotedList"><span class="text">Replies(<span class="quotedNum">0</span>):</span></p>
+</section>`;
+    return html;
+  }
   const getArticleHTML = data => {
     data.number = formatNum(data.number, 8);
     data.title = data.title || '無題';
@@ -109,6 +133,12 @@ $(() => {
         if(response.code === 0) {
           const article = response.data;
           if(isReply) {
+            const html = getReplyHTML(article);
+            const $article = $(`article[data-number="${mainEle.dataset.number}"]`);
+            $article.find(`.contentSection`).append(html);
+            globalFunction.updateQuote($article[0]);
+            globalFunction.bindHoverBox($article[0]);
+            globalFunction.bindIdReference($article[0]);
             getQuery('.exit', mainEle).click();
           } else {
             const html = getArticleHTML(article);
