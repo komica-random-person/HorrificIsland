@@ -214,8 +214,6 @@ $(() => {
       processData: false,
       headers: getHeader(),
       success: (_data, textStatus, jqXHR) => {
-        console.log(func);
-        console.log(_data);
         callback(_data);
       },
       timeout: 20000,
@@ -234,8 +232,6 @@ $(() => {
       dataType: 'json',
       headers: getHeader(),
       success: (_data, textStatus, jqXHR) => {
-        console.log(func);
-        console.log(_data);
         callback(_data, textStatus, jqXHR);
       },
       timeout: 20000,
