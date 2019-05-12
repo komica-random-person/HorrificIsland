@@ -9,6 +9,7 @@ const findParent = (element, pattern) => {
     element = element.parentElement;
   return element.parentElement === null ? null : element;
 };
+const globalFunction = {};
 
 const showImg = (imgContainer) => {
   /* This function is for onclick event on IMG tag.
@@ -75,8 +76,8 @@ const infoBox = options => {
 $(() => {
   /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
   const hoverbox = new HoverBox();
-  const updateQuote = () => {
-    $('p.content').each((_, p) => {
+  const updateQuote = (element=document) => {
+    $(element).find('p.content').each((_, p) => {
       /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
         const thread = findParent(p, /thread/);
@@ -161,9 +162,10 @@ $(() => {
     });
   };
   updateQuote();
+  globalFunction.updateQuote = updateQuote;
 
   /* 引用類相關的 hoverBox: 包括引用別人、被引用、被引用之列表 */
-  const bindHoverBox = () => {
+  const bindHoverBox = (element=document) => {
     $('.quote').not('.missing').each((index, element) => {
       hoverbox.bindQuoteHoverEvent(element);
     });
@@ -172,10 +174,11 @@ $(() => {
     });
   };
   bindHoverBox();
+  globalFunction.bindHoverBox = bindHoverBox;
 
   /* 偵測串內的ID */
-  const bindIdReference = () => {
-    $('.thread').each((index, thread) => {
+  const bindIdReference = (element=document) => {
+    $(element).find('.thread').each((index, thread) => {
       const table = {};
       const IDs = getQueriesArray('span.id', thread);
       IDs.forEach(idElement => {
@@ -203,6 +206,7 @@ $(() => {
     });
   };
   bindIdReference();
+  globalFunction.bindIdReference = bindIdReference;
 });
 
 class HoverBox {
@@ -305,7 +309,7 @@ class HoverBox {
           /* hoverBox 會顯示多個文章，文章都在 articles 中存為 jQuery 的格式 */
           reference = articles;
           parentElement = findParent(articles[0], /thread/);
-          threadElement = recursive ? $(`.container > article[data-number="${parentElement.dataset.number}"]`) : parentElement;
+          threadElement = recursive ? $(`.articleContainer > article[data-number="${parentElement.dataset.number}"]`) : parentElement;
         }
 
         if(reference !== null) {
