@@ -72,20 +72,25 @@ $(() => {
     const target = evt.target;
     if(target.getAttribute('disabled') === 'true')
       return;
+    /* 傳送時的按鈕屬性 */
     target.setAttribute('disabled', true);
     const tempString = target.innerText;
     target.innerText = '傳送中...';
     const tags = getID('hashtags').value || null;
+    /* 傳送資料整理 */
+    const mainEle = findParent(target, 'postContainer');
+    const isReply = target.dataset.type === 'reply';
     const d = new Date();
     const postData = {
-      name: getID('postName').value || null,
-      title: getID('postTitle').value || null,
+      name: getQuery('#postName', mainEle).value || null,
+      title: isReply ? null : getID('postTitle').value || null,
       time: d.toISOString(),
-      content: getID('postContent').value || null,
-      imageurl: getID('imgurl').value || null,
+      content: getQuery('#postContent', mainEle).value || null,
+      imageurl: getQuery('#imgurl', mainEle).value || null,
       tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
-      allowComment: getID('allowComment').value === 'on',
-      documentType: evt.target.dataset.type === 'reply' ? 'reply' : 'post',
+      allowComment: isReply ? false : getID('allowComment').value === 'on',
+      documentType: isReply ? 'reply' : 'post',
+      mainNumber: isReply ? Number(mainEle.dataset.number) : -1
     };
     const data = new FormData();
     for(let k in postData)
@@ -103,8 +108,12 @@ $(() => {
       postFormAPI('article', data, response => {
         if(response.code === 0) {
           const article = response.data;
-          const html = getArticleHTML(article);
-          $('main.articleContainer').prepend(html);
+          if(isReply) {
+            getQuery('.exit', mainEle).click();
+          } else {
+            const html = getArticleHTML(article);
+            $('main.articleContainer').prepend(html);
+          }
           target.removeAttribute('disabled');
           target.innerText = tempString;
           $(findParent(target, 'postTable')).find('input, textarea').val('');
@@ -164,6 +173,7 @@ $(() => {
         q.className = q.className.replace(/\s*hidden\s*/g, ' ');
       }
 
+      q.dataset.number = mainNumber;
       q.querySelector('textarea').value += `>>${targetNum}\n`;
       /* 設定位置 */
       const coord = [evt.clientX, evt.clientY];
@@ -206,6 +216,7 @@ $(() => {
       q.querySelector('.exit').addEventListener('click', () => {
         q.className += ' hidden';
       });
+      q.querySelector('#submit').addEventListener('click', postArticle);
     });
   });
 
