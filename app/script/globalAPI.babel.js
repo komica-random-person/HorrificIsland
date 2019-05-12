@@ -261,8 +261,14 @@ $(() => {
       },
     });
   };
+
+  /* Check if uuid is valid, if not, call API to get uuid */
+  getAPI(`user/uuid/${$.cookie('keygen')}`, res => {
+    if(!res.isValid) {
+      getAPI(`user/id/`, _res => {
+        $.cookie('keygen', _res.uuid);
+      });
+    }
+  });
 });
-
-
-
 
