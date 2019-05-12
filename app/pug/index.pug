@@ -19,7 +19,7 @@ mixin article(data, articleType)
         if post.image.url
           a.imgContainer(onclick='showImg(this)', data-ori=post.image.url, data-thumb=post.image.thumb)
             img(src=post.image.thumb)
-        +articleHeader(post, 'main', articleType)
+        +articleHeader(post, 'post', articleType)
         section.mainContent
           p.content
             //- replace \n with <br>
@@ -62,7 +62,7 @@ mixin articleHeader(info, t, type)
   - info.number = formatNum(info.number)
   header(data-type=t)
     span.articleType= typeString[type]
-    if info.Title != ''
+    if info.Title != '' && t == 'post'
       span.title= info.title || '無題'
     span.name= info.name || '名無し'
     - var time = new Date(info.time)

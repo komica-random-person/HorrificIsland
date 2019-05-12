@@ -77,6 +77,7 @@ $(() => {
   /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
   const hoverbox = new HoverBox();
   const updateQuote = (element=document) => {
+    /* TODO: remove duplicate quote (happeans when reply) */
     $(element).find('p.content').each((_, p) => {
       /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
@@ -91,7 +92,7 @@ $(() => {
           const refExist = getQuery(`.quotable[data-num="${num}"]`, thread) !== null;
           p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote ${refExist ? '' : 'missing'}" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
           /* Add number to quoted article for css to show quotedList */
-          const $quotedArticle = $(`*[data-number="${num}"]`).addClass('quotedArticle');
+          const $quotedArticle = $(`*[data-number="${num}"]`).not('.quickPostTable').addClass('quotedArticle');
           $quotedArticle.each((index, ele) => {
             /* 在被引用文章的串中找到引用者的編號, 將其加入 quotedList 中顯示，並加入 quotedList 的 data-quotefrom 屬性中 */
             const quotedList = getQuery('.quotedList', ele);
@@ -166,10 +167,10 @@ $(() => {
 
   /* 引用類相關的 hoverBox: 包括引用別人、被引用、被引用之列表 */
   const bindHoverBox = (element=document) => {
-    $('.quote').not('.missing').each((index, element) => {
+    $(element).find('.quote').not('.missing').each((index, element) => {
       hoverbox.bindQuoteHoverEvent(element);
     });
-    $('.quotedArticle .mainContent p.quotedList, .replyBox.quotedArticle p.quotedList').each((index, element) => {
+    $(element).find('.quotedArticle .mainContent p.quotedList, .replyBox.quotedArticle p.quotedList').each((index, element) => {
       hoverbox.bindQuotedListBox(element);
     });
   };
