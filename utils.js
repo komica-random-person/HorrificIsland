@@ -11,11 +11,6 @@ module.exports = app => {
     return pug.renderFile('./app/pug/container.pug', page);
   });
 
-  app.set('getUUID', () => {
-    const s4 = () => Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1);
-    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-  });
-
   app.set('get_random_a_to_b', (min, max, num) => {
     if(max < min || num < 1) return 0;
     const get_random_int = () => Math.floor(Math.random() * (max - min + 1) + min);
@@ -36,6 +31,17 @@ module.exports = app => {
 
   const request = require('request');
   const APIURL = 'https://h-island-api.herokuapp.com/';
+
+  app.set('getUserId', (clientIp, cb) => {
+    const url = `${APIURL}user/id/${clientIp}`;
+    request(url, (err, res, body) => {
+      if(res.statusCode === 200) {
+        cb({ err, body });
+      } else {
+        cb({ err, res, body });
+      }
+    });
+  });
 
   app.set('getHIContent', (userid, cb) => {
     const url = `${APIURL}article/list/`;

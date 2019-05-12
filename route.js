@@ -1,13 +1,22 @@
 'use strict';
 module.exports = app => {
+const getIP = req => req.headers['x-forwarded-for'] ||
+                     req.connection.remoteAddress ||
+                     req.socket.remoteAddress ||
+                     req.connection.socket.remoteAddress;
   app.use((req, res, next) => {
-  if(req.cookies.keygen === undefined) {
-    const uuid = app.get('getUUID')();
-    res.cookie('keygen', uuid);
-    req.cookies.keygen = uuid;
-    next();
-  } else
-    next();
+    if(req.cookies.keygen === undefined) {
+      app.get('getUserId')(getIP(req), result => {
+        if(result.err === null) {
+          const uuid = JSON.parse(result.body).uuid;
+          res.cookie('keygen', uuid);
+          req.cookies.keygen = uuid;
+          next();
+        } else
+          res.status(404).send('Fail to get userId');
+      });
+    } else
+      next();
   });
 
   app.get('^/$', (req, res) => {
