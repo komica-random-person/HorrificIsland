@@ -157,6 +157,7 @@ $(() => {
         q.querySelector('#submit').innerText = '回復';
         q.querySelector('#submit').dataset.type = 'reply';
         getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
+        q.style.position = 'fixed';
         article.appendChild(q);
       } else {
         q = getQuery('.quickPostTable');
@@ -166,9 +167,10 @@ $(() => {
       q.querySelector('textarea').value += `>>${targetNum}\n`;
       /* 設定位置 */
       const coord = [evt.clientX, evt.clientY];
-      q.style.position = 'fixed';
-      q.style.top = coord[1] + 'px';
-      q.style.left = coord[0] + 'px';
+      const x = coord[0] + q.offsetWidth > window.innerWidth;
+      const y = coord[1] + q.offsetHeight > window.innerHeight;
+      q.style.top = (y ? window.innerHeight - q.offsetHeight : coord[1]) + 'px';
+      q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
       q.querySelector('textarea').focus();
 
       /* 綁定拖曳事件 */
@@ -178,13 +180,17 @@ $(() => {
         const key = ['div', 'section', 'form'];
         const offsetX = _evt.clientX - Number(q.style.left.split('p')[0]);
         const offsetY = _evt.clientY - Number(q.style.top.split('p')[0]);
+        /* 由於事件綁定在父元素，必須判定是哪個子元素觸發的 */
         if(key.indexOf(target.tagName.toLowerCase()) !== -1 && target.id !== 'submit') {
-          /* 由於事件綁定在父元素，必須判定是哪個子元素觸發的 */
           const move = mEvt => {
             const top = -offsetY + mEvt.clientY;
             const left = -offsetX + mEvt.clientX;
-            q.style.top = `${top}px`;
-            q.style.left = `${left}px`;
+            const x = (left + q.offsetWidth > window.innerWidth) ? window.innerWidth - q.offsetWidth - 15 :
+              (left < 0 ? 0 : left);
+            const y = (top + q.offsetHeight > window.innerHeight) ? window.innerHeight - q.offsetHeight :
+              (top < 0 ? 0 : top);
+            q.style.top = `${y}px`;
+            q.style.left = `${x}px`;
           };
           const main = document.querySelector('main');
           main.addEventListener('mousemove', move);
