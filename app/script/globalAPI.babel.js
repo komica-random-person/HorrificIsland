@@ -110,6 +110,10 @@ $(() => {
           $(findParent(target, 'postTable')).find('input, textarea').val('');
         } else
           postError(response);
+      }, error => {
+        infoBox({ header: 'ERROR', className: 'error', content: error.err });
+        target.removeAttribute('disabled');
+        target.innerText = tempString;
       });
     }
   };
@@ -205,7 +209,7 @@ $(() => {
     header["X-user-id"] = $.cookie('keygen');
     return header;
   };
-  const postFormAPI = (func, data, callback) => {
+  const postFormAPI = (func, data, callback, catchErr=null) => {
     $.ajax({
       type: 'POST',
       url: apiUrl + func,
@@ -222,6 +226,8 @@ $(() => {
       error: (jqXHR, textStatus, errorThrown) => {
         console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
         console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+        if(catchErr !== null)
+          catchErr(jqXHR.responseJSON);
       },
     });
   };
