@@ -156,6 +156,7 @@ $(() => {
           } else {
             const html = getArticleHTML(article);
             $('main.articleContainer').prepend(html);
+            globalFunction.bindQuickReply($('main.articleContainer')[0].children[0]);
           }
           resumePostTable(true);
         } else {
