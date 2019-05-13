@@ -63,7 +63,7 @@ $(() => {
     <form>
         ${getImageContent(data.image)}
         <section class="contentSection col-xs-12">
-            <header data-type="main">
+            <header data-type="post">
               ${getImageContent(data.image, 'img')}
               <span class="articleType">【H-Island】</span>
               <span class="title">${escape(data.title)}</span>
@@ -151,6 +151,7 @@ $(() => {
             globalFunction.updateQuote($article[0]);
             globalFunction.bindHoverBox($article[0]);
             globalFunction.bindIdReference($article[0]);
+            globalFunction.bindQuickReply($article[0]);
             getQuery('.exit', mainEle).click();
           } else {
             const html = getArticleHTML(article);
@@ -188,78 +189,82 @@ $(() => {
   bindPostSupplement();
 
   /* 點按文章編號時的快速回復 */
-  $('span.num a.quotable').each((index, element) => {
-    const article = findParent(element, 'thread');
-    element.addEventListener('click', evt => {
-      evt.stopImmediatePropagation();
-      const mainNumber = article.dataset.number;
-      const targetNum = element.dataset.num;
-      /* 如果已經存在則僅改變位置，不用初始化 */
-      let q = null;
-      if(getQuery('.quickPostTable') === null) {
-        q = document.createElement('div');
-        q.className = 'quickPostTable postContainer';
-        const quickPostHTML = getID('postTable').outerHTML;
-        q.innerHTML = quickPostHTML;
-        /* 綁定功能 */
-        bindPostSupplement(q);
-        /* 整理版面 */
-        q.querySelector('#submit').innerText = '回復';
-        q.querySelector('#submit').dataset.type = 'reply';
-        getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
-        q.style.position = 'fixed';
-        article.appendChild(q);
-      } else {
-        q = getQuery('.quickPostTable');
-        q.className = q.className.replace(/\s*hidden\s*/g, ' ');
-      }
-
-      q.dataset.number = mainNumber;
-      q.querySelector('textarea').value += `>>${targetNum}\n`;
-      /* 設定位置 */
-      const coord = [evt.clientX, evt.clientY];
-      const x = coord[0] + q.offsetWidth > window.innerWidth;
-      const y = coord[1] + q.offsetHeight > window.innerHeight;
-      q.style.top = (y ? window.innerHeight - q.offsetHeight : coord[1]) + 'px';
-      q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
-      q.querySelector('textarea').focus();
-
-      /* 綁定拖曳事件 */
-      q.onmousedown = _evt => {
+  const bindQuickReply = (element=document) => {
+    $(element).find('span.num a.quotable').each((index, element) => {
+      const article = findParent(element, 'thread');
+      element.addEventListener('click', evt => {
         evt.stopImmediatePropagation();
-        const target = _evt.target;
-        const key = ['div', 'section', 'form'];
-        const offsetX = _evt.clientX - Number(q.style.left.split('p')[0]);
-        const offsetY = _evt.clientY - Number(q.style.top.split('p')[0]);
-        /* 由於事件綁定在父元素，必須判定是哪個子元素觸發的 */
-        if(key.indexOf(target.tagName.toLowerCase()) !== -1 && target.id !== 'submit') {
-          const move = mEvt => {
-            const top = -offsetY + mEvt.clientY;
-            const left = -offsetX + mEvt.clientX;
-            const x = (left + q.offsetWidth > window.innerWidth) ? window.innerWidth - q.offsetWidth - 15 :
-              (left < 0 ? 0 : left);
-            const y = (top + q.offsetHeight > window.innerHeight) ? window.innerHeight - q.offsetHeight :
-              (top < 0 ? 0 : top);
-            q.style.top = `${y}px`;
-            q.style.left = `${x}px`;
-          };
-          const main = document.querySelector('main');
-          main.addEventListener('mousemove', move);
-          const unbind = e => {
-            e.stopImmediatePropagation();
-            main.removeEventListener('mousemove', move);
-            main.onmouseup = null;
-          };
-          main.onmouseup = unbind;
+        const mainNumber = article.dataset.number;
+        const targetNum = element.dataset.num;
+        /* 如果已經存在則僅改變位置，不用初始化 */
+        let q = null;
+        if(getQuery('.quickPostTable') === null) {
+          q = document.createElement('div');
+          q.className = 'quickPostTable postContainer';
+          const quickPostHTML = getID('postTable').outerHTML;
+          q.innerHTML = quickPostHTML;
+          /* 綁定功能 */
+          bindPostSupplement(q);
+          /* 整理版面 */
+          q.querySelector('#submit').innerText = '回復';
+          q.querySelector('#submit').dataset.type = 'reply';
+          getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
+          q.style.position = 'fixed';
+          article.appendChild(q);
+        } else {
+          q = getQuery('.quickPostTable');
+          q.className = q.className.replace(/\s*hidden\s*/g, ' ');
         }
-      };
-      /* 綁定結束事件 */
-      q.querySelector('.exit').addEventListener('click', () => {
-        q.className += ' hidden';
+
+        q.dataset.number = mainNumber;
+        q.querySelector('textarea').value += `>>${targetNum}\n`;
+        /* 設定位置 */
+        const coord = [evt.clientX, evt.clientY];
+        const x = coord[0] + q.offsetWidth > window.innerWidth;
+        const y = coord[1] + q.offsetHeight > window.innerHeight;
+        q.style.top = (y ? window.innerHeight - q.offsetHeight : coord[1]) + 'px';
+        q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
+        q.querySelector('textarea').focus();
+
+        /* 綁定拖曳事件 */
+        q.onmousedown = _evt => {
+          evt.stopImmediatePropagation();
+          const target = _evt.target;
+          const key = ['div', 'section', 'form'];
+          const offsetX = _evt.clientX - Number(q.style.left.split('p')[0]);
+          const offsetY = _evt.clientY - Number(q.style.top.split('p')[0]);
+          /* 由於事件綁定在父元素，必須判定是哪個子元素觸發的 */
+          if(key.indexOf(target.tagName.toLowerCase()) !== -1 && target.id !== 'submit') {
+            const move = mEvt => {
+              const top = -offsetY + mEvt.clientY;
+              const left = -offsetX + mEvt.clientX;
+              const x = (left + q.offsetWidth > window.innerWidth) ? window.innerWidth - q.offsetWidth - 15 :
+                (left < 0 ? 0 : left);
+              const y = (top + q.offsetHeight > window.innerHeight) ? window.innerHeight - q.offsetHeight :
+                (top < 0 ? 0 : top);
+              q.style.top = `${y}px`;
+              q.style.left = `${x}px`;
+            };
+            const main = document.querySelector('main');
+            main.addEventListener('mousemove', move);
+            const unbind = e => {
+              e.stopImmediatePropagation();
+              main.removeEventListener('mousemove', move);
+              main.onmouseup = null;
+            };
+            main.onmouseup = unbind;
+          }
+        };
+        /* 綁定結束事件 */
+        q.querySelector('.exit').addEventListener('click', () => {
+          q.className += ' hidden';
+        });
+        q.querySelector('#submit').addEventListener('click', postArticle);
       });
-      q.querySelector('#submit').addEventListener('click', postArticle);
     });
-  });
+  };
+  bindQuickReply();
+  globalFunction.bindQuickReply = bindQuickReply;
 
   /* API 使用之 function */
   const getHeader = () => {

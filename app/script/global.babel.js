@@ -78,6 +78,14 @@ $(() => {
   const hoverbox = new HoverBox();
   const updateQuote = (element=document) => {
     /* TODO: remove duplicate quote (happeans when reply) */
+    if(element !== document) {
+      $('.thread').find('.quotedList').each((_, qL) => {
+        while(qL.children.length > 1) {
+          qL.removeChild(qL.children[1]);
+        }
+        qL.querySelector('.quotedNum').innerText = 0;
+      });
+    }
     $(element).find('p.content').each((_, p) => {
       /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
@@ -201,8 +209,10 @@ $(() => {
           /* Remove highlight while the ID only shown once */
           idElement.className = idElement.className.replace(/\s*quotable\s*/g, '');
         } else if(table[id].num >= 2) {
-          if(table[id].num >= 3)
-            idElement.className += ` id_${Math.floor(table[id].num / 3) * 3}`;
+          if(table[id].num >= 3){
+            const idNum = Math.floor(table[id].num / 3) * 3;
+            idElement.className += ` id_${idNum > 15 ? 15 : idNum}`;
+          }
           idElement.innerText = idElement.innerText.replace(/\(.*?\)/g, '') + `(${table[id].cnt}/${table[id].num})`;
           table[id].cnt ++;
         }
@@ -238,7 +248,6 @@ class HoverBox {
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
         const $articles = $(thread).find(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
-        console.log({$articles})
         idElement.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
         idElement.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: idElement, recursive }));
       });
