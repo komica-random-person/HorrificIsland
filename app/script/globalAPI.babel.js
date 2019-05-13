@@ -309,7 +309,7 @@ $(() => {
       },
     });
   };
-  const getAPI = (func, callback) => {
+  const getAPI = (func, callback, err) => {
     $.ajax({
       type: 'GET',
       dataType: 'json',
@@ -322,6 +322,7 @@ $(() => {
       error: (jqXHR, textStatus, errorThrown) => {
         console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
         console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+        err({ jqXHR, textStatus, errorThrown });
       },
     });
   };
@@ -333,6 +334,9 @@ $(() => {
         $.cookie('keygen', _res.uuid);
       });
     }
+    $('#APIstatus').addClass('show').find('.fail').remove();
+  }, () => {
+    $('#APIstatus').addClass('show').find('.success').remove();
   });
 });
 

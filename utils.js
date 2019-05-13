@@ -1,4 +1,4 @@
-'use strict';
+/* global process */
 module.exports = app => {
   const pug = require('pug');
   app.set('render', pageInfo => {
@@ -49,12 +49,12 @@ module.exports = app => {
     request({ url, headers }, (err, res, body) => {
       if(res.statusCode === 200) {
         app.set('HIsland-content');
-        cb({ err, body });
+        cb({ err, res: 200, body });
       } else {
         if(app.get('HIsland-content') === undefined)
           cb({ err, res: res.statusCode });
         else
-          cb({ err, body: app.get('HIsland-content') });
+          cb({ err, res: 200, body: app.get('HIsland-content') });
       }
     });
   });
