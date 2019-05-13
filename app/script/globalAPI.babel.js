@@ -38,7 +38,7 @@ $(() => {
       <span class="name">${escape(data.name) || '名無し'}</span>
       <span class="date">${getTimeString(data.time)[0]}</span>
       <span class="time">${getTimeString(data.time)[1]}</span>
-      <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
+      <span class="id quotable" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
       <span class="num" data-num="${formatNum(data.number, 8)}"><a class="link quotable" data-quotetype="num" data-num="${formatNum(data.number, 8)}">No.${formatNum(data.number, 8)}</a></span>
       <span class="del"><a class="link">刪除</a></span>
       <span class="res">[<a class="link">回覆</a>]</span>

@@ -179,7 +179,12 @@ $(() => {
 
   /* 偵測串內的ID */
   const bindIdReference = (element=document) => {
-    $(element).find('.thread').each((index, thread) => {
+    let $element = '';
+    if(element !== document)
+      $element = $(element);
+    else
+      $element = $(element).find('.thread');
+    $element.each((index, thread) => {
       const table = {};
       const IDs = getQueriesArray('span.id', thread);
       IDs.forEach(idElement => {
@@ -198,7 +203,7 @@ $(() => {
         } else if(table[id].num >= 2) {
           if(table[id].num >= 3)
             idElement.className += ` id_${Math.floor(table[id].num / 3) * 3}`;
-          idElement.innerText = idElement.innerText + `(${table[id].cnt}/${table[id].num})`;
+          idElement.innerText = idElement.innerText.replace(/\(.*?\)/g, '') + `(${table[id].cnt}/${table[id].num})`;
           table[id].cnt ++;
         }
       });
@@ -226,13 +231,14 @@ class HoverBox {
      * idElements: 要綁入事件的span.id, 因此時接對 element 變數查找 */
     const self = this;
     const idElements = getQueriesArray('span.id.quotable', element);
-    const thread = recursive ? getQuery(`.container > article[data-number="${element.dataset.number}"]`) : element;
+    const thread = recursive ? getQuery(`.articleContainer > article[data-number="${element.dataset.number}"]`) : element;
     if(idElements.length > 0) {
-      const mainCss = 'header[data-type="main"]';
+      const mainCss = 'header[data-type="post"]';
       const replyCss = '.replyBox header[data-type="reply"]';
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
         const $articles = $(thread).find(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
+        console.log({$articles})
         idElement.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
         idElement.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: idElement, recursive }));
       });
@@ -322,7 +328,7 @@ class HoverBox {
           else {
             reference.each((_, e) => {
               /* e is span.id.quoted */
-              const isMain = e.parentElement.dataset.type === 'main';
+              const isMain = e.parentElement.dataset.type === 'post';
               let parent = isMain ? findParent(e, /thread/) : findParent(e, /replyBox/);
               parent = isMain ? $(parent).clone(true).removeClass('col-xs-12').find('.replyBox').remove().end()[0] : parent;
               content += parent.outerHTML;
