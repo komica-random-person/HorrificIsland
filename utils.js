@@ -44,7 +44,7 @@ module.exports = app => {
   });
 
   app.set('getHIContent', (userid, cb) => {
-    const url = `${APIURL}article/list/`;
+    const url = `${APIURL}thread/list/`;
     const headers = { 'X-user-id': userid };
     request({ url, headers }, (err, res, body) => {
       if(res.statusCode === 200) {

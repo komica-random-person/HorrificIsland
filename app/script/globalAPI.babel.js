@@ -1,4 +1,4 @@
-/* global: getID, getQuery, getQueries, getQueriesArray, escape, findParent, $, infoBox */
+/* global globalFunction, getID, getQuery, getQueries, getQueriesArray, escape, findParent, $, infoBox */
 const apiUrl = 'https://h-island-api.herokuapp.com/';
 
 $(() => {
@@ -54,7 +54,7 @@ $(() => {
     <p class="quotedList"><span class="text">Replies(<span class="quotedNum">0</span>):</span></p>
 </section>`;
     return html;
-  }
+  };
   const getArticleHTML = data => {
     data.number = formatNum(data.number, 8);
     data.title = data.title || '無題';
@@ -104,11 +104,9 @@ $(() => {
     /* 傳送資料整理 */
     const mainEle = findParent(target, 'postContainer');
     const isReply = target.dataset.type === 'reply';
-    const d = new Date();
     const postData = {
       name: getQuery('#postName', mainEle).value || null,
       title: isReply ? null : getID('postTitle').value || null,
-      time: d.toISOString(),
       content: getQuery('#postContent', mainEle).value || null,
       imageurl: getQuery('#imgurl', mainEle).value || null,
       tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
@@ -118,7 +116,7 @@ $(() => {
     };
     const data = new FormData();
     for(let k in postData)
-      data.append(k, postData[k])
+      data.append(k, postData[k]);
     const imgfile = getID('imgfile').files;
     if(imgfile.length > 0)
       data.append('imgfile', imgfile[0]);
@@ -130,9 +128,9 @@ $(() => {
       target.innerText = tempString;
       if(success)
         $(findParent(target, 'postTable')).find('input, textarea').val('');
-    }
+    };
     /* check if the post is OK */
-    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*\:\/\/.+(\.jpg$|\.png$|\.jpeg$|\.gif$)/) === null) {
+    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*:\/\/.+(\.jpg$|\.png$|\.jpeg$|\.gif$)/) === null) {
       infoBox({ header: 'ERROR', content: '圖片網址要以 http 開頭，jpg, png, jpeg, gif 做結尾', className: 'error' });
       resumePostTable();
       return;
@@ -147,7 +145,7 @@ $(() => {
           if(isReply) {
             const html = getReplyHTML(article);
             const $article = $(`article[data-number="${mainEle.dataset.number}"]`);
-            $article.find(`.contentSection`).append(html);
+            $article.find('.contentSection').append(html);
             globalFunction.updateQuote($article[0]);
             globalFunction.bindHoverBox($article[0]);
             globalFunction.bindIdReference($article[0]);
@@ -270,7 +268,7 @@ $(() => {
   /* API 使用之 function */
   const getHeader = () => {
     const header = {};
-    header["X-user-id"] = $.cookie('keygen');
+    header['X-user-id'] = $.cookie('keygen');
     return header;
   };
   const postFormAPI = (func, data, callback, catchErr=null) => {
@@ -331,7 +329,7 @@ $(() => {
   /* Check if uuid is valid, if not, call API to get uuid */
   getAPI(`user/uuid/${$.cookie('keygen')}`, res => {
     if(!res.isValid) {
-      getAPI(`user/id/`, _res => {
+      getAPI('user/id/', _res => {
         $.cookie('keygen', _res.uuid);
       });
     }
