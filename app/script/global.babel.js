@@ -84,7 +84,7 @@ $(() => {
           qL.removeChild(qL.children[1]);
         }
         qL.querySelector('.quotedNum').innerText = 0;
-      });
+      }).end().find('span.id').addClass('quotable');
     }
     $(element).find('p.content').each((_, p) => {
       /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
