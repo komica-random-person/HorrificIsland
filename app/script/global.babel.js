@@ -79,7 +79,7 @@ $(() => {
   const updateQuote = (element=document) => {
     /* TODO: remove duplicate quote (happeans when reply) */
     if(element !== document) {
-      $('.thread').find('.quotedList').each((_, qL) => {
+      $(element).find('.quotedList').each((_, qL) => {
         while(qL.children.length > 1) {
           qL.removeChild(qL.children[1]);
         }
