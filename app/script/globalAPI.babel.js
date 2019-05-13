@@ -125,9 +125,21 @@ $(() => {
     else
       data.append('imgfile', null);
 
+    const resumePostTable = (success=false) => {
+      target.removeAttribute('disabled');
+      target.innerText = tempString;
+      if(success)
+        $(findParent(target, 'postTable')).find('input, textarea').val('');
+    }
     /* check if the post is OK */
+    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*\:\/\/.+(\.jpg$|\.png$|\.jpeg$|\.gif$)/) === null) {
+      infoBox({ header: 'ERROR', content: '圖片網址要以 http 開頭，jpg, png, jpeg, gif 做結尾', className: 'error' });
+      resumePostTable();
+      return;
+    }
     if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
       postError({ code: -1, message: '內文和影像不得同時為空' });
+      resumePostTable();
     } else {
       postFormAPI('article', data, response => {
         if(response.code === 0) {
@@ -144,15 +156,14 @@ $(() => {
             const html = getArticleHTML(article);
             $('main.articleContainer').prepend(html);
           }
-          target.removeAttribute('disabled');
-          target.innerText = tempString;
-          $(findParent(target, 'postTable')).find('input, textarea').val('');
-        } else
+          resumePostTable(true);
+        } else {
+          resumePostTable();
           postError(response);
+        }
       }, error => {
         infoBox({ header: 'ERROR', className: 'error', content: error.err });
-        target.removeAttribute('disabled');
-        target.innerText = tempString;
+        resumePostTable();
       });
     }
   };
