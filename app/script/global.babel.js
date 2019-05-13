@@ -153,7 +153,6 @@ $(() => {
               showButton.addEventListener('click', () => {
                 $(p).addClass('show').find('.hidden').removeClass('hidden');
                 p.removeChild(showButton);
-                p.style.height = '';
               });
               /* 隱藏內容時若有多個 br 或沒內容的 span 會導致真正的高度和計算的不同 */
               let prevEle = e.previousElementSibling;
@@ -162,7 +161,6 @@ $(() => {
                 prevEle = prevEle.previousElementSibling;
               }
               flag = true;
-              p.style.height = `${height + showButton.offsetHeight * 2 + 4}px`;
             }
             e.className += ' hidden';
           }
