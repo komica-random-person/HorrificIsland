@@ -97,6 +97,13 @@ div.container
       a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
       | )
     h2 H-island 的文章可能會被管理員全部刪除，請大家見諒
+    h3#APIstatus API Server 狀態：
+      span.success
+        i.fas.fa-thumbs-up
+        | 正常運作
+      span.fail
+        i.fas.fa-exclamation-triangle
+        | 無法連接
 
   //- postArticle
   section.postContainer
@@ -146,8 +153,9 @@ div.container
         div#submit.btn.btn-default 開串！
 
   main.articleContainer.col-xs-12.clearfix
-    each discussion in pageContent.hisland
-      +article(discussion, 'hisland')
+    if pageContent.hisland != undefined
+      each discussion in pageContent.hisland
+        +article(discussion, 'hisland')
     each discussion in pageContent.komica
       +article(discussion, 'komica')
 

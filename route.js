@@ -31,7 +31,8 @@ module.exports = app => {
       };
       const userid = req.cookies.keygen;
       req.app.get('getHIContent')(userid, result => {
-        pageInfo.pageContent.hisland = JSON.parse(result.body);
+        if(result.res === 200)
+          pageInfo.pageContent.hisland = JSON.parse(result.body);
         const renderedContent = req.app.get('render')(pageInfo);
         res.send(renderedContent);
       });
