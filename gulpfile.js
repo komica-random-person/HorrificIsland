@@ -1,4 +1,4 @@
-'use strict';
+/* global process */
 const gulp = require('gulp');
 const babel = require('gulp-babel');
 const sass = require('gulp-sass');
@@ -10,7 +10,7 @@ const concat = require('gulp-concat');
 
 sass.compiler = require('node-sass');
 
-console.log(`Gulp run under NODE_ENV=${process.env.NODE_ENV}`)
+console.log(`Gulp run under NODE_ENV=${process.env.NODE_ENV}`);
 
 const clean = cb => {
   /* Since del returns a promise, resolve it with additional func */
@@ -32,7 +32,7 @@ const util_script = cb => {
     }))
     .on('error', err => console.log(err.toString()))
     .pipe(concat('horrific.js'))
-    .pipe(process.env.NODE_ENV !== 'development' ? uglify() : noop())
+    .pipe(process.env.NODE_ENV !== 'dev' ? uglify() : noop())
     .pipe(gulp.dest('dist/script/'));
   gulp.src('app/script/*.min.js')
     .pipe(concat('vendor.js'))
@@ -84,7 +84,7 @@ const task_browserSync = cb => {
   };
   return gulp.series(clean, build_utils(), prepro, task);
 };
-if(process.env.NODE_ENV === 'development')
+if(process.env.NODE_ENV === 'dev')
   exports.dev = task_browserSync();
 
 const defaultTask = () => {

@@ -1,9 +1,9 @@
-'use strict';
+/* global $ */
 const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
 const getQueriesArray = (css, ele=document) => Array.prototype.slice.apply(getQueries(css, ele));
-const escape = s => s === null ? '' : s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+const escape = s => s === null ? '' : s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&quot;').replace(/'/g, '&#039;');
 const findParent = (element, pattern) => {
   while(element.parentElement !== null && element.className.match(pattern) === null)
     element = element.parentElement;
@@ -53,7 +53,7 @@ const infoBox = options => {
   const { header, className, content, button } = options;
   const $infoBox = $('#infoBox').removeClass('hidden');
   const $mask = $('#mask').removeClass('hidden');
-  $mask.one('click', () => { $mask.addClass('hidden'); $infoBox.addClass('hidden') });
+  $mask.one('click', () => { $mask.addClass('hidden'); $infoBox.addClass('hidden'); });
 
   const $header = $infoBox.find('header h2').text(header).end();
   $header[0].className = className || '';
@@ -109,7 +109,8 @@ $(() => {
             const quotedCount = Number(quotedNumElement.innerText);
             quotedNumElement.innerText = quotedCount + 1;
             const $container = $(document.createElement('a')).addClass('link').attr('href', `#${quoter.dataset.number}`).append(document.createElement('span'));
-            const span = $($container[0].children[0]).addClass('quoted').attr('data-num', quoter.dataset.number).text('>>' + quoter.dataset.number);
+            const $span = $($container[0].children[0]);
+            $span.addClass('quoted').attr('data-num', quoter.dataset.number).text('>>' + quoter.dataset.number);
             quotedList.appendChild($container[0]);
             /* set quotedfrom attr for showing hoverBox */
             quotedList.dataset.quotedfrom = quotedList.dataset.quotedfrom === undefined ? quoter.dataset.number : quotedList.dataset.quotedfrom + `, ${quoter.dataset.number}`;
@@ -117,19 +118,19 @@ $(() => {
         });
       }
       /* Change the color of quoted text */
-      if(p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/) !== null) {
+      if(p.innerText.match(/(?:[^\S]|^)>[^\s|>]+/) !== null) {
         /* REGEX 說明:
          * (1) (?: $pattern1 | $pattern2) 代表 $pattern1 跟 $pattern2 其中一個成立即可
          * (2)[^$pattern] 代表 not $pattern */
-        const match = p.innerText.match(/(?:[^\S]|^)\>[^\s|\>]+/g);
+        const match = p.innerText.match(/(?:[^\S]|^)>[^\s|>]+/g);
         match.forEach(_match => {
           _match = _match.replace(/\s/g, '');
-          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quoteText">${escape(_match)}</span>`)
+          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quoteText">${escape(_match)}</span>`);
         });
       }
       /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
        * 之後有推播，前端 append 可能要注意這部份 */
-      p.innerHTML = p.innerHTML.replace(/(http[s]*\:\/\/[^\s|\>|\<]+?)([\s|\<|\^|\@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
+      p.innerHTML = p.innerHTML.replace(/(http[s]*:\/\/[^\s|>|<]+?)([\s|<|^|@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
 
       /* 將超過固定高度的元素隱藏，並綁定按鈕來顯示 */
       const offset = 200;
@@ -140,7 +141,7 @@ $(() => {
           /* br element have offsetHeight=0, but in browser it have 4 px height */
           const eHeight = e.offsetHeight > 0 ? e.offsetHeight : 4;
           if(height + eHeight <= offset && !flag)
-            height += eHeight
+            height += eHeight;
           else {
             if(!flag) {
               /* Create show button when its not created */
@@ -258,7 +259,7 @@ class HoverBox {
         const threadNum = findParent(evt.target, recursive ? /hoverBox/ : /thread/).dataset.number;
         if(self.showList[threadNum] !== undefined) {
           /* just to make sure that self.showList works well. */
-          const onHover = () => self.e.querySelector(`.hoverBox:hover`) !== null;
+          const onHover = () => self.e.querySelector('.hoverBox:hover') !== null;
           if(!onHover()) {
             /* 滑鼠沒有在任何 hoverBox 上，移除所有 hoverBox */
             self.e.removeChild(self.showList[threadNum].element);
@@ -351,7 +352,7 @@ class HoverBox {
           });
         } else
           console.log('Reference element not found.');
-     };
+      };
     })(this);
     return mouseEnterEvt;
   }
@@ -446,14 +447,14 @@ class ElementTree {
     if(this.parent !== null && this.parent.element !== undefined) {
       this.parent.element.removeChild(this.element);
       this.parent.child = null;
-      return true
+      return true;
     } else return false;
   }
   removeChild() {
     if(this.child !== null) {
       this.element.removeChild(this.child.element);
       this.child = null;
-    } else return false
+    } else return false;
   }
   removeChildFromElement(element) {
     const child = this.findChild(element);
