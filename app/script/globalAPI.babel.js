@@ -38,7 +38,7 @@ $(() => {
       <span class="name">${escape(data.name) || '名無し'}</span>
       <span class="date">${getTimeString(data.time)[0]}</span>
       <span class="time">${getTimeString(data.time)[1]}</span>
-      <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
+      <span class="id quotable" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
       <span class="num" data-num="${formatNum(data.number, 8)}"><a class="link quotable" data-quotetype="num" data-num="${formatNum(data.number, 8)}">No.${formatNum(data.number, 8)}</a></span>
       <span class="del"><a class="link">刪除</a></span>
       <span class="res">[<a class="link">回覆</a>]</span>
@@ -63,7 +63,7 @@ $(() => {
     <form>
         ${getImageContent(data.image)}
         <section class="contentSection col-xs-12">
-            <header data-type="main">
+            <header data-type="post">
               ${getImageContent(data.image, 'img')}
               <span class="articleType">【H-Island】</span>
               <span class="title">${escape(data.title)}</span>
@@ -125,9 +125,21 @@ $(() => {
     else
       data.append('imgfile', null);
 
+    const resumePostTable = (success=false) => {
+      target.removeAttribute('disabled');
+      target.innerText = tempString;
+      if(success)
+        $(findParent(target, 'postTable')).find('input, textarea').val('');
+    }
     /* check if the post is OK */
+    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*\:\/\/.+(\.jpg$|\.png$|\.jpeg$|\.gif$)/) === null) {
+      infoBox({ header: 'ERROR', content: '圖片網址要以 http 開頭，jpg, png, jpeg, gif 做結尾', className: 'error' });
+      resumePostTable();
+      return;
+    }
     if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
       postError({ code: -1, message: '內文和影像不得同時為空' });
+      resumePostTable();
     } else {
       postFormAPI('article', data, response => {
         if(response.code === 0) {
@@ -139,20 +151,20 @@ $(() => {
             globalFunction.updateQuote($article[0]);
             globalFunction.bindHoverBox($article[0]);
             globalFunction.bindIdReference($article[0]);
+            globalFunction.bindQuickReply($article[0]);
             getQuery('.exit', mainEle).click();
           } else {
             const html = getArticleHTML(article);
             $('main.articleContainer').prepend(html);
           }
-          target.removeAttribute('disabled');
-          target.innerText = tempString;
-          $(findParent(target, 'postTable')).find('input, textarea').val('');
-        } else
+          resumePostTable(true);
+        } else {
+          resumePostTable();
           postError(response);
+        }
       }, error => {
         infoBox({ header: 'ERROR', className: 'error', content: error.err });
-        target.removeAttribute('disabled');
-        target.innerText = tempString;
+        resumePostTable();
       });
     }
   };
@@ -177,78 +189,82 @@ $(() => {
   bindPostSupplement();
 
   /* 點按文章編號時的快速回復 */
-  $('span.num a.quotable').each((index, element) => {
-    const article = findParent(element, 'thread');
-    element.addEventListener('click', evt => {
-      evt.stopImmediatePropagation();
-      const mainNumber = article.dataset.number;
-      const targetNum = element.dataset.num;
-      /* 如果已經存在則僅改變位置，不用初始化 */
-      let q = null;
-      if(getQuery('.quickPostTable') === null) {
-        q = document.createElement('div');
-        q.className = 'quickPostTable postContainer';
-        const quickPostHTML = getID('postTable').outerHTML;
-        q.innerHTML = quickPostHTML;
-        /* 綁定功能 */
-        bindPostSupplement(q);
-        /* 整理版面 */
-        q.querySelector('#submit').innerText = '回復';
-        q.querySelector('#submit').dataset.type = 'reply';
-        getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
-        q.style.position = 'fixed';
-        article.appendChild(q);
-      } else {
-        q = getQuery('.quickPostTable');
-        q.className = q.className.replace(/\s*hidden\s*/g, ' ');
-      }
-
-      q.dataset.number = mainNumber;
-      q.querySelector('textarea').value += `>>${targetNum}\n`;
-      /* 設定位置 */
-      const coord = [evt.clientX, evt.clientY];
-      const x = coord[0] + q.offsetWidth > window.innerWidth;
-      const y = coord[1] + q.offsetHeight > window.innerHeight;
-      q.style.top = (y ? window.innerHeight - q.offsetHeight : coord[1]) + 'px';
-      q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
-      q.querySelector('textarea').focus();
-
-      /* 綁定拖曳事件 */
-      q.onmousedown = _evt => {
+  const bindQuickReply = (element=document) => {
+    $(element).find('span.num a.quotable').each((index, element) => {
+      const article = findParent(element, 'thread');
+      element.addEventListener('click', evt => {
         evt.stopImmediatePropagation();
-        const target = _evt.target;
-        const key = ['div', 'section', 'form'];
-        const offsetX = _evt.clientX - Number(q.style.left.split('p')[0]);
-        const offsetY = _evt.clientY - Number(q.style.top.split('p')[0]);
-        /* 由於事件綁定在父元素，必須判定是哪個子元素觸發的 */
-        if(key.indexOf(target.tagName.toLowerCase()) !== -1 && target.id !== 'submit') {
-          const move = mEvt => {
-            const top = -offsetY + mEvt.clientY;
-            const left = -offsetX + mEvt.clientX;
-            const x = (left + q.offsetWidth > window.innerWidth) ? window.innerWidth - q.offsetWidth - 15 :
-              (left < 0 ? 0 : left);
-            const y = (top + q.offsetHeight > window.innerHeight) ? window.innerHeight - q.offsetHeight :
-              (top < 0 ? 0 : top);
-            q.style.top = `${y}px`;
-            q.style.left = `${x}px`;
-          };
-          const main = document.querySelector('main');
-          main.addEventListener('mousemove', move);
-          const unbind = e => {
-            e.stopImmediatePropagation();
-            main.removeEventListener('mousemove', move);
-            main.onmouseup = null;
-          };
-          main.onmouseup = unbind;
+        const mainNumber = article.dataset.number;
+        const targetNum = element.dataset.num;
+        /* 如果已經存在則僅改變位置，不用初始化 */
+        let q = null;
+        if(getQuery('.quickPostTable') === null) {
+          q = document.createElement('div');
+          q.className = 'quickPostTable postContainer';
+          const quickPostHTML = getID('postTable').outerHTML;
+          q.innerHTML = quickPostHTML;
+          /* 綁定功能 */
+          bindPostSupplement(q);
+          /* 整理版面 */
+          q.querySelector('#submit').innerText = '回復';
+          q.querySelector('#submit').dataset.type = 'reply';
+          getQueries('.postInfo[data-id="postTitle"], section.addition', q).forEach(e => e.parentElement.removeChild(e));
+          q.style.position = 'fixed';
+          article.appendChild(q);
+        } else {
+          q = getQuery('.quickPostTable');
+          q.className = q.className.replace(/\s*hidden\s*/g, ' ');
         }
-      };
-      /* 綁定結束事件 */
-      q.querySelector('.exit').addEventListener('click', () => {
-        q.className += ' hidden';
+
+        q.dataset.number = mainNumber;
+        q.querySelector('textarea').value += `>>${targetNum}\n`;
+        /* 設定位置 */
+        const coord = [evt.clientX, evt.clientY];
+        const x = coord[0] + q.offsetWidth > window.innerWidth;
+        const y = coord[1] + q.offsetHeight > window.innerHeight;
+        q.style.top = (y ? window.innerHeight - q.offsetHeight : coord[1]) + 'px';
+        q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
+        q.querySelector('textarea').focus();
+
+        /* 綁定拖曳事件 */
+        q.onmousedown = _evt => {
+          evt.stopImmediatePropagation();
+          const target = _evt.target;
+          const key = ['div', 'section', 'form'];
+          const offsetX = _evt.clientX - Number(q.style.left.split('p')[0]);
+          const offsetY = _evt.clientY - Number(q.style.top.split('p')[0]);
+          /* 由於事件綁定在父元素，必須判定是哪個子元素觸發的 */
+          if(key.indexOf(target.tagName.toLowerCase()) !== -1 && target.id !== 'submit') {
+            const move = mEvt => {
+              const top = -offsetY + mEvt.clientY;
+              const left = -offsetX + mEvt.clientX;
+              const x = (left + q.offsetWidth > window.innerWidth) ? window.innerWidth - q.offsetWidth - 15 :
+                (left < 0 ? 0 : left);
+              const y = (top + q.offsetHeight > window.innerHeight) ? window.innerHeight - q.offsetHeight :
+                (top < 0 ? 0 : top);
+              q.style.top = `${y}px`;
+              q.style.left = `${x}px`;
+            };
+            const main = document.querySelector('main');
+            main.addEventListener('mousemove', move);
+            const unbind = e => {
+              e.stopImmediatePropagation();
+              main.removeEventListener('mousemove', move);
+              main.onmouseup = null;
+            };
+            main.onmouseup = unbind;
+          }
+        };
+        /* 綁定結束事件 */
+        q.querySelector('.exit').addEventListener('click', () => {
+          q.className += ' hidden';
+        });
+        q.querySelector('#submit').addEventListener('click', postArticle);
       });
-      q.querySelector('#submit').addEventListener('click', postArticle);
     });
-  });
+  };
+  bindQuickReply();
+  globalFunction.bindQuickReply = bindQuickReply;
 
   /* API 使用之 function */
   const getHeader = () => {

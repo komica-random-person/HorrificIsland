@@ -78,6 +78,14 @@ $(() => {
   const hoverbox = new HoverBox();
   const updateQuote = (element=document) => {
     /* TODO: remove duplicate quote (happeans when reply) */
+    if(element !== document) {
+      $('.thread').find('.quotedList').each((_, qL) => {
+        while(qL.children.length > 1) {
+          qL.removeChild(qL.children[1]);
+        }
+        qL.querySelector('.quotedNum').innerText = 0;
+      });
+    }
     $(element).find('p.content').each((_, p) => {
       /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
@@ -179,7 +187,12 @@ $(() => {
 
   /* 偵測串內的ID */
   const bindIdReference = (element=document) => {
-    $(element).find('.thread').each((index, thread) => {
+    let $element = '';
+    if(element !== document)
+      $element = $(element);
+    else
+      $element = $(element).find('.thread');
+    $element.each((index, thread) => {
       const table = {};
       const IDs = getQueriesArray('span.id', thread);
       IDs.forEach(idElement => {
@@ -196,9 +209,11 @@ $(() => {
           /* Remove highlight while the ID only shown once */
           idElement.className = idElement.className.replace(/\s*quotable\s*/g, '');
         } else if(table[id].num >= 2) {
-          if(table[id].num >= 3)
-            idElement.className += ` id_${Math.floor(table[id].num / 3) * 3}`;
-          idElement.innerText = idElement.innerText + `(${table[id].cnt}/${table[id].num})`;
+          if(table[id].num >= 3){
+            const idNum = Math.floor(table[id].num / 3) * 3;
+            idElement.className += ` id_${idNum > 15 ? 15 : idNum}`;
+          }
+          idElement.innerText = idElement.innerText.replace(/\(.*?\)/g, '') + `(${table[id].cnt}/${table[id].num})`;
           table[id].cnt ++;
         }
       });
@@ -226,9 +241,9 @@ class HoverBox {
      * idElements: 要綁入事件的span.id, 因此時接對 element 變數查找 */
     const self = this;
     const idElements = getQueriesArray('span.id.quotable', element);
-    const thread = recursive ? getQuery(`.container > article[data-number="${element.dataset.number}"]`) : element;
+    const thread = recursive ? getQuery(`.articleContainer > article[data-number="${element.dataset.number}"]`) : element;
     if(idElements.length > 0) {
-      const mainCss = 'header[data-type="main"]';
+      const mainCss = 'header[data-type="post"]';
       const replyCss = '.replyBox header[data-type="reply"]';
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
@@ -322,7 +337,7 @@ class HoverBox {
           else {
             reference.each((_, e) => {
               /* e is span.id.quoted */
-              const isMain = e.parentElement.dataset.type === 'main';
+              const isMain = e.parentElement.dataset.type === 'post';
               let parent = isMain ? findParent(e, /thread/) : findParent(e, /replyBox/);
               parent = isMain ? $(parent).clone(true).removeClass('col-xs-12').find('.replyBox').remove().end()[0] : parent;
               content += parent.outerHTML;
