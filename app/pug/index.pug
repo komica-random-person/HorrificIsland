@@ -75,9 +75,9 @@ mixin articleHeader(info, t, type)
       span.del
         a.link 刪除
     span.res
-      | [
-      a.link 回覆
-      | ]
+      | [&nbsp
+      a.link(href= 'thread/' + Number(info.number)) 回覆
+      | &nbsp]
 
 mixin postForm(labelText, id, placeholder, type)
   section.postInfo(data-id=id)
@@ -106,13 +106,20 @@ div.container
         | 無法連接
 
   //- postArticle
-  section.postContainer
+  section.postContainer(data-number= pageContent.replyFormat ? formatNum(pageContent.hisland[0].post.number) : '')
     form#postTable.postTable
       section.exit
         div.btn.btn-danger
           i.fas.fa-times-circle
+      if pageContent.replyFormat
+        header
+          h4 [
+            a.link(href='/') 回到列表
+            | ]
       +postForm('名稱', 'postName', '名無し', 'text')
-      +postForm('標題', 'postTitle', '無題', 'text')
+      if !pageContent.replyFormat
+        //- replyFormat 代表是回復模式(看單一串)
+        +postForm('標題', 'postTitle', '無題', 'text')
       +postForm('', 'postContent', '想聊些什麼？', 'textarea')
         section.controlPannel
           div.function
@@ -145,12 +152,13 @@ div.container
             input(id='imgurl', type='text', placeholder='輸入圖片/影片之網址或拖曳圖片檔案到此', autocomplete='off')
             input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
       section.submission
-        section.addition
-          label
-            input(type='checkbox', id='allowComment', checked)
-            div.btn.btn-on 留言: 開
-            div.btn.btn-off 留言: 關
-        div#submit.btn.btn-default 開串！
+        if !pageContent.replyFormat
+          section.addition
+            label
+              input(type='checkbox', id='allowComment', checked)
+              div.btn.btn-on 留言: 開
+              div.btn.btn-off 留言: 關
+        div#submit.btn.btn-default(data-type= pageContent.replyFormat ? 'reply' : 'post')= pageContent.replyFormat ? '回復' : '開串！'
 
   main.articleContainer.col-xs-12.clearfix
     if pageContent.hisland != undefined

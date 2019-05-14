@@ -43,12 +43,25 @@ module.exports = app => {
     });
   });
 
+  const threadAPI = (uri, userid, resolve, reject=(() => null)) => {
+    const url = `${APIURL}${uri}`;
+    const headers = { 'X-user-id': userid };
+    request({ url, headers }, (err, res, body) => {
+      if(err === null && res.statusCode === 200) {
+        resolve(body);
+      } else {
+        reject({ err, res, body });
+      }
+    });
+  };
+  app.set('API', { threadAPI });
+
   app.set('getHIContent', (userid, cb) => {
     const url = `${APIURL}thread/list/`;
     const headers = { 'X-user-id': userid };
     request({ url, headers }, (err, res, body) => {
       if(res.statusCode === 200) {
-        app.set('HIsland-content');
+        app.set('HIsland-content', body);
         cb({ err, res: 200, body });
       } else {
         if(app.get('HIsland-content') === undefined)
