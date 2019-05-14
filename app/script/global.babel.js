@@ -434,6 +434,7 @@ class HoverBox {
         getID('hoverBox').style.zIndex = '';
         _evt.target.className += ' hidden';
       });
+      $hoverBox.find('.quoted, .quote').one('click', () => getID('mask').click());
     }
 
     /* If hoverBox is referenced from id, do not bind id */
