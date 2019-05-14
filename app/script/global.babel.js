@@ -229,8 +229,8 @@ class HoverBox {
   constructor() {
     this.e = getID('hoverBox');
     this.showList = {};
-    this.activeEvt = isMobile ? 'click' : 'mouseleave';
-    this.inactiveEvt = isMobile ? 'click' : 'mouseenter';
+    this.activeEvt = isMobile ? 'click' : 'mouseenter';
+    this.inactiveEvt = isMobile ? 'click' : 'mouseleave';
   }
   bindQuoteHoverEvent(element, recursive=false) {
     const self = this;
