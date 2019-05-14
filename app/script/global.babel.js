@@ -9,6 +9,7 @@ const findParent = (element, pattern) => {
     element = element.parentElement;
   return element.parentElement === null ? null : element;
 };
+const isMobile = window.innerWidth < 500;
 const globalFunction = {};
 
 const showImg = (imgContainer) => {
@@ -228,11 +229,15 @@ class HoverBox {
   constructor() {
     this.e = getID('hoverBox');
     this.showList = {};
+    this.activeEvt = isMobile ? 'click' : 'mouseleave';
+    this.inactiveEvt = isMobile ? 'click' : 'mouseenter';
   }
   bindQuoteHoverEvent(element, recursive=false) {
     const self = this;
-    element.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
-    element.addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive }));
+    if(isMobile)
+      return;
+    element.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element, recursive }));
+    element.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element, recursive }));
   }
   bindIdReference(element, recursive=false) {
     /* element: thread element or hoverBox element, depends on recursive
@@ -247,8 +252,8 @@ class HoverBox {
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
         const $articles = $(thread).find(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
-        idElement.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
-        idElement.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: idElement, recursive }));
+        idElement.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
+        idElement.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element: idElement, recursive }));
       });
     }
   }
@@ -294,7 +299,10 @@ class HoverBox {
         }
       };
     })(this);
-    return mouseLeaveEvt;
+    if(!isMobile)
+      return mouseLeaveEvt;
+    else
+      return () => {};
   }
   mouseEnterHoverBox({ element, recursive, articles=null }) {
     /* element: 事件觸發者(span元素), 
@@ -359,30 +367,29 @@ class HoverBox {
   bindQuotedListBox(element, recursive=false) {
     /* element: p.quotedList */
     const self = this;
-    const $quotedElement = $(element).find('.quoted');
-    $quotedElement.each((index, e) => {
-      /* 綁定個別的 quoted */
-      e.addEventListener('mouseenter', self.mouseEnterHoverBox({ element: e, recursive }));
-      e.addEventListener('mouseleave', self.mouseLeaveHoverBox({ element: e, recursive }));
-    });
+    if(!isMobile) {
+      const $quotedElement = $(element).find('.quoted');
+      $quotedElement.each((index, e) => {
+        /* 綁定個別的 quoted */
+        e.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element: e, recursive }));
+        e.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element: e, recursive }));
+      });
+    }
 
     /* 綁定 replies, 一樣透過 recursive 判斷是否要回到 .container 找到 thread */
     if(element.dataset.quotedfrom !== undefined) {
       const quotedFrom = element.dataset.quotedfrom.split(', ');
       const thread = recursive ? findParent(element, /hoverBox/) : findParent(element, /thread/);
       const $thread = recursive ? $(`.container article[data-number="${thread.dataset.number}"]`) : $(thread);
-      const articles = [];
       const queryString = quotedFrom.map(number => `span.num[data-num="${number}"]`).join(', ');
       /* 這邊直接用 jQuery 跟 queryString 結合來一次選所有文章 */
       const $articles = $thread.find(queryString);
-      element.children[0].addEventListener('mouseenter', self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
-      element.children[0].addEventListener('mouseleave', self.mouseLeaveHoverBox({ element, recursive }));
+      element.children[0].addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
+      element.children[0].addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element, recursive }));
     }
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
     const self = this;
-    /* Check if hoverBox to this target is already exist */
-    let appendElement = self.e;
     if(parentElement !== null) {
       /* 若存在相同層級的 hoverBox, 刪除之(倒裝三小w) */
       const p = self.showList[threadNum].findChild(parentElement);
@@ -410,12 +417,24 @@ class HoverBox {
     const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : coord[0] - hoverBox.offsetWidth;
     hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
     /* 必須先移動 X 來避免由於 X overflow 的 line break 改變 offsetHeight */
-    const showY = coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : coord[1] - hoverBox.offsetHeight;
+    const showY = isMobile ? 5 : coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : coord[1] - hoverBox.offsetHeight;
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
     /* recursively bind */
     const $hoverBox = $(hoverBox).find('.quote').not('.missing').each((index, element) => self.bindQuoteHoverEvent(element, true)).end().end();
     $hoverBox.find('.replyBox.quotedArticle p.quotedList, .mainContent p.quotedList').each((index, element) => self.bindQuotedListBox(element, true));
+    if(isMobile) {
+      /* 手機版直接將所有 popup 刪除 */
+      $hoverBox[0].style.maxHeight = '75%';
+      getID('hoverBox').style.zIndex = 3;
+      $('#mask').removeClass('hidden').one('click', _evt => {
+        self.e.innerHTML = '';
+        for(let key in self.showList)
+          delete self.showList[key];
+        getID('hoverBox').style.zIndex = '';
+        _evt.target.className += ' hidden';
+      });
+    }
 
     /* If hoverBox is referenced from id, do not bind id */
     if(content.match(/id quotable/g) !== null && content.match(/id quotable/g).length > 1) {

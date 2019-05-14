@@ -187,6 +187,8 @@ article.thread, #hoverBox
   header.imgInfo h4, section.imgInfo h4
     font-size: .85em
     margin: .5em 0
+  &:target header[data-type=post]
+    border: white 3px dotted
   .contentSection
     header
       span
@@ -290,6 +292,8 @@ article.thread, #hoverBox
     padding-left: 0
   p.quotedList
     margin-top: 0
+  &:target
+    border: white 3px dotted
 
 #hoverBox, .hoverBox
   max-height: 100%
@@ -392,8 +396,6 @@ div.bar
           font-size: .85em
           label
             width: 100%
-            input[type=text]
-              width: 70%
             textarea
               width: 100%
 

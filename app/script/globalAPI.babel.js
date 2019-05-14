@@ -1,4 +1,4 @@
-/* global globalFunction, getID, getQuery, getQueries, getQueriesArray, escape, findParent, $, infoBox */
+/* global globalFunction, getID, getQuery, getQueries, getQueriesArray, isMobile, escape, findParent, $, infoBox */
 const apiUrl = 'http://localhost:8888/';
 
 $(() => {
@@ -221,7 +221,7 @@ $(() => {
         const coord = [evt.clientX, evt.clientY];
         const x = coord[0] + q.offsetWidth > window.innerWidth;
         const y = coord[1] + q.offsetHeight > window.innerHeight;
-        q.style.top = (y ? window.innerHeight - q.offsetHeight : coord[1]) + 'px';
+        q.style.top = (isMobile ? 5 : (y ? window.innerHeight - q.offsetHeight : coord[1])) + 'px';
         q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
         q.querySelector('textarea').focus();
 
