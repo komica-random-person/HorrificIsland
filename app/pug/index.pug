@@ -156,8 +156,9 @@ div.container
     if pageContent.hisland != undefined
       each discussion in pageContent.hisland
         +article(discussion, 'hisland')
-    each discussion in pageContent.komica
-      +article(discussion, 'komica')
+    if pageContent.komica != undefined
+      each discussion in pageContent.komica
+        +article(discussion, 'komica')
 
   section#hoverBox.hoverBox
 

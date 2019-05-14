@@ -36,7 +36,7 @@ module.exports = app => {
     const url = `${APIURL}user/id/${clientIp}`;
     request(url, (err, res, body) => {
       if(res.statusCode === 200) {
-        cb({ err, body });
+        cb({ err, res, body });
       } else {
         cb({ err, res, body });
       }
