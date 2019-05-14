@@ -74,9 +74,10 @@ mixin articleHeader(info, t, type)
     if type != 'komica'
       span.del
         a.link 刪除
+    - var href = type == 'hisland' ? '/thread/' + Number(info.number) : 'https://sora.komica.org/00/pixmicat.php?res=' + Number(info.number)
     span.res
       | [&nbsp
-      a.link(href= 'thread/' + Number(info.number)) 回覆
+      a.link(href= href, target= type == 'komica' ? '_blank' : '') 回覆
       | &nbsp]
 
 mixin postForm(labelText, id, placeholder, type)
