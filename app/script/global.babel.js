@@ -100,7 +100,7 @@ $(() => {
           const refExist = getQuery(`.quotable[data-num="${num}"]`, thread) !== null;
           p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote ${refExist ? '' : 'missing'}" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
           /* Add number to quoted article for css to show quotedList */
-          const $quotedArticle = $(`*[data-number="${num}"]`).not('.quickPostTable').addClass('quotedArticle');
+          const $quotedArticle = $(`*[data-number="${num}"]`).not('.quickPostTable, .postContainer').addClass('quotedArticle');
           $quotedArticle.each((index, ele) => {
             /* 在被引用文章的串中找到引用者的編號, 將其加入 quotedList 中顯示，並加入 quotedList 的 data-quotefrom 屬性中 */
             const quotedList = getQuery('.quotedList', ele);
