@@ -1,4 +1,4 @@
-/* global $ */
+/* global $, hljs */
 const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
@@ -170,21 +170,31 @@ $(() => {
       }
       /* Markdown 相關, 注意這邊 \n 已經都被替換成 br 了 */
       const markdownRegex = [
-        /\*\*(\w.+?\w)\*\*/, 
-        /\*(\w.+?\w)\*/, 
-        /~~(\w.+?\w)~~/, 
-        /==(\w.+?\w)==/, 
-        /__(\w.+?\w)__/,
-        /#(\s.+?)</,
+        /\*\*([^\s|<].+?[^<|\s])\*\*/, 
+        /\*([^\s|>].+?[^\s|<])\*/, 
+        /~~([^\s|>].+?[^\s|<])~~/, 
+        /==([^\s|>].+?[^\s|<])==/, 
+        /__([^\s|>].+?[^\s|<])__/,
+        /#(\s.+?)<br/,
+        /```(\w+)(?:<\/span>)<br>(.+?)```/,
       ];
-      const markdownClass = ['bold', 'italic', 'del', 'spoiler', 'underline', 'title'];
+      const markdownClass = ['bold', 'italic', 'del', 'spoiler', 'underline', 'title', 'code'];
       markdownRegex.forEach((r, index) => {
         const rMatch = () => p.innerHTML.match(r);
         while(rMatch() !== null) {
           if(markdownClass[index] === 'italic')
             p.innerHTML = p.innerHTML.replace(r, `<i class="${markdownClass[index]}">$1</i>${index === markdownRegex.length - 1 ? '<' : ''}`);
-          else
-            p.innerHTML = p.innerHTML.replace(r, `<span class="${markdownClass[index]}">$1</span>${index === markdownRegex.length - 1 ? '<' : ''}`);
+          else if(markdownClass[index] === 'code') {
+            const result = rMatch();
+            const langName = result[1];
+            const content = result[2];
+            const pre = document.createElement('pre');
+            pre.innerHTML = `<code class="language-${langName}">${content}</code>`;
+            hljs.highlightBlock(pre);
+            p.innerHTML = p.innerHTML.replace(result[0], pre.outerHTML);
+            break;
+          } else
+            p.innerHTML = p.innerHTML.replace(r, `<span class="${markdownClass[index]}">$1</span>${index === markdownClass.indexOf('title') ? '<br' : ''}`);
         }
       });
     });
