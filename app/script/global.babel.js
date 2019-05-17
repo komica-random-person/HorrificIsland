@@ -168,6 +168,22 @@ $(() => {
           }
         });
       }
+      /* Markdown 相關, 注意這邊 \n 已經都被替換成 br 了 */
+      const markdownRegex = [
+        /\*\*(\w.+?\w)\*\*/, 
+        /\*(\w.+?\w)\*/, 
+        /~~(\w.+?\w)~~/, 
+        /==(\w.+?\w)==/, 
+        /__(\w.+?\w)__/,
+        /#(\s.+?)</
+      ];
+      const markdownClass = ['bold', 'italic', 'del', 'spoiler', 'underline', 'title'];
+      markdownRegex.forEach((r, index) => {
+        const rMatch = () => p.innerHTML.match(r);
+        while(rMatch() !== null) {
+          p.innerHTML = p.innerHTML.replace(r, `<span class="${markdownClass[index]}">$1</span>${index === markdownRegex.length - 1 ? '<' : ''}`);
+        }
+      });
     });
   };
   updateQuote();
