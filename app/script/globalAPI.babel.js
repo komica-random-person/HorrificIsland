@@ -335,7 +335,7 @@ $(() => {
   getAPI(`user/uuid/${$.cookie('keygen')}`, res => {
     if(!res.isValid) {
       getAPI('user/id/', _res => {
-        $.cookie('keygen', _res.uuid);
+        $.cookie('keygen', _res.uuid, { expires: 365, path: '/' });
       });
     }
     $('#APIstatus').addClass('show').find('.fail').remove();

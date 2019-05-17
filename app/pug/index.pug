@@ -23,7 +23,7 @@ mixin article(data, articleType)
         section.mainContent
           p.content
             //- replace \n with <br>
-            - post.content = post.content || ''
+            - post.content = post.content || '無本文'
             - var split = post.content.split('\n')
             each text in split
               span= text
@@ -47,7 +47,8 @@ mixin replyBox(reply, articleType)
       //- there exist a ($filename)s.jpg file for each image, use Regex to get the url
       a.imgContainer(onclick='showImg(this)', data-ori=reply.image.url, data-thumb=reply.image.thumb)
         img(src=reply.image.thumb)
-    - var split = reply.content.split('\n')
+    - var content = reply.content || '無本文'
+    - var split = content.split('\n')
     p.content
       each text in split
         span= text
