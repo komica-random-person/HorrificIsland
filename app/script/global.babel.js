@@ -331,7 +331,7 @@ class HoverBox {
     if(!isMobile)
       return mouseLeaveEvt;
     else
-      return () => {};
+      return () => { };
   }
   mouseEnterHoverBox({ element, recursive, articles=null }) {
     /* element: 事件觸發者(span元素), 
