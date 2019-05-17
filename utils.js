@@ -35,13 +35,18 @@ module.exports = app => {
   app.set('getUserId', (clientIp, cb) => {
     const url = `${APIURL}user/id/${clientIp}`;
     request(url, (err, res, body) => {
-      if(res.statusCode === 200) {
+      if(!err && res.statusCode === 200) {
         cb({ err, res, body });
       } else {
         cb({ err, res, body });
       }
     });
   });
+
+  const getIP = req => req.headers['x-forwarded-for'] ||
+                       req.connection.remoteAddress ||
+                       req.socket.remoteAddress ||
+                       req.connection.socket.remoteAddress;
 
   const threadAPI = (uri, userid, resolve, reject=(() => null)) => {
     const url = `${APIURL}${uri}`;
@@ -54,12 +59,14 @@ module.exports = app => {
       }
     });
   };
-  app.set('API', { threadAPI });
+  app.set('API', { threadAPI, getIP });
 
   app.set('getHIContent', (userid, cb) => {
-    const url = `${APIURL}thread/list/`;
-    const headers = { 'X-user-id': userid };
-    request({ url, headers }, (err, res, body) => {
+    const requestData = {
+      url: `${APIURL}thread/list/`,
+      headers: { 'X-user-id': userid }
+    };
+    request(requestData, (err, res, body) => {
       if(res.statusCode === 200) {
         app.set('HIsland-content', body);
         cb({ err, res: 200, body });
