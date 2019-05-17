@@ -130,12 +130,13 @@ div.container
               i.fas.fa-file-image
               i.fas.fa-file-image.on
             span.tooltips 上傳圖片/使用網址附加圖片
-          div.function
-            label
-              input(type='checkbox', name='func', data-target='hashtag')
-              i.fas.fa-hashtag
-              i.fas.fa-hashtag.on
-            span.tooltips 將串加入 hashtags
+          if !pageContent.replyFormat
+            div.function
+              label
+                input(type='checkbox', name='func', data-target='hashtag')
+                i.fas.fa-hashtag
+                i.fas.fa-hashtag.on
+              span.tooltips 將串加入 hashtags
           div.function
             label
               input(type='checkbox', name='func')
@@ -152,6 +153,9 @@ div.container
             input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔', autocomplete='off')
           section.hidden-func.image
             input(id='imgurl', type='text', placeholder='輸入圖片/影片之網址或拖曳圖片檔案到此', autocomplete='off')
+            div.btn.btn-default(onclick='this.nextSibling.click()')
+              i.far.fa-file-image
+              | &nbsp;選擇檔案
             input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
       section.submission
         if !pageContent.replyFormat
