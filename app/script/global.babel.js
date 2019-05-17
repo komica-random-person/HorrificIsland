@@ -88,6 +88,63 @@ $(() => {
       }).end().find('span.id').addClass('quotable');
     }
     $(element).find('p.content').each((_, p) => {
+      /* Change the color of quoted text */
+      const quoteReg = /(?:^|\n)(>[^>|\n]\s*[^\n]+)/g;
+      if(p.innerText.match(quoteReg) !== null) {
+        /* REGEX 說明:
+         * (1) (?: $pattern1 | $pattern2) 代表 $pattern1 跟 $pattern2 其中一個成立即可
+         * (2)[^$pattern] 代表 not $pattern */
+        const match = p.innerText.match(quoteReg);
+        match.forEach(_match => {
+          _match = _match.replace(/^\s/g, '');
+          p.innerHTML = p.innerHTML.replace(/ {2}/g, ' ');
+          p.innerHTML = p.innerHTML.replace(escape(_match), `<span class="quoteText">${escape(_match)}</span>`)
+        });
+      }
+      /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
+       * 之後有推播，前端 append 可能要注意這部份 */
+      p.innerHTML = p.innerHTML.replace(/(http[s]*:\/\/[^\s|>|<]+?)([\s|<|^|@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
+
+      /* Markdown 相關, 注意這邊 \n 已經都被替換成 br 了 */
+      const markdownRegex = [
+        /\*\*([^\s].+?[^\s])\*\*/, 
+        /\*([^\s].+?[^\s])\*/, 
+        /~~([^\s].+?[^\s])~~/, 
+        /==([^\s].+?[^\s])==/, 
+        /__([^\s].+?[^\s])__/,
+        /(?:^|>)# (.+?)\n/,
+        /```(\w+)(?:<\/span>)\n(.+?)```(?:<\/span>)/s,
+      ];
+      const markdownClass = ['bold', 'italic', 'del', 'spoiler', 'underline', 'title', 'code'];
+      let pHTML = p.innerHTML.replace(/<br>/g, '\n');
+      markdownRegex.forEach((r, index) => {
+        const rMatch = () => pHTML.match(r);
+        while(rMatch() !== null) {
+          if(markdownClass[index] === 'italic')
+            pHTML = pHTML.replace(r, `<i class="${markdownClass[index]}">$1</i>`);
+          else if(markdownClass[index] === 'code') {
+            const result = rMatch();
+            const langName = result[1];
+            let content = result[2];
+            /* 由於 code 區塊可能會已經存在其他 markdown, 需將其消除 */
+            const regexList = (tagName, post='') => new RegExp(`<${tagName}${post}>(.+?)</${tagName}>`, 's');
+            const regexTags = [['span', ''], ['span', ' class=".+?"'], ['i', ''], ['i', ' class=".+?"']].map(e => regexList(e[0], e[1]));
+            regexTags.forEach(reg => {
+              while(content.match(reg) !== null) {
+                content = content.replace(reg, content.match(reg)[1]);
+              }
+            });
+            const pre = document.createElement('pre');
+            pre.innerHTML = `<code class="language-${langName}">${content}</code>`;
+            hljs.highlightBlock(pre.children[0]);
+            pHTML = pHTML.replace(result[0], pre.outerHTML);
+            break;
+          } else
+            pHTML = pHTML.replace(r, `${index === markdownClass.indexOf('title') ? '>' : ''}<span class="${markdownClass[index]}">$1</span>${index === markdownClass.indexOf('title') ? '\n' : ''}`);
+        }
+      });
+      p.innerHTML = pHTML.replace(/\n/g, '<br>');
+
       /* 偵測每篇文章的內容，若有引用則將其由 >>\d{8} 代換成 span.quote 元素 */
       if(p.innerText.match(/>>\d{8}\s*/) !== null) {
         const thread = findParent(p, /thread/);
@@ -118,20 +175,6 @@ $(() => {
           });
         });
       }
-      /* Change the color of quoted text */
-      if(p.innerText.match(/(?:[^\S]|^)>[^\s|>]+/) !== null) {
-        /* REGEX 說明:
-         * (1) (?: $pattern1 | $pattern2) 代表 $pattern1 跟 $pattern2 其中一個成立即可
-         * (2)[^$pattern] 代表 not $pattern */
-        const match = p.innerText.match(/(?:[^\S]|^)>[^\s|>]+/g);
-        match.forEach(_match => {
-          _match = _match.replace(/\s/g, '');
-          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<span class="quoteText">${escape(_match)}</span>`);
-        });
-      }
-      /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
-       * 之後有推播，前端 append 可能要注意這部份 */
-      p.innerHTML = p.innerHTML.replace(/(http[s]*:\/\/[^\s|>|<]+?)([\s|<|^|@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
 
       /* 將超過固定高度的元素隱藏，並綁定按鈕來顯示 */
       const offset = 200;
@@ -168,35 +211,6 @@ $(() => {
           }
         });
       }
-      /* Markdown 相關, 注意這邊 \n 已經都被替換成 br 了 */
-      const markdownRegex = [
-        /\*\*([^\s|<].+?[^<|\s])\*\*/, 
-        /\*([^\s|>].+?[^\s|<])\*/, 
-        /~~([^\s|>].+?[^\s|<])~~/, 
-        /==([^\s|>].+?[^\s|<])==/, 
-        /__([^\s|>].+?[^\s|<])__/,
-        /#(\s.+?)<br/,
-        /```(\w+)(?:<\/span>)<br>(.+?)```/,
-      ];
-      const markdownClass = ['bold', 'italic', 'del', 'spoiler', 'underline', 'title', 'code'];
-      markdownRegex.forEach((r, index) => {
-        const rMatch = () => p.innerHTML.match(r);
-        while(rMatch() !== null) {
-          if(markdownClass[index] === 'italic')
-            p.innerHTML = p.innerHTML.replace(r, `<i class="${markdownClass[index]}">$1</i>${index === markdownRegex.length - 1 ? '<' : ''}`);
-          else if(markdownClass[index] === 'code') {
-            const result = rMatch();
-            const langName = result[1];
-            const content = result[2];
-            const pre = document.createElement('pre');
-            pre.innerHTML = `<code class="language-${langName}">${content}</code>`;
-            hljs.highlightBlock(pre);
-            p.innerHTML = p.innerHTML.replace(result[0], pre.outerHTML);
-            break;
-          } else
-            p.innerHTML = p.innerHTML.replace(r, `<span class="${markdownClass[index]}">$1</span>${index === markdownClass.indexOf('title') ? '<br' : ''}`);
-        }
-      });
     });
   };
   updateQuote();
@@ -331,7 +345,7 @@ class HoverBox {
     if(!isMobile)
       return mouseLeaveEvt;
     else
-      return () => {};
+      return () => { };
   }
   mouseEnterHoverBox({ element, recursive, articles=null }) {
     /* element: 事件觸發者(span元素), 

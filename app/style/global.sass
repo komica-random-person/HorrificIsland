@@ -132,6 +132,11 @@ body
             border-radius: 2px
             &#imgurl
               height: 4em
+          &.image .btn.btn-default
+            width: 100%
+            margin-top: 3px
+            border-radius: 1px
+            padding: 3px 0
           input#imgfile
             display: none
       section.submission
@@ -312,13 +317,13 @@ article.thread, #hoverBox
 
 #hoverBox, .hoverBox
   max-height: 100%
-  overflow-y: auto
   position: fixed
-  top: -5000px
+  top: -100%
   left: 0
   background: rgb(32, 32, 32)
   border: 3px solid rgba(255, 255, 255, .7)
   padding: 0
+  overflow: visible
   article
     margin-bottom: 0
     border: none
@@ -354,6 +359,7 @@ div.bar
   text-align: center
   border: 1px solid #d1d5da
   overflow: hidden
+  max-width: 100%
   &.warning h2
     color: #eea236
   &.info h2
@@ -376,6 +382,7 @@ div.bar
   p
     font-size: 14pt
     margin: 1em 0
+    word-break: break-all
 #mask
   width: 100vw
   height: 100vh
