@@ -328,11 +328,13 @@ $(() => {
   };
 
   /* Check if uuid is valid, if not, call API to get uuid */
-  getAPI(`user/uuid/${$.cookie('keygen')}`, res => {
-    if(!res.isValid) {
-      getAPI('user/id/', _res => {
-        $.cookie('keygen', _res.uuid, { expires: 365, path: '/' });
-      });
+  getAPI('user/uuid', res => {
+    $.cookie('keygen', res.uuid);
+    if(sessionStorage.getItem('user') === null) {
+      getAPI('user/id', _res => {
+        const user = { uuid: res.uuid, id: _res.id };
+        sessionStorage.setItem('user', JSON.stringify(user));
+      }, () => {});
     }
     $('#APIstatus').addClass('show').find('.fail').remove();
   }, () => {
