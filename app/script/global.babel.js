@@ -1,4 +1,4 @@
-/* global $, hljs */
+/* global $, hljs, ControlPannel, UserStorage */
 const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
@@ -51,6 +51,7 @@ const showImg = (imgContainer) => {
 };
 
 const infoBox = options => {
+  /* 佔滿整頁的提示訊息，可以定義是否有按鈕及按鈕行為 */
   const { header, className, content, button } = options;
   const $infoBox = $('#infoBox').removeClass('hidden');
   const $mask = $('#mask').removeClass('hidden');
@@ -78,8 +79,10 @@ $(() => {
   /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
   const hoverbox = new HoverBox();
   const updateQuote = (element=document) => {
-    /* TODO: remove duplicate quote (happeans when reply) */
+    /* element 於畫面載入時是 document, 會 global 的進行 event binding，
+     * 而在前端 ajax 呼叫時由於需要再度 render, element 會改成該筆新增的元素之相應目標 */
     if(element !== document) {
+      /* 重置該串的 binding, 這樣才不會產生重複的 reference. */
       $(element).find('.quotedList').each((_, qL) => {
         while(qL.children.length > 1) {
           qL.removeChild(qL.children[1]);
@@ -98,7 +101,7 @@ $(() => {
         match.forEach(_match => {
           _match = _match.replace(/^\s/g, '');
           p.innerHTML = p.innerHTML.replace(/ {2}/g, ' ');
-          p.innerHTML = p.innerHTML.replace(escape(_match), `<span class="quoteText">${escape(_match)}</span>`)
+          p.innerHTML = p.innerHTML.replace(escape(_match), `<span class="quoteText">${escape(_match)}</span>`);
         });
       }
       /* Replace ^http into a tag with regex. Notably, pug already escape most of the < or >
@@ -221,7 +224,8 @@ $(() => {
     $(element).find('.quote').not('.missing').each((index, element) => {
       hoverbox.bindQuoteHoverEvent(element);
     });
-    $(element).find('.quotedArticle .mainContent p.quotedList, .replyBox.quotedArticle p.quotedList').each((index, element) => {
+    const prefix = element === document ? '.quotedArticle' : '';
+    $(element).find(`${prefix} .mainContent p.quotedList, .replyBox.quotedArticle p.quotedList`).each((index, element) => {
       hoverbox.bindQuotedListBox(element);
     });
   };
@@ -231,10 +235,7 @@ $(() => {
   /* 偵測串內的ID */
   const bindIdReference = (element=document) => {
     let $element = '';
-    if(element !== document)
-      $element = $(element);
-    else
-      $element = $(element).find('.thread');
+    $element = element !== document ? $(element) : $(element).find('.thread');
     $element.each((index, thread) => {
       const table = {};
       const IDs = getQueriesArray('span.id', thread);
@@ -266,6 +267,11 @@ $(() => {
   };
   bindIdReference();
   globalFunction.bindIdReference = bindIdReference;
+
+  const user = new UserStorage();
+  /* 控制面板相關 */
+  const controlPannel = new ControlPannel(null, user);
+  user.applySetting();
 });
 
 class HoverBox {
@@ -351,7 +357,6 @@ class HoverBox {
     /* element: 事件觸發者(span元素), 
      * recursive: 觸發者是否為 hoverBox 內的 span, 
      * articles: search by ID or replies, which may have multiple contents */
-
     const mouseEnterEvt = (self => {
       /* 用閉包將 this 綁定至 self 變數中 */
       return evt => {

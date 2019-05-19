@@ -62,6 +62,22 @@ mixin articleHeader(info, t, type)
   - var typeString = { komica: '【Komica】', hisland: '【H-Island】' }
   - info.number = formatNum(info.number)
   header(data-type=t)
+    section.articleControlPannel
+      label
+        input.pannelSwitch(type='checkbox')
+        i.fas.fa-angle-right.off
+        i.fas.fa-angle-double-down.on
+      section.control
+        ul
+          li.btn.btn-default(data-act='hide')= t == 'reply' ? '隱藏本文' : '隱藏本串'
+          li.btn.btn-default 篩選器&nbsp;
+            i.fas.fa-angle-double-right
+            section.hid-submenu
+              ul
+                li.btn.btn-default(data-act='filter') 過濾 ID
+                li.btn.btn-default(data-act='localFilter') 本串過濾 ID
+          li.btn.btn-default(data-act='delete') 刪除/折疊
+          li.btn.btn-default(data-act='report') 回報
     span.articleType= typeString[type]
     if info.Title != '' && t == 'post'
       span.title= info.title || '無題'
@@ -72,7 +88,7 @@ mixin articleHeader(info, t, type)
     span.id.quotable(data-quotetype= 'id', data-id= info.id)= 'ID:' + info.id
     span.num(data-num= info.number)
       a.link.quotable(data-quotetype= 'num', data-num= info.number)= 'No.' + info.number
-    if type != 'komica'
+    //- if type != 'komica'
       span.del
         a.link 刪除
     - var href = type == 'hisland' ? '/thread/' + Number(info.number) : 'https://sora.komica.org/00/pixmicat.php?res=' + Number(info.number)
@@ -95,10 +111,11 @@ mixin postForm(labelText, id, placeholder, type)
 div.container
   header.pageTitle
     h1 Horrific Island
-    h2 (目前仍為測試版本，可能有許多BUG。 Github:
-      a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
-      | )
-    h2 H-island 的文章可能會被管理員全部刪除，請大家見諒
+    h2 Github:&nbsp;
+      a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link&nbsp;&nbsp;
+      | Discord: &nbsp;
+      a(href="https://discord.gg/9Nwfms7") https://discord.gg/9Nwfms7
+    h3 H-island 目前仍為測試版，所有文章可能會被管理員全部刪除，請大家見諒
     h3#APIstatus API Server 狀態：
       span.success
         i.fas.fa-thumbs-up

@@ -196,6 +196,46 @@ article.thread, #hoverBox
     border: white 3px dotted
   .contentSection
     header
+      section.articleControlPannel
+        display: inline-block
+        position: relative
+        z-index: 1
+        input
+          display: none
+          & ~ i
+            display: none
+            font-size: 1.3em
+            color: rgb(150, 150, 150)
+            cursor: pointer
+            padding: .1em .3em
+          & + i
+            display: inline-block
+          &:checked ~ i
+            display: inline-block
+          &:checked + i
+            display: none
+        section.control
+          position: absolute
+          top: 0
+          left: 90%
+          display: none
+          ul
+            margin: 0
+            padding: 0
+          li
+            display: block
+            position: relative
+            padding: .2em 1em
+            border-radius: 0
+            border: none
+            section.hid-submenu
+              position: absolute
+              top: 0
+              left: 100%
+              display: none
+              max-width: unset
+            &:hover section.hid-submenu
+              display: block
       span
         display: inline-block
         padding: .05em .3em
@@ -304,6 +344,34 @@ article.thread, #hoverBox
       display: inline-block
   .replyBox header span.res
     display: none
+  .replyBox.hiddenArticle, &.hiddenArticle
+    position: relative
+    &:after
+      content: ' '
+      width: 100%
+      height: 90%
+      position: absolute
+      left: 0%
+      top: 50%
+      transform: translate(0, -50%)
+      background: rgba(0, 0, 0, .95)
+      display: block
+    &:before
+      content: '文章已隱藏'
+      position: absolute
+      left: 50%
+      top: 50%
+      width: 100%
+      text-align: center
+      transform: translate(-50%, -50%)
+      color: #fff
+      z-index: 1
+    p
+      display: none!important
+  &.hiddenArticle
+    padding-bottom: 0
+    .replyBox, .mainContent
+      display: none!important
 .replyBox
   background: #282A2E
   padding: .2em .5em
@@ -324,6 +392,7 @@ article.thread, #hoverBox
   border: 3px solid rgba(255, 255, 255, .7)
   padding: 0
   overflow: visible
+  z-index: 2
   article
     margin-bottom: 0
     border: none
@@ -340,6 +409,8 @@ article.thread, #hoverBox
       margin-bottom: 0
     .quotedList
       margin-top: 0
+  .articleControlPannel
+    display: none!important
 
 p.debug
   text-align: justify
@@ -355,7 +426,7 @@ div.bar
   background: #fff
   color: #333
   border-radius: 7px
-  z-index: 3
+  z-index: 4
   text-align: center
   border: 1px solid #d1d5da
   overflow: hidden
@@ -391,7 +462,7 @@ div.bar
   top: 0
   left: 0
   cursor: pointer
-  z-index: 2
+  z-index: 3
 
 @media screen and (max-width: 600px)
   .container
