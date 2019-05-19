@@ -1,4 +1,4 @@
-/* global $, hljs */
+/* global $, hljs, ControlPannel, UserStorage */
 const getID = id => document.getElementById(id);
 const getQuery = (css, ele=document) => ele.querySelector(css);
 const getQueries = (css, ele=document) => ele.querySelectorAll(css);
@@ -267,6 +267,11 @@ $(() => {
   };
   bindIdReference();
   globalFunction.bindIdReference = bindIdReference;
+
+  const user = new UserStorage();
+  /* 控制面板相關 */
+  const controlPannel = new ControlPannel(null, user);
+  user.applySetting();
 });
 
 class HoverBox {
