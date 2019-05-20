@@ -342,6 +342,7 @@ $(() => {
         user.setKeyVal('key', { uuid: res.uuid, id: _res.id });
       }, () => {});
     }
+    $('#userPannel #userId').text(user.data.key.id);
     $('#APIstatus').addClass('show').find('.fail').remove();
   }, () => {
     $('#APIstatus').addClass('show').find('.success').remove();
