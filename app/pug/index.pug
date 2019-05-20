@@ -102,7 +102,8 @@ mixin postForm(labelText, id, placeholder, type)
     label
       h4.label= labelText
       if type == 'text' || type == 'file'
-        input(id=id, placeholder=placeholder, type=type, maxlength='100', autocomplete='off')
+        - var m_length = id == 'postTitle' ? 25 : 10
+        input(id=id, placeholder=placeholder, type=type, maxlength=m_length, autocomplete='off')
       else
         textarea(id=id, placeholder=placeholder)
     if block

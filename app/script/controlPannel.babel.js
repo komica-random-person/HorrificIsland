@@ -169,8 +169,9 @@ class UserStorage {
       } else if(key === 'hidden') {
         /* hide article */
         data[key].forEach(num => {
-          $(`.thread[data-number="${num}"], .replyBox[data-number=${num}]`).addClass('hiddenArticle');
-        })
+          const $articles = $(`.thread[data-number="${num}"], .replyBox[data-number=${num}]`).addClass('hiddenArticle');
+          $articles.find('li[data-act="hide"]').text('顯示本文');
+        });
       }
     }
   }
