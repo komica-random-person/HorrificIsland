@@ -112,7 +112,8 @@ class UserStorage {
       hidden: [],
       filter: [],
       filterLocal: [],
-      article: {}
+      article: {},
+      key: null
     };
     for(let k in data)
       userData[k] = data[k];
@@ -142,7 +143,8 @@ class UserStorage {
       hidden: [],
       filter: [],
       filterLocal: [],
-      article: {}
+      article: {},
+      key: null
     };
     this.storage.setItem(this.name, JSON.stringify(userData));
   }
@@ -169,8 +171,9 @@ class UserStorage {
       } else if(key === 'hidden') {
         /* hide article */
         data[key].forEach(num => {
-          $(`.thread[data-number="${num}"], .replyBox[data-number=${num}]`).addClass('hiddenArticle');
-        })
+          const $articles = $(`.thread[data-number="${num}"], .replyBox[data-number=${num}]`).addClass('hiddenArticle');
+          $articles.find('li[data-act="hide"]').text('顯示本文');
+        });
       }
     }
   }

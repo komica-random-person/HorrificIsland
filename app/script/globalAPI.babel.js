@@ -1,4 +1,4 @@
-/* global globalFunction, getID, getQuery, getQueries, getQueriesArray, isMobile, escape, findParent, $, infoBox */
+/* global globalFunction, ControlPannel, getID, getQuery, getQueries, isMobile, escape, findParent, $, infoBox, UserStorage */
 const apiUrl = 'https://h-island-api.herokuapp.com/';
 
 $(() => {
@@ -31,9 +31,11 @@ $(() => {
       return content;
     }
   };
+  const getControlPannelHTML = () => document.querySelector('.articleControlPannel').outerHTML;
   const getReplyHTML = data => {
     let html = `<section class="replyBox clearfix" id="${formatNum(data.number, 8)}" data-number="${formatNum(data.number, 8)}">
     <header data-type="reply">
+      ${getControlPannelHTML()}
       <span class="articleType">【H-Island】</span>
       <span class="name">${escape(data.name) || '名無し'}</span>
       <span class="date">${getTimeString(data.time)[0]}</span>
@@ -64,6 +66,7 @@ $(() => {
         ${getImageContent(data.image)}
         <section class="contentSection col-xs-12">
             <header data-type="post">
+              ${getControlPannelHTML()}
               ${getImageContent(data.image, 'img')}
               <span class="articleType">【H-Island】</span>
               <span class="title">${escape(data.title)}</span>
@@ -151,10 +154,13 @@ $(() => {
             globalFunction.bindIdReference($article[0]);
             globalFunction.bindQuickReply($article[0]);
             getQuery('.exit', mainEle).click();
+            new ControlPannel($article[0]);
           } else {
             const html = getArticleHTML(article);
-            $('main.articleContainer').prepend(html);
-            globalFunction.bindQuickReply($('main.articleContainer')[0].children[0]);
+            const $articleContainer = $('main.articleContainer');
+            $articleContainer.prepend(html);
+            globalFunction.bindQuickReply($articleContainer[0].children[0]);
+            new ControlPannel($articleContainer[0].children[0]);
           }
           resumePostTable(true);
         } else {
@@ -330,10 +336,10 @@ $(() => {
   /* Check if uuid is valid, if not, call API to get uuid */
   getAPI('user/uuid', res => {
     $.cookie('keygen', res.uuid);
-    if(sessionStorage.getItem('user') === null) {
+    const user = new UserStorage();
+    if(user.data.key === null || user.data.uuid !== res.uuid) {
       getAPI('user/id', _res => {
-        const user = { uuid: res.uuid, id: _res.id };
-        sessionStorage.setItem('user', JSON.stringify(user));
+        user.setKeyVal('key', { uuid: res.uuid, id: _res.id });
       }, () => {});
     }
     $('#APIstatus').addClass('show').find('.fail').remove();
