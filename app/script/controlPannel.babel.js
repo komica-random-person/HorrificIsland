@@ -112,7 +112,8 @@ class UserStorage {
       hidden: [],
       filter: [],
       filterLocal: [],
-      article: {}
+      article: {},
+      key: null
     };
     for(let k in data)
       userData[k] = data[k];
@@ -142,7 +143,8 @@ class UserStorage {
       hidden: [],
       filter: [],
       filterLocal: [],
-      article: {}
+      article: {},
+      key: null
     };
     this.storage.setItem(this.name, JSON.stringify(userData));
   }
