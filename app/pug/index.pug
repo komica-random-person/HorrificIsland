@@ -191,8 +191,6 @@ div.container
     if pageContent.komica != undefined
       each discussion in pageContent.komica
         +article(discussion, 'komica')
-  
-  section#userPannel
 
   section#hoverBox.hoverBox
 
@@ -209,3 +207,24 @@ section#infoBox.hidden
       button.btn.btn-default Button
 section#mask.hidden
 
+section#userPannel
+  section.in-block.user
+    | [&nbsp;
+    span#userId
+    | &nbsp;]
+  section.in-block.userFuncContainer
+    label(for='userPannelSwitch')
+      | [&nbsp;
+      span.link 控制面版
+      | &nbsp;]
+    input#userPannelSwitch(type='checkbox')
+    ul.in-block.userPannel
+      li.btn.btn-default 隱藏文章列表(未做)
+      li.btn.btn-default.level
+        | NGID 相關&nbsp;
+        i.fas.fa-angle-double-right
+        ul.in-block
+          li.btn.btn-default NGID 一覽(未做)
+          li.btn.btn-default 匯出 NGIC 名單(未做)
+          li.btn.btn-default 匯入 NGID 名單(未做)
+      li.btn.btn-default 複製文庫管理(未做)

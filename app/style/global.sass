@@ -4,6 +4,10 @@ body
 .link
   cursor: pointer
   color: #81A2BE
+  &:focus, &:hover
+    color: #71ade0
+.in-block
+  display: inline-block
 
 #APIstatus
   display: none
@@ -463,6 +467,52 @@ div.bar
   left: 0
   cursor: pointer
   z-index: 3
+section#userPannel
+  z-index: 1
+  position: fixed
+  top: 0
+  width: 100%
+  text-align: center
+  background: #54606d
+  .in-block
+    margin-right: 5px
+  *:not(span)::selection
+    background-color: unset
+    color: unset
+  label
+    margin: 0
+  input#userPannelSwitch
+    display: none
+    & + ul
+      display: none
+    &:checked + ul
+      display: inline-block
+  .userFuncContainer
+    position: relative
+  ul
+    padding: 0
+    margin: 0
+  .userPannel
+    top: 100%
+    position: absolute
+    left: 50%
+    transform: translate(-50%, 0)
+    li
+      position: relative
+      display: block
+      border-radius: 0
+      border: none
+      padding: .2em 1em
+      &.level
+        ul
+          display: none
+          position: absolute
+          top: 0
+          left: 100%
+        &:hover
+          ul
+            display: block
+
 
 @media screen and (max-width: 600px)
   .container

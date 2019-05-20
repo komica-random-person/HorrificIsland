@@ -119,7 +119,7 @@ $(() => {
         /```(\w+)(?:<\/span>)\n(.+?)```(?:<\/span>)/s,
       ];
       const markdownClass = ['bold', 'italic', 'del', 'spoiler', 'underline', 'title', 'code'];
-      let pHTML = p.innerHTML.replace(/<br>/g, '\n');
+      let pHTML = p.innerHTML.replace(/\n/g, '').replace(/<br>/g, '\n');
       markdownRegex.forEach((r, index) => {
         const rMatch = () => pHTML.match(r);
         while(rMatch() !== null) {
