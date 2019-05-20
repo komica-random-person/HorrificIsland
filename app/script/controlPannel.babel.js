@@ -8,20 +8,22 @@ class ControlPannel {
   }
 
   bindPannelSwitch() {
+    const self = this;
     $(this.element).find('input.pannelSwitch').on('click', e => {
       e.stopPropagation();
+      $(self.element).find('input.pannelSwitch:checked').click();
       const target = e.target;
       const contropannel = findParent(target, 'articleControlPannel');
       const element = contropannel.querySelector('.control');
       element.style.display = target.checked ? 'table' : 'none';
-      if(target.checked)
-        $(document).on('click', _e => {
+      if(target.checked) {
+        $(document).unbind('click').on('click', _e => {
           /* 模仿 8ch 行為，點其他地方關閉 control pannel */
-          if(findParent(_e.target, 'articleControlPannel') === null) {
+          if(target.checked && findParent(_e.target, 'articleControlPannel') === null)
             target.click();
-            $(document).unbind('click');
-          }
+          $(document).unbind('click');
         });
+      }
     });
   }
 
