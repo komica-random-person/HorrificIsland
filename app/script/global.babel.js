@@ -283,8 +283,6 @@ class HoverBox {
   }
   bindQuoteHoverEvent(element, recursive=false) {
     const self = this;
-    if(isMobile)
-      return;
     element.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element, recursive }));
     element.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element, recursive }));
   }
@@ -361,6 +359,7 @@ class HoverBox {
       /* 用閉包將 this 綁定至 self 變數中 */
       return evt => {
         evt.stopImmediatePropagation();
+        evt.preventDefault();
         const coord = [evt.clientX, evt.clientY];
         const targetNum = evt.target.dataset.num;
         let parentElement = null;
@@ -415,14 +414,12 @@ class HoverBox {
   bindQuotedListBox(element, recursive=false) {
     /* element: p.quotedList */
     const self = this;
-    if(!isMobile) {
-      const $quotedElement = $(element).find('.quoted');
-      $quotedElement.each((index, e) => {
-        /* 綁定個別的 quoted */
-        e.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element: e, recursive }));
-        e.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element: e, recursive }));
-      });
-    }
+    const $quotedElement = $(element).find('.quoted');
+    $quotedElement.each((index, e) => {
+      /* 綁定個別的 quoted */
+      e.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element: e, recursive }));
+      e.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element: e, recursive }));
+    });
 
     /* 綁定 replies, 一樣透過 recursive 判斷是否要回到 .container 找到 thread */
     if(element.dataset.quotedfrom !== undefined) {
@@ -465,7 +462,7 @@ class HoverBox {
     const showX = coord[0] + hoverBox.offsetWidth < window.innerWidth ? coord[0] : coord[0] - hoverBox.offsetWidth;
     hoverBox.style.left = showX > 0 ? showX + 'px' : 0;
     /* 必須先移動 X 來避免由於 X overflow 的 line break 改變 offsetHeight */
-    const showY = isMobile ? 5 : coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : coord[1] - hoverBox.offsetHeight;
+    const showY = isMobile ? 25 : coord[1] + hoverBox.offsetHeight < window.innerHeight ? coord[1] : coord[1] - hoverBox.offsetHeight;
     hoverBox.style.top = showY > 0 ? showY + 'px' : 0;
 
     /* recursively bind */
@@ -487,9 +484,7 @@ class HoverBox {
 
     /* If hoverBox is referenced from id, do not bind id */
     if(content.match(/id quotable/g) !== null && content.match(/id quotable/g).length > 1) {
-      $hoverBox.mCustomScrollbar({
-        scrollInertia: 0,
-      });
+      $hoverBox.mCustomScrollbar({ scrollInertia: 0 });
     } else {
       self.bindIdReference(hoverBox, true);
     }
