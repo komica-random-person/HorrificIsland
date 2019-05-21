@@ -341,9 +341,15 @@ $(() => {
   getAPI('user/uuid', res => {
     $.cookie('keygen', res.uuid);
     const user = new UserStorage();
-    if(user.data.key === null || user.data.uuid !== res.uuid) {
+    /* Check if ID belongs to today */
+    const getTodayString = date => `${date.getFullYear()}${date.getMonth()}${date.getDate()}`;
+    const conditions = [
+      user.data.key === null, user.data.key.uuid !== res.uuid,
+      user.data.key.time === undefined, getTodayString(new Date(user.data.key.time)) !== getTodayString(new Date())
+    ];
+    if(conditions.reduce((cur, next) => { return cur || next; }, false)) {
       getAPI('user/id', _res => {
-        user.setKeyVal('key', { uuid: res.uuid, id: _res.id });
+        user.setKeyVal('key', { uuid: res.uuid, id: _res.id, time: new Date() });
       }, () => {});
     }
     $('#userPannel #userId').text(user.data.key.id);
