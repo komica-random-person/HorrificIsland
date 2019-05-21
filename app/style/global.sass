@@ -503,18 +503,27 @@ section#userPannel
       position: relative
       display: block
       border-radius: 0
-      border: none
       padding: .2em 1em
+      border: none
+      border-left: 1px solid #333
+      border-right: 1px solid #333
+      &:first-child
+        border-top: 1px solid #333
+      &:last-child
+        border-bottom: 1px solid #333
       &.level
         ul
           display: none
           position: absolute
           top: 0
           left: 100%
+          z-index: 1
         &:hover
+          border-right: none
           ul
             display: block
-
+            li:first-child
+              border-left: none
 
 @media screen and (max-width: 600px)
   .container
