@@ -340,7 +340,8 @@ $(() => {
     /* Check if ID belongs to today */
     const getTodayString = date => `${date.getFullYear()}${date.getMonth()}${date.getDate()}`;
     const getCompareDate = () => getTodayString(new Date(user.data.key.time)) !== getTodayString(new Date());
-    if(user.data.key === null || user.data.key === undefined || user.data.key.id === undefined || user.data.key.uuid === undefined || user.data.key.uuid !== res.uuid || user.data.key.time === undefined || getCompareDate()) {
+    const notDefined = (user.data.key === null) || (user.data.key === undefined) || (user.data.key.id === undefined) || (user.data.key.uuid === undefined) || (user.data.key.time === undefined);
+    if(notDefined || user.data.uuid !== res.uuid || getCompareDate()) {
       getAPI('user/id', _res => {
         user.setKeyVal('key', { uuid: res.uuid, id: _res.id, time: new Date() });
         $('#userPannel #userId').text(user.data.key.id);

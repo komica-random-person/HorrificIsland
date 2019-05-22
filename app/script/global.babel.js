@@ -12,15 +12,19 @@ const findParent = (element, pattern) => {
 const isMobile = window.innerWidth < 500;
 const globalFunction = {};
 
+/**
+ * This function determine eitch to view the full image or the thumb of image
+ * via the "data-status" attribute of imgContainer.
+ * @param {HTMLElement} imgContainer Container of <img> tag
+ */
 const showImg = (imgContainer) => {
-  /* This function is for onclick event on IMG tag.
-   * 1. determine whether element is zoomed in by element attribute: data-status
+  /* 1. determine whether element is zoomed in by element attribute: data-status
    * 2. check the file format, if is webm, create video element and insert to its parent */
   const e = imgContainer;
   const zoomed = e.dataset.status === 'yes';
   if(zoomed) {
-    /* if image is zoomed */
     e.dataset.status = 'no';
+    /* e.children[0] refers to <img> */
     e.children[0].setAttribute('src', e.dataset.thumb);
     e.className = e.className.replace(/\s*zoomed\s*/g, '').replace(/\s*video\s*/g, '');
     if(e.children[e.children.length - 1].tagName === 'VIDEO')
@@ -50,6 +54,19 @@ const showImg = (imgContainer) => {
   }
 };
 
+/**
+ * Creates a full-page pop-up window with customized content and button
+ * @param {object} options Options of displaying InfoBox
+ * @param {string} options.header Text to shown on the header of InfoBox
+ * @param {string} options.content Text to shown on the center of InfoBox
+ * @param {string} options.className Classname of header to determine the color, including [warning,info,error]
+ * @param {boolean} options.isHTML To determine either using jQuery.html or jQuery.text as insertion method
+ * @param {callback} options.binding Function to call after infoBox is shown
+ * @param {object} options.button Options of button
+ * @param {callback} options.button.callback Function to call after button is pressed
+ * @param {string} options.button.content Text to shown on button
+ * @param {string} options.button.btnClassName Classname of button
+ */
 const infoBox = options => {
   /* 佔滿整頁的提示訊息，可以定義是否有按鈕及按鈕行為 */
   const { header, className, content, button, isHTML, binding } = options;
