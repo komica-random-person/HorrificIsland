@@ -1,4 +1,4 @@
-/* global $, infoBox, getID, getQuery, findParent, escape, getQueriesArray, getQueries, isMobile, globalFunction */
+/* global $, hljs, infoBox, getID, getQuery, findParent, escape, getQueriesArray, getQueries, isMobile, globalFunction */
 class ControlPannel {
   constructor(element=null, user=null) {
     this.element = element === null ? document : element;
@@ -6,7 +6,6 @@ class ControlPannel {
     this.bindControFunction();
     this.user = user === null ? new UserStorage() : user;
   }
-
   bindPannelSwitch() {
     const self = this;
     $(this.element).find('input.pannelSwitch').on('click', e => {
@@ -26,7 +25,6 @@ class ControlPannel {
       }
     });
   }
-
   bindControFunction() {
     const self = this;
     $(this.element).find('li.btn.btn-default').on('click', evt => {
@@ -47,7 +45,6 @@ class ControlPannel {
       $(document).click();
     });
   }
-
   findMainElement(element) {
     /* element here will be li.btn.btn-default, find the parent (either thread or replyBox) and return */
     let parent = findParent(element, 'replyBox');
@@ -55,7 +52,6 @@ class ControlPannel {
       parent = findParent(element, 'thread');
     return parent;
   }
-
   evtHide(btn) {
     const self = this;
     const element = self.findMainElement(btn);
@@ -80,6 +76,11 @@ class ControlPannel {
     const element = self.findMainElement(btn);
     const thread = element.className.match(/replyBox/) === null ? element : findParent(element, 'thread');
     const id = element.querySelector('span.id').dataset.id;
+    /* You can't filter yourself! */
+    if(self.user.data.key.id === id) {
+      infoBox({ header: '嘿！', content: '請不要 NGID 自己！', className: 'error' });
+      return;
+    }
     if(local) {
       const $thread = $(thread).find(`span.id[data-id="${id}"]`).parents('.replyBox').hide().end().end();
       if(thread.querySelector('span.id').dataset.id === id)
@@ -151,6 +152,7 @@ class UserStorage {
     this.storage.setItem(this.name, JSON.stringify(userData));
   }
   applySetting() {
+    /* Read the data stored in storage, parse to JSON and apply to browser */
     const data = this.data;
     for(let key in data) {
       if(key === 'filter') {
@@ -179,8 +181,142 @@ class UserStorage {
       }
     }
   }
+  bindUserPannel() {
+    const self = this;
+    const $switch = $('#userPannelSwitch');
+    $switch.on('click', evt => {
+      /* 點擊任意地點關閉 UserPannel */
+      evt.stopPropagation();
+      if($switch[0].checked)
+        $(document).on('click', _evt => {
+          if($switch[0].checked && findParent(evt.target, 'UserPannel') === null) {
+            $(document).unbind('click');
+            $switch.click();
+          }
+        });
+    });
+    /* Functions of userPannel */
+    const $triggers = $('.userFuncContainer .userPannel li');
+    $triggers.on('click', evt => {
+      const func = evt.target.dataset.target;
+      if(func === 'hidden') {
+        /* Hidden articles */
+        self.setKeyVal('hidden', []);
+        $('.hiddenArticle').removeClass('hiddenArticle');
+      } else if(func.match(/ngid/) !== null) {
+        let data = self.data;
+        if(func === 'ngid_list') {
+          /* 可視化 NGID LIST，並加上刪除鈕、刪除事件 */
+          if(data.filter.length === 0 && data.filterLocal.length == 0) {
+            infoBox({ header: 'NGID List', content: '今天島上一片和平沒有智障ㄛ(或者你還沒看到w)', className: 'success' });
+            return;
+          }
+          const table = document.createElement('table');
+          table.className = 'table table-bordered';
+          table.innerHTML = `<thead>
+            <tr>
+              <th>NGID</th>
+              <th>Thread</th>
+              <th>Action</th>
+            </tr>
+          </thead>`;
+          const tbody = document.createElement('tbody');
+          const getFilterContent = (id, thread='*') => {
+            return `<tr class="NGID">
+              <td data-name="id" data-id="${id}">${id}</td>
+              <td data-name="thread" data-number="${thread}">${thread}</td>
+              <td>
+                <button class="btn btn-default">刪除</button>
+              </td>
+            </tr>`;
+          };
+          data.filter.forEach(e => { tbody.innerHTML += getFilterContent(e.id); });
+          data.filterLocal.forEach(e => { tbody.innerHTML += getFilterContent(e.id, e.thread); });
+          table.appendChild(tbody);
+          const binding = $main => {
+            /* 每個刪除鈕被按下後的事件，若有按鈕被按下 離開 infoBox 時將會重新載入網頁 */
+            $main.find('table .btn').on('click', _evt => {
+              const parent = findParent(_evt.target, 'NGID');
+              const id = parent.querySelector('td[data-name="id"]').dataset.id;
+              const thread = parent.querySelector('td[data-name="thread"]').dataset.number;
+              const _data = self.data;
+              if(thread === '*') {
+                /* Global filter */
+                const filtered = _data.filter.filter(e => e.id !== id);
+                self.setKeyVal('filter', filtered);
+              } else {
+                /* Local filter */
+                const filtered = _data.filterLocal.filter(e => { return e.id !== id || e.thread !== thread; });
+                self.setKeyVal('filterLocal', filtered);
+              }
+              parent.parentElement.removeChild(parent);
+              $('#mask').one('click', () => location.reload());
+            });
+          };
+          infoBox({ content: table.outerHTML, isHTML: true, header: 'NGID 一覽', className: 'info', binding });
+        } else if(func === 'ngid_export') {
+          if(data.filter.length === 0 && data.filterLocal.length == 0) {
+            infoBox({ header: 'NGID List', content: '你還沒有 NGID 別人，所以也沒什麼好輸出的ㄛ', className: 'success' });
+            return;
+          }
+          const container = document.createElement('section');
+          const pre = document.createElement('pre');
+          pre.style.textAlign = 'left';
+          const mapping = each => { delete each.time; return each; };
+          const jsoncontent = JSON.stringify({ filter: data.filter.map(mapping), filterLocal: data.filterLocal.map(mapping) });
+          pre.innerHTML = `<code class="language-javascript">${jsoncontent}</code>`;
+          container.appendChild(pre);
+          const binding = $main => {
+            const code = $main.find('code')[0];
+            hljs.highlightBlock(code);
+          };
+          infoBox({ header: 'NGID export', content: container.outerHTML, className: 'info', isHTML: true, binding });
+        } else if(func === 'ngid_import') {
+          /* NGID_LIST_IMPORT */
+          const container = document.createElement('section');
+          container.innerHTML = '<textarea id="NGID_import" placeholder="於此處輸入 NGID" style="padding: .5em; width: 100%; min-height: 150px; border: 1px solid #333;"></textarea>';
+          const button = {
+            content: '引入 NGID',
+            callback: () => {
+              const jsonString = getID('NGID_import').value;
+              if(jsonString === '')
+                return;
+              try {
+                const { filter, filterLocal } = JSON.parse(jsonString);
+                const _data = self.data;
+                if(filter !== undefined && filter.length > 0) {
+                  filter.forEach(_f => {
+                    if(_data.filter.filter(existData => existData.id === _f.id).length === 0)
+                      _data.filter.push(_f);
+                  });
+                }
+                if(filterLocal !== undefined && filterLocal.length > 0) {
+                  filterLocal.forEach(_f => {
+                    if(_data.filterLocal.filter(existData => existData.id === _f.id).length === 0)
+                      _data.filterLocal.push(_f);
+                  });
+                }
+                self.setKeyVal('filter', _data.filter);
+                self.setKeyVal('filterLocal', _data.filterLocal);
+                location.reload();
+              } catch(e) {
+                infoBox({ header: 'Failed', content: '引入 NGID 失敗，可能複製錯了？', className: 'error' });
+              }
+            }
+          };
+          infoBox({ header: 'NGID import', content: container.outerHTML, className: 'info', isHTML: true, button });
+        }
+      } else if(func === 'article_library') {
+        /* TODO: article library configuration */
+      }
+    });
+  }
   setKeyVal(key, val) {
     const data = this.data;
+    if(key.match(/filter/) !== null && this.data.key.id !== undefined) {
+      /* DO NOT filter yourself */
+      val = val.filter(e => e.id !== this.data.key.id);
+    }
     data[key] = val;
     this.data = data;
   }

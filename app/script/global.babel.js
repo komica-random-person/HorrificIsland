@@ -52,17 +52,35 @@ const showImg = (imgContainer) => {
 
 const infoBox = options => {
   /* 佔滿整頁的提示訊息，可以定義是否有按鈕及按鈕行為 */
-  const { header, className, content, button } = options;
+  const { header, className, content, button, isHTML, binding } = options;
   const $infoBox = $('#infoBox').removeClass('hidden');
   const $mask = $('#mask').removeClass('hidden');
-  $mask.one('click', () => { $mask.addClass('hidden'); $infoBox.addClass('hidden'); });
+  const $btnContainer = $infoBox.find('.btnContainer');
+  const btnContainerHTML = $btnContainer[0].outerHTML; 
+  const $main = $infoBox.find('main');
+  const infoBoxReset = () => $main.html('<p></p>' + btnContainerHTML);
+  $mask.one('click', () => {
+    $mask.addClass('hidden');
+    $infoBox.addClass('hidden');
+    if(isHTML)
+      infoBoxReset();
+  });
+  infoBoxReset();
 
   const $header = $infoBox.find('header h2').text(header).end();
   $header[0].className = className || '';
-  $infoBox.find('main p').text(content);
+  if(isHTML) {
+    if(button === undefined)
+      $main.html(content);
+    else
+      $main.find('p').text('').end().prepend(content);
+    if(binding)
+      binding($main);
+  } else
+    $infoBox.find('main p').text(content);
 
-  const $button = $infoBox.find('button');
   if(button !== undefined) {
+    const $button = $main.find('button');
     const { content: btnContent, className: btnClassName, callback } = button;
     $button.text(btnContent);
     $button[0].className = 'btn';
@@ -71,8 +89,8 @@ const infoBox = options => {
       $button.on('click', () => $mask.click());
     } else
       $button.on('click', callback);
-  } else
-    $button.addClass('hidden');
+  } else if(!isHTML)
+    $main.find('button').addClass('hidden');
 };
 
 $(() => {
@@ -272,6 +290,7 @@ $(() => {
   /* 控制面板相關 */
   const controlPannel = new ControlPannel(null, user);
   user.applySetting();
+  user.bindUserPannel();
 });
 
 class HoverBox {
