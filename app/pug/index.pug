@@ -219,12 +219,18 @@ section#userPannel
       | &nbsp;]
     input#userPannelSwitch(type='checkbox')
     ul.in-block.userPannel
-      li.btn.btn-default 隱藏文章列表(未做)
       li.btn.btn-default.level
         | NGID 相關&nbsp;
         i.fas.fa-angle-double-right
         ul.in-block
-          li.btn.btn-default NGID 一覽(未做)
-          li.btn.btn-default 匯出 NGIC 名單(未做)
-          li.btn.btn-default 匯入 NGID 名單(未做)
-      li.btn.btn-default 複製文庫管理(未做)
+          li.btn.btn-default(data-target='hidden') 取消隱藏文章
+          li.btn.btn-default(data-target='ngid_list') NGID 一覽
+          li.btn.btn-default(data-target='ngid_export') 匯出 NGID 名單
+          li.btn.btn-default(data-target='ngid_import') 匯入 NGID 名單
+      li.btn.btn-default.level
+        | 複製文庫&nbsp;
+        i.fas.fa-angle-double-right
+        ul.in-block
+          li.btn.btn-default(data-target='article_list') 複製文一覽(未做)
+          li.btn.btn-default(data-target='article_export') 匯出複製文庫 (未做)
+          li.btn.btn-default(data-target='article_import') 匯入複製文庫 (未做)
