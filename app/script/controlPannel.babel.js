@@ -45,8 +45,12 @@ class ControlPannel {
       $(document).click();
     });
   }
+  /**
+   * Find the parent (either .thread or .replyBox) of input element
+   * @param {HTMLElement} element Should be li.btn.btn-default
+   * @returns {HTMLElement} Either .thread or .replyBox element
+   */
   findMainElement(element) {
-    /* element here will be li.btn.btn-default, find the parent (either thread or replyBox) and return */
     let parent = findParent(element, 'replyBox');
     if(parent === null)
       parent = findParent(element, 'thread');
