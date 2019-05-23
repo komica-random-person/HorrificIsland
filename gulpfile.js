@@ -28,7 +28,11 @@ const util_style = cb => {
 const util_script = cb => {
   gulp.src('app/script/*.babel.js')
     .pipe(babel({
-      presets: ['@babel/preset-env']
+      presets: [
+        [
+          '@babel/preset-env',
+        ]
+      ],
     }))
     .on('error', err => console.log(err.toString()))
     .pipe(concat('horrific.js'))

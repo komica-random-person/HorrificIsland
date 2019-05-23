@@ -2,13 +2,24 @@
 const apiUrl = 'http://localhost:8888/';
 
 $(() => {
+  /**
+   * Formatting number to prefix with N zeros.
+   * @param {Number} num Number to be format
+   * @param {Number} length Target length
+   * @returns {String}
+   */
   const formatNum = (num, length=8) => {
     let base = '';
     for(let i = 0; i < length; i++) base += 0;
     return (base + num).split('').reverse().slice(0, length).reverse().join('');
   };
-  const getTimeString = (utcString) => {
-    const date = new Date(utcString);
+  /**
+   * Formatting ISO string into YYYY/MM/DD, HH:mm:ms
+   * @param {String} timeString ISO time string to be formatted.
+   * @returns {Array.<String>} [YYYY/MM/DD, HH:mm:ms]
+   */
+  const getTimeString = (timeString) => {
+    const date = new Date(timeString);
     const d = {
       year: date.getFullYear(),
       mon: formatNum(date.getMonth() + 1, 2),
@@ -19,6 +30,11 @@ $(() => {
     };
     return [`${d.year}/${d.mon}/${d.date}`, ` ${d.hour}:${d.min}:${d.millisecond}`];
   };
+  /**
+   * Generates image header or tag HTML code by image data.
+   * @param {{url: String, thumb: String}} imgData Image data to be parse into HTML.
+   * @param {String} type Should be either [header,img] determine either to get header or <a><img></a>
+   */
   const getImageContent = (imgData, type='header') => {
     if(imgData.url === null) {
       return '';
@@ -126,6 +142,10 @@ $(() => {
     else
       data.append('imgfile', null);
 
+    /**
+     * Resume the post table since clicking 'post' would disable the submit button
+     * @param {Boolean} success Determine either to clear the post table or not.
+     */
     const resumePostTable = (success=false) => {
       target.removeAttribute('disabled');
       target.innerText = tempString;
@@ -175,25 +195,35 @@ $(() => {
   };
   getID('submit').addEventListener('click', postArticle);
 
-
-  /* 貼文時的輔助選單 */
+  /**
+   * Bind the subfunctions of posting articles.
+   * @param {HTMLElement} mainElement Documnet or the container of quickReply
+   */
   const bindPostSupplement = (mainElement=document) => {
+    /* 使用類似閉包的方式來判斷是否要進行 subfunction 的啟用 */
+    let lastChecked = null;
     $(mainElement).find('input[name="func"]').on('click', evt => {
       /* Reset all */
       $(mainElement).find('input[name="func"]:checked').prop('checked', false);
       $(mainElement).find('.hidden-func').removeClass('active');
-      /* set selected function as activate */
       const target = evt.target;
-      target.checked = true;
-      const targetCss = `.hidden-func.${target.dataset.target}`;
-      const targetElement = getQuery(targetCss, mainElement);
-      if(targetElement !== null)
-        targetElement.className += ' active';
+      /** 若該 subfunction 開關被點擊兩次則關閉該 subfunction */
+      if(lastChecked !== target) {
+        target.checked = true;
+        const targetCss = `.hidden-func.${target.dataset.target}`;
+        const targetElement = getQuery(targetCss, mainElement);
+        if(targetElement !== null)
+          targetElement.className += ' active';
+        lastChecked = target;
+      }
     });
   };
   bindPostSupplement();
 
-  /* 點按文章編號時的快速回復 */
+  /**
+   * 綁定點按文章編號時的快速回復相關功能
+   * @param {HTMLElement} element Document to bind with
+   */
   const bindQuickReply = (element=document) => {
     $(element).find('span.num a.quotable').each((index, element) => {
       const article = findParent(element, 'thread');
@@ -319,42 +349,74 @@ $(() => {
       },
     });
   };
-  const getAPI = (func, callback, err) => {
-    $.ajax({
-      type: 'GET',
-      dataType: 'json',
-      headers: getHeader(),
-      url: apiUrl + func,
-      contentType: 'application/json;',
-      success: (data, textStatus, jqXHR) => {
-        callback(data, textStatus, jqXHR);
-      },
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
-        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
-        err({ jqXHR, textStatus, errorThrown });
-      },
-    });
-  };
 
-  /* Check if uuid is valid, if not, call API to get uuid */
-  getAPI('user/uuid', res => {
+  const api = new API();
+  api.get('user/uuid').then(res => {
     $.cookie('keygen', res.uuid);
     const user = new UserStorage();
     /* Check if ID belongs to today */
     const getTodayString = date => `${date.getFullYear()}${date.getMonth()}${date.getDate()}`;
     const getCompareDate = () => getTodayString(new Date(user.data.key.time)) !== getTodayString(new Date());
     const notDefined = (user.data.key === null) || (user.data.key === undefined) || (user.data.key.id === undefined) || (user.data.key.uuid === undefined) || (user.data.key.time === undefined);
-    if(notDefined || user.data.uuid !== res.uuid || getCompareDate()) {
-      getAPI('user/id', _res => {
+    if(notDefined || user.data.key.uuid !== res.uuid || getCompareDate()) {
+      api.get('user/id').then(_res => {
         user.setKeyVal('key', { uuid: res.uuid, id: _res.id, time: new Date() });
         $('#userPannel #userId').text(user.data.key.id);
-      }, () => {});
+      }).catch(api.onError);
     } else
       $('#userPannel #userId').text(user.data.key.id);
     $('#APIstatus').addClass('show').find('.fail').remove();
-  }, () => {
-    $('#APIstatus').addClass('show').find('.success').remove();
-  });
+  }).catch(api.onError);
 });
 
+class API {
+  /**
+   * @param {String} url Url to API server
+   */
+  constructor(url='http://localhost:8888/') {
+    this.url = url;
+  }
+  get header () {
+    const header = {};
+    header['X-user-id'] = $.cookie('keygen');
+    return header;
+  }
+  /**
+   * Bind basic header with customized headers.
+   * @param {Object} headers Object contains mutiple customized headers.
+   */
+  advanceHeader(headers) {
+    const header = this.header;
+    for(let key in headers)
+      header[key] = headers[key];
+    return header;
+  }
+  /**
+   * @param {String} func Url to GET. Should NOT be start with /.
+   * @returns {Promise}
+   */
+  get(func) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        headers: self.header,
+        url: self.url + func,
+        contentType: 'application/json;',
+        success: (data, textStatus, jqXHR) => {
+          resolve(data, textStatus, jqXHR);
+        },
+        error: (jqXHR, textStatus, errorThrown) => {
+          console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+          console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+          reject({ jqXHR, textStatus, errorThrown });
+        },
+      });
+    });
+  }
+  onError(res) {
+    console.log(res);
+    $('#APIstatus').addClass('show').find('.success').remove();
+  }
+}
