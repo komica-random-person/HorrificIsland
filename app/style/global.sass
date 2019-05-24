@@ -1,3 +1,26 @@
+
+@mixin fixed-flex
+  display: -webkit-box
+  display: -webkit-flex
+  display: -moz-box
+  display: -ms-flexbox
+  display: flex
+  -webkit-box-align: center
+  -webkit-align-items: center
+  -mos-box-align: center
+  -ms-flex-align: center
+  align-items: center
+  -webkit-box-pack: center
+  -webkit-justify-content: center
+  -moz-box-pack: center
+  -ms-flex-pack: center
+  justify-content: center
+  position: fixed
+  top: 0
+  right: 0
+  bottom: 0
+  left: 0
+
 body
   background: #1D1F21
   color: rgba(255, 255, 255, .8)
@@ -425,41 +448,42 @@ div.bar
   margin: 50px 0
   height: 5px
 #infoBox
-  position: fixed
-  top: 50%
-  left: 50%
-  transform: translate(-50%, -50%)
-  background: #fff
+  @include fixed-flex
+  background: rgba(0, 0, 0, .2)
   color: #333
-  border-radius: 7px
   z-index: 4
   text-align: center
-  border: 1px solid #d1d5da
   overflow: hidden
   max-width: 100%
+  cursor: pointer
   &.warning h2
     color: #eea236
   &.info h2
     color: #46b8da
   &.error h2
     color: red
-  header, main
-    padding: .5em 2em
-  header
-    border-top-right-radius: 7px
-    border-top-left-radius: 7px
-    background: #f6f8fa
-    border-bottom: 1px solid #d1d5da
-  main
-    background: #fff
-    button
-      padding: .3em .5em
-  h2
-    margin: 5px 0
-  p
-    font-size: 14pt
-    margin: 1em 0
-    word-break: break-all
+  section.mainContent
+    cursor: default
+    header, main
+      padding: .5em 2em
+    header
+      border-top-right-radius: 7px
+      border-top-left-radius: 7px
+      background: #f6f8fa
+      border-bottom: 1px solid #d1d5da
+    main
+      background: #fff
+      border-bottom-right-radius: 3px
+      border-bottom-left-radius: 3px
+      button
+        padding: .3em .5em
+        cursor: pointer
+    h2
+      margin: 5px 0
+    p
+      font-size: 14pt
+      margin: 1em 0
+      word-break: break-all
 #mask
   width: 100vw
   height: 100vh

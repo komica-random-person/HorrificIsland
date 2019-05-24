@@ -69,18 +69,19 @@ const showImg = (imgContainer) => {
  */
 const infoBox = options => {
   /* 佔滿整頁的提示訊息，可以定義是否有按鈕及按鈕行為 */
-  const { header, className, content, button, isHTML, binding } = options;
+  const { header, className, content, button, isHTML, binding, afterClose=()=>{} } = options;
   const $infoBox = $('#infoBox').removeClass('hidden');
-  const $mask = $('#mask').removeClass('hidden');
   const $btnContainer = $infoBox.find('.btnContainer');
   const btnContainerHTML = $btnContainer[0].outerHTML; 
   const $main = $infoBox.find('main');
   const infoBoxReset = () => $main.html('<p></p>' + btnContainerHTML);
-  $mask.one('click', () => {
-    $mask.addClass('hidden');
-    $infoBox.addClass('hidden');
-    if(isHTML)
-      infoBoxReset();
+  $infoBox.on('click', evt => {
+    if(findParent(evt.target, 'mainContent') === null) {
+      $infoBox.addClass('hidden');
+      if(isHTML)
+        infoBoxReset();
+      afterClose();
+    }
   });
   infoBoxReset();
 
@@ -103,7 +104,7 @@ const infoBox = options => {
     $button[0].className = 'btn';
     $button.addClass(btnClassName || 'btn-default');
     if(callback === undefined) {
-      $button.on('click', () => $mask.click());
+      $button.on('click', () => $infoBox.click());
     } else
       $button.on('click', callback);
   } else if(!isHTML)

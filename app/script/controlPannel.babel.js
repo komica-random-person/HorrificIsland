@@ -203,7 +203,9 @@ class UserStorage {
     const $triggers = $('.userFuncContainer .userPannel li');
     $triggers.on('click', evt => {
       const func = evt.target.dataset.target;
-      if(func === 'hidden') {
+      if(func === undefined)
+        return;
+      else if(func === 'hidden') {
         /* Hidden articles */
         self.setKeyVal('hidden', []);
         $('.hiddenArticle').removeClass('hiddenArticle');
@@ -237,9 +239,11 @@ class UserStorage {
           data.filter.forEach(e => { tbody.innerHTML += getFilterContent(e.id); });
           data.filterLocal.forEach(e => { tbody.innerHTML += getFilterContent(e.id, e.thread); });
           table.appendChild(tbody);
+          let reloadSwitch = false;
           const binding = $main => {
             /* 每個刪除鈕被按下後的事件，若有按鈕被按下 離開 infoBox 時將會重新載入網頁 */
             $main.find('table .btn').on('click', _evt => {
+              _evt.stopPropagation();
               const parent = findParent(_evt.target, 'NGID');
               const id = parent.querySelector('td[data-name="id"]').dataset.id;
               const thread = parent.querySelector('td[data-name="thread"]').dataset.number;
@@ -254,10 +258,11 @@ class UserStorage {
                 self.setKeyVal('filterLocal', filtered);
               }
               parent.parentElement.removeChild(parent);
-              $('#mask').one('click', () => location.reload());
+              reloadSwitch = true;
             });
           };
-          infoBox({ content: table.outerHTML, isHTML: true, header: 'NGID 一覽', className: 'info', binding });
+          const afterClose = () => reloadSwitch ? location.reload() : '';
+          infoBox({ content: table.outerHTML, isHTML: true, header: 'NGID 一覽', className: 'info', binding, afterClose });
         } else if(func === 'ngid_export') {
           if(data.filter.length === 0 && data.filterLocal.length == 0) {
             infoBox({ header: 'NGID List', content: '你還沒有 NGID 別人，所以也沒什麼好輸出的ㄛ', className: 'success' });
@@ -279,6 +284,7 @@ class UserStorage {
           /* NGID_LIST_IMPORT */
           const container = document.createElement('section');
           container.innerHTML = '<textarea id="NGID_import" placeholder="於此處輸入 NGID" style="padding: .5em; width: 100%; min-height: 150px; border: 1px solid #333;"></textarea>';
+          let reloadSwitch = false;
           const button = {
             content: '引入 NGID',
             callback: () => {
@@ -302,13 +308,15 @@ class UserStorage {
                 }
                 self.setKeyVal('filter', _data.filter);
                 self.setKeyVal('filterLocal', _data.filterLocal);
-                location.reload();
+                reloadSwitch = true;
+                $('#infoBox').click();
               } catch(e) {
                 infoBox({ header: 'Failed', content: '引入 NGID 失敗，可能複製錯了？', className: 'error' });
               }
             }
           };
-          infoBox({ header: 'NGID import', content: container.outerHTML, className: 'info', isHTML: true, button });
+          const afterClose = () => reloadSwitch ? location.reload() : '';
+          infoBox({ header: 'NGID import', content: container.outerHTML, className: 'info', isHTML: true, button, afterClose });
         }
       } else if(func === 'article_library') {
         /* TODO: article library configuration */

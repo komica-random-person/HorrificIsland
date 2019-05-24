@@ -1,6 +1,4 @@
 /* global globalFunction, ControlPannel, getID, getQuery, getQueries, isMobile, escape, findParent, $, infoBox, UserStorage */
-const apiUrl = 'http://localhost:8888/';
-
 $(() => {
   /**
    * Formatting number to prefix with N zeros.
@@ -162,7 +160,7 @@ $(() => {
       postError({ code: -1, message: '內文和影像不得同時為空' });
       resumePostTable();
     } else {
-      postFormAPI('article', data, response => {
+      api.postForm('article', data).then(response => {
         if(response.code === 0) {
           const article = response.data;
           if(isReply) {
@@ -187,8 +185,8 @@ $(() => {
           resumePostTable();
           postError(response);
         }
-      }, error => {
-        infoBox({ header: 'ERROR', className: 'error', content: error.err });
+      }).catch(error => {
+        infoBox({ header: 'ERROR', className: 'error', content: error.jqXHR.responseText });
         resumePostTable();
       });
     }
@@ -215,6 +213,8 @@ $(() => {
         if(targetElement !== null)
           targetElement.className += ' active';
         lastChecked = target;
+      } else {
+        lastChecked = null;
       }
     });
   };
@@ -301,56 +301,8 @@ $(() => {
   bindQuickReply();
   globalFunction.bindQuickReply = bindQuickReply;
 
-  /* API 使用之 function */
-  const getHeader = () => {
-    const header = {};
-    header['X-user-id'] = $.cookie('keygen');
-    return header;
-  };
-  const postFormAPI = (func, data, callback, catchErr=null) => {
-    $.ajax({
-      type: 'POST',
-      url: apiUrl + func,
-      data,
-      contentType: false,
-      processData: false,
-      headers: getHeader(),
-      success: (_data, textStatus, jqXHR) => {
-        console.log(func);
-        console.log(_data);
-        callback(_data);
-      },
-      timeout: 20000,
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
-        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
-        if(catchErr !== null)
-          catchErr(jqXHR.responseJSON);
-      },
-    });
-  };
-  const postAPI = (func, data, callback) => {
-    $.ajax({
-      type: 'POST',
-      url: apiUrl + func,
-      data: JSON.stringify(data),
-      contentType: 'application/json;',
-      dataType: 'json',
-      headers: getHeader(),
-      success: (_data, textStatus, jqXHR) => {
-        console.log(func);
-        console.log(_data);
-        callback(_data, textStatus, jqXHR);
-      },
-      timeout: 20000,
-      error: (jqXHR, textStatus, errorThrown) => {
-        console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
-        console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
-      },
-    });
-  };
-
   const api = new API();
+  globalFunction.api = api;
   api.get('user/uuid').then(res => {
     $.cookie('keygen', res.uuid);
     const user = new UserStorage();
@@ -376,6 +328,10 @@ class API {
   constructor(url='http://localhost:8888/') {
     this.url = url;
   }
+  /**
+   * Get basic header from cookie
+   * @returns {{ 'X-user-id': string }} headers Object contains mutiple customized headers.
+   */
   get header () {
     const header = {};
     header['X-user-id'] = $.cookie('keygen');
@@ -407,6 +363,60 @@ class API {
         success: (data, textStatus, jqXHR) => {
           resolve(data, textStatus, jqXHR);
         },
+        error: (jqXHR, textStatus, errorThrown) => {
+          console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+          console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+          reject({ jqXHR, textStatus, errorThrown });
+        },
+      });
+    });
+  }
+  /**
+   * Post formData to requested url
+   * @param {string} func 
+   * @param {FormData} data 
+   */
+  postForm (func, data) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        type: 'POST',
+        url: self.url + func,
+        data,
+        contentType: false,
+        processData: false,
+        headers: self.header,
+        success: (_data, textStatus, jqXHR) => {
+          resolve({ data: _data, textStatus, jqXHR });
+        },
+        timeout: 20000,
+        error: (jqXHR, textStatus, errorThrown) => {
+          console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+          console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+          reject({ jqXHR, textStatus, errorThrown });
+        },
+      });
+    });
+  }
+  /**
+   * Post data to requested url
+   * @param {string} func 
+   * @param {FormData} data 
+   */
+  post (func, data) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        type: 'POST',
+        url: self.header + func,
+        data: JSON.stringify(data),
+        contentType: 'application/json;',
+        dataType: 'json',
+        headers: self.header,
+        success: (_data, textStatus, jqXHR) => {
+          resolve({ data: _data, textStatus, jqXHR });
+        },
+        timeout: 20000,
         error: (jqXHR, textStatus, errorThrown) => {
           console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
           console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
