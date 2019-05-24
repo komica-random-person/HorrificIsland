@@ -17,7 +17,13 @@ $(() => {
    * @returns {Array.<String>} [YYYY/MM/DD, HH:mm:ms]
    */
   const getTimeString = (timeString) => {
-    const date = new Date(timeString);
+    const timeZone = new Date().getTimezoneOffset();
+    let date = new Date(timeString);
+    if(timeZone !== 8 * -60) {
+      const diff = 8 * -60 - timeZone;
+      date = Number(date) - diff * 1000 * 60;
+      date = new Date(date);
+    }
     const d = {
       year: date.getFullYear(),
       mon: formatNum(date.getMonth() + 1, 2),
