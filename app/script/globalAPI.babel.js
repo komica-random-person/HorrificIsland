@@ -161,8 +161,9 @@ $(() => {
       resumePostTable();
     } else {
       api.postForm('article', data).then(response => {
-        if(response.code === 0) {
-          const article = response.data;
+        const responseData = response.data;
+        if(responseData.code === 0) {
+          const article = responseData.data;
           if(isReply) {
             const html = getReplyHTML(article);
             const $article = $(`article[data-number="${mainEle.dataset.number}"]`);
@@ -183,7 +184,7 @@ $(() => {
           resumePostTable(true);
         } else {
           resumePostTable();
-          postError(response);
+          postError(responseData);
         }
       }).catch(error => {
         infoBox({ header: 'ERROR', className: 'error', content: error.jqXHR.responseText });
