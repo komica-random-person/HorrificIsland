@@ -30,11 +30,11 @@
     "path": "^0.12.7",
     "pug": "^2.0.3",
     "request": "^2.88.0",
-    "tar": ">=4.4.2",
-    "serve-favicon": "^2.5.0"
+    "serve-favicon": "^2.5.0",
+    "tar": ">=4.4.2"
   },
   "devDependencies": {
-    "browser-sync": "^2.26.3",
+    "browser-sync": "^2.26.5",
     "eslint": "^5.16.0"
   }
 }
