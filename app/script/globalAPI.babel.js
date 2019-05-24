@@ -17,7 +17,13 @@ $(() => {
    * @returns {Array.<String>} [YYYY/MM/DD, HH:mm:ms]
    */
   const getTimeString = (timeString) => {
-    const date = new Date(timeString);
+    const timeZone = new Date().getTimezoneOffset();
+    let date = new Date(timeString);
+    if(timeZone !== 8 * -60) {
+      const diff = 8 * -60 - timeZone;
+      date = Number(date) - diff * 1000 * 60;
+      date = new Date(date);
+    }
     const d = {
       year: date.getFullYear(),
       mon: formatNum(date.getMonth() + 1, 2),
@@ -56,7 +62,6 @@ $(() => {
       <span class="time">${getTimeString(data.time)[1]}</span>
       <span class="id quotable" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
       <span class="num" data-num="${formatNum(data.number, 8)}"><a class="link quotable" data-quotetype="num" data-num="${formatNum(data.number, 8)}">No.${formatNum(data.number, 8)}</a></span>
-      <span class="del"><a class="link">刪除</a></span>
       <span class="res">[<a class="link">回覆</a>]</span>
     </header>`;
     if(data.image.url !== null) {
@@ -89,7 +94,6 @@ $(() => {
               <span class="time">${getTimeString(data.time)[1]}</span>
               <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
               <span class="num" data-num="${data.number}"><a class="link quotable" data-quotetype="num" data-num="${data.number}">No.${data.number}</a></span>
-              <span class="del"><a class="link">刪除</a></span>
               <span class="res">[<a class="link">回覆</a>]</span>
             </header>
             <section class="mainContent">
@@ -179,6 +183,7 @@ $(() => {
             const $articleContainer = $('main.articleContainer');
             $articleContainer.prepend(html);
             globalFunction.bindQuickReply($articleContainer[0].children[0]);
+            globalFunction.updateQuote($articleContainer[0].children[0]);
             new ControlPannel($articleContainer[0].children[0]);
           }
           resumePostTable(true);

@@ -7,7 +7,6 @@ const bodyParser = require('body-parser');
 const favicon = require('serve-favicon');
 
 const port = process.env.PORT || 9999;
-process.env.TZ = 'Asia/Taipei';
 const app = express();
 
 app.use(compress());
