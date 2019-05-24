@@ -183,6 +183,7 @@ $(() => {
             const $articleContainer = $('main.articleContainer');
             $articleContainer.prepend(html);
             globalFunction.bindQuickReply($articleContainer[0].children[0]);
+            globalFunction.updateQuote($articleContainer[0].children[0]);
             new ControlPannel($articleContainer[0].children[0]);
           }
           resumePostTable(true);
