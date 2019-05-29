@@ -28,6 +28,12 @@ mixin article(data, articleType)
             each text in split
               span= text
               br
+          if post.tags.length > 0
+            section.tagContainer
+              each tag in post.tags
+                span.tag.m-r-1.link= '#' + tag
+              span.addTag.hidden
+                i.fas.fa-plus-circle
           p.quotedList
             span.text Replies(
               span.quotedNum 0
