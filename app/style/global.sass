@@ -21,6 +21,17 @@
   bottom: 0
   left: 0
 
+
+$type: p m
+$tCss: padding margin
+$dir: l r t b
+$dirCss: left right top bottom
+@for $t from 1 through 2
+  @for $d from 1 through 4
+    @for $i from 1 through 4
+      .#{nth($type, $t)}-#{nth($dir, $d)}-#{$i}
+        #{nth($tCss, $t)}-#{nth($dirCss, $d)}: .5em * $i
+
 body
   background: #1D1F21
   color: rgba(255, 255, 255, .8)
@@ -70,6 +81,8 @@ tr
       cursor: move
       .exit
         display: inline-block
+      .function[data-type=hashtag]
+        display: none!important
     .postTable
       padding: 1em 0
       display: inline-block
@@ -395,7 +408,7 @@ article.thread, #hoverBox
       transform: translate(-50%, -50%)
       color: #fff
       z-index: 1
-    p
+    p, img, .imgInfo
       display: none!important
   &.hiddenArticle
     padding-bottom: 0

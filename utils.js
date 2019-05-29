@@ -92,7 +92,8 @@ module.exports = app => {
           image: {
             url: !withImg ? null : imgBase + article.Picture,
             thumb: !withImg ? null : `${imgThumb}${article.Picture.replace(/^(.+?)\..+$/, '$1s.jpg')}`
-          }
+          },
+          tags: []
         };
       };
       data.post = convert(data.Head);

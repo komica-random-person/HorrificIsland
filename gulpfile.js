@@ -7,6 +7,7 @@ const nodemon = require('gulp-nodemon');
 const uglify = require('gulp-uglify');
 const noop = require('gulp-noop');
 const concat = require('gulp-concat');
+const cleanCSS = require('gulp-clean-css');
 
 sass.compiler = require('node-sass');
 
@@ -19,8 +20,10 @@ const clean = cb => {
 const util_style = cb => {
   gulp.src('./app/style/*.sass')
     .pipe(sass().on('error', sass.logError))
+    .pipe(process.env.NODE_ENV !== 'dev' ? cleanCSS() : noop())
     .pipe(gulp.dest('dist/style/'));
   gulp.src('./app/style/*.css')
+    .pipe(process.env.NODE_ENV !== 'dev' ? cleanCSS() : noop())
     .pipe(concat('vendor.css'))
     .pipe(gulp.dest('dist/style/'));
   cb();
