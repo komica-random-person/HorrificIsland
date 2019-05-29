@@ -21,6 +21,17 @@
   bottom: 0
   left: 0
 
+
+$type: p m
+$tCss: padding margin
+$dir: l r t b
+$dirCss: left right top bottom
+@for $t from 1 through 2
+  @for $d from 1 through 4
+    @for $i from 1 through 4
+      .#{nth($type, $t)}-#{nth($dir, $d)}-#{$i}
+        #{nth($tCss, $t)}-#{nth($dirCss, $d)}: .5em * $i
+
 body
   background: #1D1F21
   color: rgba(255, 255, 255, .8)
