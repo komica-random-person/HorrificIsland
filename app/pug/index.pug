@@ -142,26 +142,26 @@ div.container
         +postForm('標題', 'postTitle', '無題', 'text')
       +postForm('', 'postContent', '想聊些什麼？', 'textarea')
         section.controlPannel
-          div.function
+          div.function(data-type='image')
             label
               input(type='checkbox', name='func', data-target='image')
               i.fas.fa-file-image
               i.fas.fa-file-image.on
             span.tooltips 上傳圖片/使用網址附加圖片
           if !pageContent.replyFormat
-            div.function
+            div.function(data-type='hashtag')
               label
                 input(type='checkbox', name='func', data-target='hashtag')
                 i.fas.fa-hashtag
                 i.fas.fa-hashtag.on
               span.tooltips 將串加入 hashtags
-          div.function
+          div.function(data-type='emoji')
             label
               input(type='checkbox', name='func')
               i.far.fa-grin-squint
               i.far.fa-grin-squint.on
             span.tooltips 開啟顏文字庫
-          div.function
+          div.function(data-type='copyLibrary')
             label
               input(type='checkbox', name='func')
               i.fas.fa-torah
