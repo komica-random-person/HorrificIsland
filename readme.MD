@@ -20,5 +20,5 @@ Discord channel: https://discord.gg/9Nwfms7 (若為開發者請注明)
 
 #### Windows
 * Local API server: `npm run windev`
-* Remote API server: `npm run windstart`
+* Remote API server: `npm run winstart`
 
