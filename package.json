@@ -4,6 +4,7 @@
   "description": "A fake komica website",
   "main": "server.js",
   "scripts": {
+    "lint": "eslint *.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart": "NODE_ENV=production ./node_modules/gulp/bin/gulp.js",
     "start": "NODE_ENV=production node server.js",
