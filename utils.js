@@ -1,4 +1,7 @@
 /* global process */
+
+'use strict';
+
 module.exports = app => {
   const pug = require('pug');
   app.set('render', pageInfo => {

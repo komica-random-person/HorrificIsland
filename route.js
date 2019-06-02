@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = app => {
   app.get('^/$', (req, res) => {
     req.app.get('getMainContent')(content => {
