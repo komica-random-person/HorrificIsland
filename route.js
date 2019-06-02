@@ -1,4 +1,3 @@
-/* global process, __dirname */
 module.exports = app => {
   app.get('^/$', (req, res) => {
     req.app.get('getMainContent')(content => {
@@ -37,7 +36,7 @@ module.exports = app => {
       const renderedContent = req.app.get('render')(pageInfo);
       res.send(renderedContent);
     }, error => {
-      const { res: response, body, err } = error;
+      const { body } = error;
       res.status(500).send(body);
     });
   });

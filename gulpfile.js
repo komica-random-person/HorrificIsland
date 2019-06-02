@@ -77,7 +77,7 @@ const task_nodemon = cb => {
     started = true;
   });
 };
-const task_browserSync = cb => {
+const task_browserSync = () => {
   const browserSync =  require('browser-sync');
   const prepro = gulp.parallel(task_nodemon, watch);
   const task = () => {
