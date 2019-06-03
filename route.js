@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-  app.get('^/$', (req, res) => {
+  app.get('/', (req, res) => {
     req.app.get('getMainContent')(content => {
       const pageInfo = {
         name: 'index',
@@ -21,7 +21,7 @@ module.exports = app => {
     });
   });
 
-  app.get('^/thread/:num', (req, res) => {
+  app.get('/thread/:num', (req, res) => {
     const api = req.app.get('API');
     const articleNum = req.params.num;
     api.threadAPI(`thread/${articleNum}`, req.cookies.keygen, result => {
