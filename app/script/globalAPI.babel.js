@@ -269,8 +269,14 @@ $(() => {
         const coord = [evt.clientX, evt.clientY];
         const x = coord[0] + q.offsetWidth > window.innerWidth;
         const y = coord[1] + q.offsetHeight > window.innerHeight;
-        q.style.top = (isMobile ? 5 : (y ? window.innerHeight - q.offsetHeight : coord[1])) + 'px';
-        q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
+
+        let xAdjusted = x ? window.innerWidth - q.offsetWidth - 15 : coord[0];
+        xAdjusted = xAdjusted > 0 ? xAdjusted : 0;
+
+        q.style.top = (isMobile ? 25 : (y ? window.innerHeight - q.offsetHeight : coord[1])) + 'px';
+        q.style.left = xAdjusted + 'px';
+        if(isMobile && q.getBoundingClientRect().width > window.innerWidth)
+          q.style.width = `${window.innerWidth}px`;
         q.querySelector('textarea').focus();
 
         /* 綁定拖曳事件 */
