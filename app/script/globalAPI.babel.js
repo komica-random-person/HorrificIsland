@@ -130,11 +130,16 @@ $(() => {
       title: isReply ? null : getID('postTitle').value || null,
       content: getQuery('#postContent', mainEle).value || null,
       imageurl: getQuery('#imgurl', mainEle).value || null,
-      tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
+      tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(',').filter(e => e !== ''),
       allowComment: isReply ? false : getID('allowComment').value === 'on',
       documentType: isReply ? 'reply' : 'post',
       mainNumber: isReply ? Number(mainEle.dataset.number) : -1
     };
+    /* 處理空白字元 */
+    ['name', 'title', 'content'].forEach(key => {
+      postData[key] = postData[key] === null ? null : postData[key].replace(/\s+$/g, '');
+      postData[key] = postData[key] === '' ? null : postData[key];
+    });
     const data = new FormData();
     for(let k in postData)
       data.append(k, postData[k]);
@@ -154,14 +159,15 @@ $(() => {
       if(success)
         $(findParent(target, 'postTable')).find('input, textarea').val('');
     };
+
     /* check if the post is OK */
-    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*:\/\/.+(\.jpg$|\.png$|\.jpeg$|\.gif$)/) === null) {
+    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*:\/\/[^\s]+(\.jpg|\.png|\.jpeg|\.gif)$/) === null) {
       infoBox({ header: 'ERROR', content: '圖片網址要以 http 開頭，jpg, png, jpeg, gif 做結尾', className: 'error' });
       resumePostTable();
       return;
     }
     if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
-      postError({ code: -1, message: '內文和影像不得同時為空' });
+      postError({ code: -1, message: '內文和影像不得同時為空或空白' });
       resumePostTable();
     } else {
       api.postForm('article', data).then(response => {
