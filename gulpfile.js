@@ -1,4 +1,7 @@
 /* global process */
+
+'use strict';
+
 const gulp = require('gulp');
 const babel = require('gulp-babel');
 const sass = require('gulp-sass');
@@ -77,7 +80,7 @@ const task_nodemon = cb => {
     started = true;
   });
 };
-const task_browserSync = cb => {
+const task_browserSync = () => {
   const browserSync =  require('browser-sync');
   const prepro = gulp.parallel(task_nodemon, watch);
   const task = () => {

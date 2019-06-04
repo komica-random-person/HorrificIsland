@@ -1,4 +1,7 @@
 /* global process, __dirname */
+
+'use strict';
+
 const express = require('express');
 const path = require('path');
 const compress = require('compression');
