@@ -94,7 +94,7 @@ $(() => {
               <span class="time">${getTimeString(data.time)[1]}</span>
               <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
               <span class="num" data-num="${data.number}"><a class="link quotable" data-quotetype="num" data-num="${data.number}">No.${data.number}</a></span>
-              <span class="res">[<a class="link">回覆</a>]</span>
+              <span class="res">[<a class="link" href="/thread/${data.number}">回覆</a>]</span>
             </header>
             <section class="mainContent">
                 <p class="content show" style="">${escape(data.content).split('\n').map(e => `<span>${e}</span>`).join('<br>')}</p>
