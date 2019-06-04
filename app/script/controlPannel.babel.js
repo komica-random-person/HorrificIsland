@@ -1,10 +1,11 @@
-/* global $, hljs, infoBox, getID, getQuery, findParent, escape, getQueriesArray, getQueries, isMobile, globalFunction */
+/* global $, API, hljs, infoBox, getID, getQuery, findParent, escape, getQueriesArray, getQueries, isMobile, globalFunction */
 class ControlPannel {
   constructor(element=null, user=null) {
     this.element = element === null ? document : element;
     this.bindPannelSwitch();
     this.bindControFunction();
     this.user = user === null ? new UserStorage() : user;
+    this.api = new API();
   }
   bindPannelSwitch() {
     const self = this;
@@ -103,7 +104,23 @@ class ControlPannel {
     }
   }
   evtDelete(btn) {
-    infoBox({ header: 'Oh no !', content: '本功能還沒實作', button: { content: '了解惹' }});
+    // infoBox({ header: 'Oh no !', content: '本功能還沒實作', button: { content: '了解惹' }});
+    let parent = findParent(btn, 'replyBox');
+    parent = parent === null ? findParent(btn, 'thread') : parent;
+    const number = Number(parent.dataset.number);
+    this.api.delete(`article/${number}`)
+      .then(res => {
+        if(res.code === 0 && res.type === 'Success')
+          parent.parentElement.removeChild(parent);
+      })
+      .catch(err => {
+        const { jqXHR } = err;
+        const errorInfo = { 401: '這似乎不是你的文章？', 400: '不要亂丸！', other: 'Server 說他也不知道為啥...' };
+        if(jqXHR.status === 401 || jqXHR.status === 400) {
+          infoBox({ header: '刪除失敗', content: errorInfo[jqXHR.status], className: 'error' });
+        } else
+          infoBox({ header: '刪除失敗', content: errorInfo.other, className: 'error' });
+      });
   }
   evtReport(btn) {
     infoBox({ header: 'Oh no !', content: '本功能還沒實作', button: { content: '了解惹' }});

@@ -404,16 +404,13 @@ class API {
       });
     });
   }
-  /**
-   * Post data to requested url
-   * @param {string} func 
-   * @param {FormData} data 
-   */
-  post (func, data) {
+  _getJsonAjax(method, func, data) {
     const self = this;
+    if(['post', 'put'].indexOf(method.toLowerCase()) === -1)
+      throw ReferenceError('No such method: ' + method);
     return new Promise((resolve, reject) => {
       $.ajax({
-        type: 'POST',
+        type: method.toUpperCase(),
         url: self.header + func,
         data: JSON.stringify(data),
         contentType: 'application/json;',
@@ -423,6 +420,32 @@ class API {
           resolve({ data: _data, textStatus, jqXHR });
         },
         timeout: 20000,
+        error: (jqXHR, textStatus, errorThrown) => {
+          console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+          console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+          reject({ jqXHR, textStatus, errorThrown });
+        },
+      });
+    });
+  }
+  /**
+   * Post data to requested url
+   * @param {string} func 
+   * @param {FormData} data 
+   */
+  post (func, data) {
+    return this._getJsonAjax('post', func, data);
+  }
+  delete (func) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        type: 'delete'.toUpperCase(),
+        headers: self.header,
+        url: self.url + func,
+        success: (data, textStatus, jqXHR) => {
+          resolve(data, textStatus, jqXHR);
+        },
         error: (jqXHR, textStatus, errorThrown) => {
           console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
           console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
