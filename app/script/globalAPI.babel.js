@@ -94,7 +94,7 @@ $(() => {
               <span class="time">${getTimeString(data.time)[1]}</span>
               <span class="id" data-quotetype="id" data-id="${data.id}">ID:${data.id}</span>
               <span class="num" data-num="${data.number}"><a class="link quotable" data-quotetype="num" data-num="${data.number}">No.${data.number}</a></span>
-              <span class="res">[<a class="link">回覆</a>]</span>
+              <span class="res">[<a class="link" href="/thread/${data.number}">回覆</a>]</span>
             </header>
             <section class="mainContent">
                 <p class="content show" style="">${escape(data.content).split('\n').map(e => `<span>${e}</span>`).join('<br>')}</p>
@@ -130,11 +130,16 @@ $(() => {
       title: isReply ? null : getID('postTitle').value || null,
       content: getQuery('#postContent', mainEle).value || null,
       imageurl: getQuery('#imgurl', mainEle).value || null,
-      tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(','),
+      tags: tags === null ? null : tags.replace(/,\s*/g, ',').split(',').filter(e => e !== ''),
       allowComment: isReply ? false : getID('allowComment').value === 'on',
       documentType: isReply ? 'reply' : 'post',
       mainNumber: isReply ? Number(mainEle.dataset.number) : -1
     };
+    /* 處理空白字元 */
+    ['name', 'title', 'content'].forEach(key => {
+      postData[key] = postData[key] === null ? null : postData[key].replace(/\s+$/g, '');
+      postData[key] = postData[key] === '' ? null : postData[key];
+    });
     const data = new FormData();
     for(let k in postData)
       data.append(k, postData[k]);
@@ -154,14 +159,15 @@ $(() => {
       if(success)
         $(findParent(target, 'postTable')).find('input, textarea').val('');
     };
+
     /* check if the post is OK */
-    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*:\/\/.+(\.jpg$|\.png$|\.jpeg$|\.gif$)/) === null) {
+    if(postData.imageurl !== null && postData.imageurl.toLowerCase().match(/http[s]*:\/\/[^\s]+(\.jpg|\.png|\.jpeg|\.gif)$/) === null) {
       infoBox({ header: 'ERROR', content: '圖片網址要以 http 開頭，jpg, png, jpeg, gif 做結尾', className: 'error' });
       resumePostTable();
       return;
     }
     if(postData.content === null && postData.imageurl === null && imgfile.length === 0) {
-      postError({ code: -1, message: '內文和影像不得同時為空' });
+      postError({ code: -1, message: '內文和影像不得同時為空或空白' });
       resumePostTable();
     } else {
       api.postForm('article', data).then(response => {
@@ -263,8 +269,14 @@ $(() => {
         const coord = [evt.clientX, evt.clientY];
         const x = coord[0] + q.offsetWidth > window.innerWidth;
         const y = coord[1] + q.offsetHeight > window.innerHeight;
-        q.style.top = (isMobile ? 5 : (y ? window.innerHeight - q.offsetHeight : coord[1])) + 'px';
-        q.style.left = (x ? window.innerWidth - q.offsetWidth - 15 : coord[0]) + 'px';
+
+        let xAdjusted = x ? window.innerWidth - q.offsetWidth - 15 : coord[0];
+        xAdjusted = xAdjusted > 0 ? xAdjusted : 0;
+
+        q.style.top = (isMobile ? 25 : (y ? window.innerHeight - q.offsetHeight : coord[1])) + 'px';
+        q.style.left = xAdjusted + 'px';
+        if(isMobile && q.getBoundingClientRect().width > window.innerWidth)
+          q.style.width = `${window.innerWidth}px`;
         q.querySelector('textarea').focus();
 
         /* 綁定拖曳事件 */
@@ -404,16 +416,13 @@ class API {
       });
     });
   }
-  /**
-   * Post data to requested url
-   * @param {string} func 
-   * @param {FormData} data 
-   */
-  post (func, data) {
+  _getJsonAjax(method, func, data) {
     const self = this;
+    if(['post', 'put'].indexOf(method.toLowerCase()) === -1)
+      throw ReferenceError('No such method: ' + method);
     return new Promise((resolve, reject) => {
       $.ajax({
-        type: 'POST',
+        type: method.toUpperCase(),
         url: self.header + func,
         data: JSON.stringify(data),
         contentType: 'application/json;',
@@ -423,6 +432,32 @@ class API {
           resolve({ data: _data, textStatus, jqXHR });
         },
         timeout: 20000,
+        error: (jqXHR, textStatus, errorThrown) => {
+          console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
+          console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
+          reject({ jqXHR, textStatus, errorThrown });
+        },
+      });
+    });
+  }
+  /**
+   * Post data to requested url
+   * @param {string} func 
+   * @param {FormData} data 
+   */
+  post (func, data) {
+    return this._getJsonAjax('post', func, data);
+  }
+  delete (func) {
+    const self = this;
+    return new Promise((resolve, reject) => {
+      $.ajax({
+        type: 'delete'.toUpperCase(),
+        headers: self.header,
+        url: self.url + func,
+        success: (data, textStatus, jqXHR) => {
+          resolve(data, textStatus, jqXHR);
+        },
         error: (jqXHR, textStatus, errorThrown) => {
           console.log(`ERROR at: ${func} (${jqXHR.responseText})`);
           console.log(`ERROR code: ${jqXHR.status}, ERROR thrown: ${errorThrown}`);
