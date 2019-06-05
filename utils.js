@@ -65,21 +65,38 @@ module.exports = app => {
   app.set('API', { threadAPI, getIP });
 
   app.set('getHIContent', (userid, cb) => {
+    const contentCoolDown = process.env.CACHE_TIME || 30000;
     const requestData = {
       url: `${APIURL}thread/list/`,
       headers: { 'X-user-id': userid }
     };
-    request(requestData, (err, res, body) => {
-      if(res.statusCode === 200) {
-        app.set('HIsland-content', body);
-        cb({ err, res: 200, body });
-      } else {
-        if(app.get('HIsland-content') === undefined)
-          cb({ err, res: res.statusCode });
-        else
-          cb({ err, res: 200, body: app.get('HIsland-content') });
-      }
-    });
+    if(app.get('contentCoolDown') === undefined) {
+      app.set('contentCoolDown', Date.now());
+    }
+    if(Date.now() - app.get('contentCoolDown') < contentCoolDown && app.get('HIsland-content') !== undefined) {
+      cb({ err: null, res: 200, body: app.get('HIsland-content') });
+    } else if(app.get('HIsland-content') !== undefined) {
+      cb({ err: null, res: 200, body: app.get('HIsland-content') });
+      request(requestData, (err, res, body) => {
+        if(res.statusCode === 200) {
+          app.set('HIsland-content', body);
+          app.set('contentCoolDown', Date.now());
+        }
+      });
+    } else {
+      request(requestData, (err, res, body) => {
+        if(res.statusCode === 200) {
+          app.set('HIsland-content', body);
+          cb({ err, res: 200, body });
+          app.set('contentCoolDown', Date.now());
+        } else {
+          if(app.get('HIsland-content') === undefined)
+            cb({ err, res: res.statusCode });
+          else
+            cb({ err, res: 200, body: app.get('HIsland-content') });
+        }
+      });
+    }
   });
 
   const homu2hisland = datas => {

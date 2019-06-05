@@ -8,8 +8,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "prestart": "NODE_ENV=production ./node_modules/gulp/bin/gulp.js",
     "start": "NODE_ENV=production node server.js",
-    "dev": "NODE_ENV=dev ./node_modules/gulp/bin/gulp.js dev",
-    "windev": "set NODE_ENV=dev && .\\node_modules\\.bin\\gulp.cmd",
+    "dev": "NODE_ENV=dev CACHE_TIME=0 ./node_modules/gulp/bin/gulp.js dev",
+    "windev": "set NODE_ENV=dev && set CACHE_TIME=0 && .\\node_modules\\.bin\\gulp.cmd",
     "winstart": "set NODE_ENV=production && .\\node_modules\\.bin\\gulp.cmd && node server.js"
   },
   "author": "",
