@@ -71,8 +71,10 @@ module.exports = app => {
       app.set('contentCoolDown', Date.now());
     }
     if(Date.now() - app.get('contentCoolDown') < contentCoolDown && app.get('HIsland-content') !== undefined) {
+      /* Under cache cool down, directly send content. */
       cb({ err: null, res: 200, body: app.get('HIsland-content') });
     } else if(app.get('HIsland-content') !== undefined) {
+      /* Over cache cool down, directly send content and update content */
       cb({ err: null, res: 200, body: app.get('HIsland-content') });
       request(requestData, (err, res, body) => {
         if(res.statusCode === 200) {
@@ -81,6 +83,7 @@ module.exports = app => {
         }
       });
     } else {
+      /* First lunch app, get content and save to cache */
       request(requestData, (err, res, body) => {
         if(res.statusCode === 200) {
           app.set('HIsland-content', body);
