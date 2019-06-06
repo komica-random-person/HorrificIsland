@@ -193,6 +193,8 @@ $(() => {
             new ControlPannel($articleContainer[0].children[0]);
           }
           resumePostTable(true);
+          /* GET thread to refresh Web server cache */
+          api.get('thread/list').then(() => {});
         } else {
           resumePostTable();
           postError(responseData);
