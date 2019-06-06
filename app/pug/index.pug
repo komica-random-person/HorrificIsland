@@ -87,7 +87,8 @@ mixin articleHeader(info, t, type)
     span.articleType= typeString[type]
     if info.Title != '' && t == 'post'
       span.title= info.title || '無題'
-    span.name= info.name || '名無し'
+    - var trip = info.name != null && info.name.match('◈') !== null
+    span(class= 'name' + (trip ? ' trip' : ''))= info.name || '名無し'
     - var time = new Date(info.time)
     span.date= time.getFullYear() + '/' + formatNum(time.getMonth() + 1, 2) + '/' + formatNum(time.getDate(), 2)
     span.time= formatNum(time.getHours(), 2) + ':' + formatNum(time.getMinutes(), 2) + ':' + formatNum(time.getMilliseconds(), 3)
@@ -108,7 +109,7 @@ mixin postForm(labelText, id, placeholder, type)
     label
       h4.label= labelText
       if type == 'text' || type == 'file'
-        - var m_length = id == 'postTitle' ? 25 : 10
+        - var m_length = id == 'postTitle' ? 150 : 100
         input(id=id, placeholder=placeholder, type=type, maxlength=m_length, autocomplete='off')
       else
         textarea(id=id, placeholder=placeholder)

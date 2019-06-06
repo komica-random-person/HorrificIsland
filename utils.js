@@ -85,11 +85,12 @@ module.exports = app => {
     } else {
       /* First lunch app, get content and save to cache */
       request(requestData, (err, res, body) => {
-        if(res.statusCode === 200) {
+        if(err == null && res.statusCode === 200) {
           app.set('HIsland-content', body);
           app.set('contentCoolDown', Date.now());
           cb({ err, res: 200, body });
         } else {
+          res = res === undefined ? { statusCode: 404 } : res;
           if(app.get('HIsland-content') === undefined)
             cb({ err, res: res.statusCode });
           else
