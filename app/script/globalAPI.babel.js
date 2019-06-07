@@ -207,6 +207,32 @@ $(() => {
   };
   getID('submit').addEventListener('click', postArticle);
 
+  const bindHiddenReplies = evt => {
+    evt.stopImmediatePropagation();
+    const element = evt.target;
+    if(element.dataset.busy === 'true')
+      return;
+    const targetNum = Number(element.dataset.target);
+    const $article = $(findParent(element, 'thread'));
+    element.innerText = '取得中...';
+    element.dataset.busy = 'true';
+    api.get(`thread/${targetNum}`).then(result => {
+      const replies = result.replies.slice(0, element.dataset.hidnum);
+      const content =replies.map(reply => getReplyHTML(reply));
+      $article.find('.mainContent').after(content);
+      element.dataset.busy = 'false';
+      element.parentElement.parentElement.removeChild(element.parentElement);
+      globalFunction.updateQuote($article[0]);
+      globalFunction.bindHoverBox($article[0]);
+      globalFunction.bindIdReference($article[0]);
+      globalFunction.bindQuickReply($article[0]);
+    }).catch(() => {
+      element.dataset.busy = 'false';
+      element.innerText = '重試';
+    });
+  };
+  $('.hiddenReplies').on('click', bindHiddenReplies);
+
   /**
    * Bind the subfunctions of posting articles.
    * @param {HTMLElement} mainElement Documnet or the container of quickReply
