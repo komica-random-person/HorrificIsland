@@ -34,6 +34,11 @@ mixin article(data, articleType)
                 span.tag.m-r-1.link= '#' + tag
               span.addTag.hidden
                 i.fas.fa-plus-circle
+          if post.hiddenReplies
+            section.hiddenRepliesContainer
+              p.m-t-1 有 #{post.hiddenReplies} 篇回應被省略 [&nbsp;
+                a.link.hiddenReplies(data-target= post.number, data-hidnum= post.hiddenReplies, href='javascript: void(0);') 展開
+                | &nbsp;]
           p.quotedList
             span.text Replies(
               span.quotedNum 0

@@ -30,7 +30,7 @@ $dirCss: left right top bottom
   @for $d from 1 through 4
     @for $i from 1 through 4
       .#{nth($type, $t)}-#{nth($dir, $d)}-#{$i}
-        #{nth($tCss, $t)}-#{nth($dirCss, $d)}: .5em * $i
+        #{nth($tCss, $t)}-#{nth($dirCss, $d)}: .5em * $i !important
 
 body
   background: #1D1F21
@@ -321,6 +321,9 @@ article.thread, #hoverBox
           padding: 0
           &.show
             max-height: unset
+        .hiddenRepliesContainer p
+          color: #b7b7b7
+          margin: 0
     .imgContainer
       cursor: pointer
       img
