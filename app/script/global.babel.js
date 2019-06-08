@@ -216,12 +216,19 @@ $(() => {
       }
 
       /* 將超過固定高度的元素隱藏，並綁定按鈕來顯示 */
+      const replyMode = getQuery('.container').dataset.replymode === 'true';
       const offset = 200;
       let flag = false;
       if(p.offsetHeight > offset) {
         let height = 0;
         Array.prototype.slice.apply(p.children).forEach(e => {
-          /* br element have offsetHeight=0, but in browser it have 4 px height */
+          /* If the content is (1) already expanded or (2) the post in reply mode, don't close it again. */
+          if((replyMode && findParent(p, 'mainContent') !== null) || p.className.match(/show/) !== null)
+            return true;
+          /* Remove last binding button to prevent duplicate binding */
+          if(e.className.match(/showContentTrigger/) !== null)
+            e.parentElement.removeChild(e);
+          /* <br> element have offsetHeight=0, but in browser it have 4 px height */
           const eHeight = e.offsetHeight > 0 ? e.offsetHeight : 4;
           if(height + eHeight <= offset && !flag)
             height += eHeight;
@@ -230,7 +237,7 @@ $(() => {
               /* Create show button when its not created */
               const br = document.createElement('br');
               const showButton = document.createElement('span');
-              showButton.className = 'link';
+              showButton.className = 'link showContentTrigger';
               showButton.innerText = '展開文章...';
               p.appendChild(br);
               p.appendChild(showButton);
