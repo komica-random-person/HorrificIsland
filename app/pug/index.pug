@@ -124,21 +124,26 @@ mixin postForm(labelText, id, placeholder, type)
 main.mainContainer.clearfix.dracula
   div.container(data-replymode= pageContent.replyFormat ? 'true' : 'false')
     header.pageTitle
-      h1 Horrific Island
-      h2 Github:&nbsp;
-        a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
-        | &nbsp;&nbsp;Discord: &nbsp;
-        a(href="https://discord.gg/9Nwfms7", target='_blank') Link
-        | &nbsp;&nbsp;複製文庫: &nbsp;
-        a(href="https://komicapy.blogspot.com/", target='_blank') Link
-      h3 H-island 目前仍為測試版，所有文章可能會被管理員全部刪除，請大家見諒
-      h3#APIstatus API Server 狀態：
+      h1.m-t-2 Horrific Island
+      h3.m-t-1 H-island 目前仍為測試版，所有文章可能會被管理員全部刪除，請大家見諒
+      h4#APIstatus API Server 狀態：
         span.success
           i.fas.fa-thumbs-up
           | &nbsp;正常運作
         span.fail
           i.fas.fa-exclamation-triangle
           | 無法連接
+      h2.m-b-1(style= 'font-size: 25px')
+        | 【&nbsp;
+        a.link(href='https://github.com/komica-random-person/HorrificIsland', target='_blank')
+          i.fab.fa-github &nbsp;Github
+        | &nbsp;】【&nbsp;
+        a(href="https://discord.gg/9Nwfms7", target='_blank')
+          i.fab.fa-discord &nbsp;Discord
+        | &nbsp;】【&nbsp;
+        a(href="https://komicapy.blogspot.com/", target='_blank')
+          i.far.fa-copy &nbsp;複製文庫
+        | &nbsp;】
 
     //- postArticle
     section.postContainer(data-number= pageContent.replyFormat ? formatNum(pageContent.hisland[0].post.number) : '')
