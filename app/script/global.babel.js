@@ -124,6 +124,7 @@ $(() => {
           qL.removeChild(qL.children[1]);
         }
         qL.querySelector('.quotedNum').innerText = 0;
+        qL.dataset.quotedfrom = '';
       }).end().find('span.id').addClass('quotable');
     }
     $(element).find('p.content').each((_, p) => {
@@ -343,8 +344,9 @@ class HoverBox {
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
         const $articles = $(thread).find(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
-        idElement.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
-        idElement.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element: idElement, recursive }));
+        const $idEle = $(idElement).unbind();
+        $idEle.on(self.activeEvt, self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
+        $idEle.on(self.inactiveEvt, self.mouseLeaveHoverBox({ element: idElement, recursive }));
       });
     }
   }
@@ -473,8 +475,12 @@ class HoverBox {
       const queryString = quotedFrom.map(number => `span.num[data-num="${number}"]`).join(', ');
       /* 這邊直接用 jQuery 跟 queryString 結合來一次選所有文章 */
       const $articles = $thread.find(queryString);
-      element.children[0].addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
-      element.children[0].addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element, recursive }));
+      const mouseEnterEvt = self.mouseEnterHoverBox({ element, recursive, articles: $articles });
+      const mouseLeaveEvt = self.mouseLeaveHoverBox({ element, recursive });
+      const $triggerElement = $(element.children[0]);
+      $triggerElement.unbind();
+      $triggerElement.on(self.activeEvt, mouseEnterEvt);
+      $triggerElement.on(self.inactiveEvt, mouseLeaveEvt);
     }
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
