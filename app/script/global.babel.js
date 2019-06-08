@@ -124,6 +124,7 @@ $(() => {
           qL.removeChild(qL.children[1]);
         }
         qL.querySelector('.quotedNum').innerText = 0;
+        qL.dataset.quotedfrom = '';
       }).end().find('span.id').addClass('quotable');
     }
     $(element).find('p.content').each((_, p) => {
@@ -216,12 +217,19 @@ $(() => {
       }
 
       /* 將超過固定高度的元素隱藏，並綁定按鈕來顯示 */
+      const replyMode = getQuery('.container').dataset.replymode === 'true';
       const offset = 200;
       let flag = false;
       if(p.offsetHeight > offset) {
         let height = 0;
         Array.prototype.slice.apply(p.children).forEach(e => {
-          /* br element have offsetHeight=0, but in browser it have 4 px height */
+          /* If the content is (1) already expanded or (2) the post in reply mode, don't close it again. */
+          if((replyMode && findParent(p, 'mainContent') !== null) || p.className.match(/show/) !== null)
+            return true;
+          /* Remove last binding button to prevent duplicate binding */
+          if(e.className.match(/showContentTrigger/) !== null)
+            e.parentElement.removeChild(e);
+          /* <br> element have offsetHeight=0, but in browser it have 4 px height */
           const eHeight = e.offsetHeight > 0 ? e.offsetHeight : 4;
           if(height + eHeight <= offset && !flag)
             height += eHeight;
@@ -230,7 +238,7 @@ $(() => {
               /* Create show button when its not created */
               const br = document.createElement('br');
               const showButton = document.createElement('span');
-              showButton.className = 'link';
+              showButton.className = 'link showContentTrigger';
               showButton.innerText = '展開文章...';
               p.appendChild(br);
               p.appendChild(showButton);
@@ -336,8 +344,9 @@ class HoverBox {
       idElements.forEach(idElement => {
         const id = idElement.dataset.id;
         const $articles = $(thread).find(`${mainCss} span.id.quotable[data-id="${id}"], ${replyCss} span.id.quotable[data-id="${id}"]`);
-        idElement.addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
-        idElement.addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element: idElement, recursive }));
+        const $idEle = $(idElement).unbind();
+        $idEle.on(self.activeEvt, self.mouseEnterHoverBox({ element: idElement, recursive, articles: $articles }));
+        $idEle.on(self.inactiveEvt, self.mouseLeaveHoverBox({ element: idElement, recursive }));
       });
     }
   }
@@ -466,8 +475,12 @@ class HoverBox {
       const queryString = quotedFrom.map(number => `span.num[data-num="${number}"]`).join(', ');
       /* 這邊直接用 jQuery 跟 queryString 結合來一次選所有文章 */
       const $articles = $thread.find(queryString);
-      element.children[0].addEventListener(self.activeEvt, self.mouseEnterHoverBox({ element, recursive, articles: $articles }));
-      element.children[0].addEventListener(self.inactiveEvt, self.mouseLeaveHoverBox({ element, recursive }));
+      const mouseEnterEvt = self.mouseEnterHoverBox({ element, recursive, articles: $articles });
+      const mouseLeaveEvt = self.mouseLeaveHoverBox({ element, recursive });
+      const $triggerElement = $(element.children[0]);
+      $triggerElement.unbind();
+      $triggerElement.on(self.activeEvt, mouseEnterEvt);
+      $triggerElement.on(self.inactiveEvt, mouseLeaveEvt);
     }
   }
   createHoverBox({ content, targetNum, coord, threadNum, parentElement=null }) {
@@ -520,11 +533,10 @@ class HoverBox {
     }
 
     /* If hoverBox is referenced from id, do not bind id */
-    if(content.match(/id quotable/g) !== null && content.match(/id quotable/g).length > 1) {
-      $hoverBox.mCustomScrollbar({ scrollInertia: 0 });
-    } else {
+    if(content.match(/id quotable/g) === null || content.match(/id quotable/g).length <= 1) {
       self.bindIdReference(hoverBox, true);
     }
+    $hoverBox.mCustomScrollbar({ scrollInertia: 0 });
   }
   mergeContent(...contents) {
     return `<section class="contentSection">${contents.join('')}</section>`;

@@ -121,7 +121,7 @@ mixin postForm(labelText, id, placeholder, type)
     if block
       block
 
-div.container
+div.container(data-replymode= pageContent.replyFormat ? 'true' : 'false')
   header.pageTitle
     h1 Horrific Island
     h2 Github:&nbsp;
