@@ -2,23 +2,23 @@
 
 module.exports = app => {
   app.get('/', (req, res) => {
-    req.app.get('getMainContent')(content => {
-      const pageInfo = {
-        name: 'index',
-        title: 'Index',
-        description: 'index',
-        pageContent: {
-          komica: content.content,
-        }
-      };
-      const userid = req.cookies.keygen;
-      req.app.get('getHIContent')(userid, result => {
-        if(result.res === 200)
-          pageInfo.pageContent.hisland = JSON.parse(result.body);
-        const renderedContent = req.app.get('render')(pageInfo);
-        res.send(renderedContent);
-      });
+    // req.app.get('getMainContent')(content => {
+    const pageInfo = {
+      name: 'index',
+      title: 'Index',
+      description: 'index',
+      pageContent: {
+        komica: [],
+      }
+    };
+    const userid = req.cookies.keygen;
+    req.app.get('getHIContent')(userid, result => {
+      if(result.res === 200)
+        pageInfo.pageContent.hisland = JSON.parse(result.body);
+      const renderedContent = req.app.get('render')(pageInfo);
+      res.send(renderedContent);
     });
+    // });
   });
 
   app.get('/thread/:num', (req, res) => {
