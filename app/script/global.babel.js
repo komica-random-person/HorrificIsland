@@ -527,11 +527,10 @@ class HoverBox {
     }
 
     /* If hoverBox is referenced from id, do not bind id */
-    if(content.match(/id quotable/g) !== null && content.match(/id quotable/g).length > 1) {
-      $hoverBox.mCustomScrollbar({ scrollInertia: 0 });
-    } else {
+    if(content.match(/id quotable/g) === null || content.match(/id quotable/g).length <= 1) {
       self.bindIdReference(hoverBox, true);
     }
+    $hoverBox.mCustomScrollbar({ scrollInertia: 0 });
   }
   mergeContent(...contents) {
     return `<section class="contentSection">${contents.join('')}</section>`;
