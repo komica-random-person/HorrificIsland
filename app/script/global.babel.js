@@ -98,7 +98,7 @@ const infoBox = options => {
     $infoBox.find('main p').text(content);
 
   if(button !== undefined) {
-    const $button = $main.find('button');
+    const $button = $main.find('.btnContainer button');
     const { content: btnContent, className: btnClassName, callback } = button;
     $button.text(btnContent);
     $button[0].className = 'btn';
@@ -113,6 +113,12 @@ const infoBox = options => {
 
 $(() => {
   /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
+  const user = new UserStorage();
+  user.applySetting();
+  user.bindUserPannel();
+  /* 控制面板相關 */
+  const controlPannel = new ControlPannel(null, user);
+
   const hoverbox = new HoverBox();
   const updateQuote = (element=document) => {
     /* element 於畫面載入時是 document, 會 global 的進行 event binding，
@@ -196,7 +202,7 @@ $(() => {
           const num = _match.slice(2);
           /* 從 thread 物件中找尋引用的文章是否存在，若不存在則加入 missing 的類別 */
           const refExist = getQuery(`.quotable[data-num="${num}"]`, thread) !== null;
-          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote ${refExist ? '' : 'missing'}" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
+          p.innerHTML = p.innerHTML.split(escape(_match)).join(`<a href="#${num}"><span class="quote link ${refExist ? '' : 'missing'}" data-quoteType="num" data-num="${num}">${escape(_match)}</span></a>`);
           /* Add number to quoted article for css to show quotedList */
           const $quotedArticle = $(`*[data-number="${num}"]`).not('.quickPostTable, .postContainer').addClass('quotedArticle');
           $quotedArticle.each((index, ele) => {
@@ -311,12 +317,6 @@ $(() => {
   };
   bindIdReference();
   globalFunction.bindIdReference = bindIdReference;
-
-  const user = new UserStorage();
-  /* 控制面板相關 */
-  const controlPannel = new ControlPannel(null, user);
-  user.applySetting();
-  user.bindUserPannel();
 });
 
 class HoverBox {
