@@ -131,12 +131,14 @@ class UserStorage {
   constructor(storage=localStorage, name='user') {
     this.storage = storage;
     this.name = name;
+    this.themeName = ['dracula', 'ch8', 'komica'];
     const data = storage.getItem(this.name) === null ? {} : JSON.parse(storage.getItem(this.name));
     const userData = {
       hidden: [],
       filter: [],
       filterLocal: [],
       article: {},
+      custom: { theme: 0 },
       key: null
     };
     for(let k in data)
@@ -175,6 +177,7 @@ class UserStorage {
   applySetting() {
     /* Read the data stored in storage, parse to JSON and apply to browser */
     const data = this.data;
+    const self = this;
     for(let key in data) {
       if(key === 'filter') {
         /* NGID */
@@ -199,6 +202,9 @@ class UserStorage {
           const $articles = $(`.thread[data-number="${num}"], .replyBox[data-number=${num}]`).addClass('hiddenArticle');
           $articles.find('li[data-act="hide"]').text('顯示本文');
         });
+      } else if(key === 'custom') {
+        console.log(data[key])
+        self.setTheme(data[key].theme);
       }
     }
   }
@@ -337,8 +343,64 @@ class UserStorage {
         }
       } else if(func === 'article_library') {
         /* TODO: article library configuration */
+      } else if(func === 'theme') {
+        const table = document.createElement('table');
+        table.className = 'table table-bordered';
+        table.innerHTML = `<thead>
+          <tr>
+            <th>主題名稱</th>
+            <th>選擇</th>
+          </tr>
+        </thead>
+        <tr class="theme">
+          <td data-name="val">Dracula(黑)</td>
+          <td>
+            <button class="btn btn-default" data-val="0">選擇</button>
+          </td>
+        </tr>
+        <tr class="theme">
+          <td data-name="val">8ch(紫)</td>
+          <td>
+            <button class="btn btn-default" data-val="1">選擇</button>
+          </td>
+        </tr>
+        <tr class="theme">
+          <td data-name="val">komica(黃)</td>
+          <td>
+            <button class="btn btn-default" data-val="2">選擇</button>
+          </td>
+        </tr>`;
+        infoBox({
+          header: '客製化主題選擇',
+          content: table.outerHTML,
+          isHTML: true,
+          binding: ($main) => {
+            $main.find('.theme button').on('click', evt => {
+              const themeNum = Number(evt.target.dataset.val);
+              self.setTheme(themeNum);
+            });
+          },
+          button: {
+            callback: () => {
+              const currentTheme = $('main.mainContainer')[0].className.split(' ').filter(e => self.themeName.indexOf(e) !== -1)[0];
+              const themeNum = self.themeName.indexOf(currentTheme);
+              const data = self.data.custom;
+              data.theme = Number(themeNum);
+              self.setKeyVal('custom', data);
+              $('#infoBox').click();
+            },
+            content: '儲存設定',
+            className: 'btn-success'
+          }
+        });
       }
     });
+  }
+  setTheme(theNum) {
+    const theme = this.themeName;
+    const $main = $('main.mainContainer');
+    theme.forEach(e => $main.removeClass(e));
+    $main.addClass(theme[theNum]);
   }
   setKeyVal(key, val) {
     const data = this.data;

@@ -39,7 +39,7 @@ mixin article(data, articleType)
               p.m-t-1 有 #{post.hiddenReplies} 篇回應被省略 [&nbsp;
                 a.link.hiddenReplies(data-target= post.number, data-hidnum= post.hiddenReplies, href='javascript: void(0);') 展開
                 | &nbsp;]
-          p.quotedList
+          p.quotedList.link
             span.text Replies(
               span.quotedNum 0
               | ):
@@ -64,7 +64,7 @@ mixin replyBox(reply, articleType)
       each text in split
         span= text
         br
-    p.quotedList
+    p.quotedList.link
       span.text Replies(
         span.quotedNum 0
         | ):
@@ -121,131 +121,137 @@ mixin postForm(labelText, id, placeholder, type)
     if block
       block
 
-div.container(data-replymode= pageContent.replyFormat ? 'true' : 'false')
-  header.pageTitle
-    h1 Horrific Island
-    h2 Github:&nbsp;
-      a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
-      | &nbsp;&nbsp;Discord: &nbsp;
-      a(href="https://discord.gg/9Nwfms7", target='_blank') Link
-      | &nbsp;&nbsp;複製文庫: &nbsp;
-      a(href="https://komicapy.blogspot.com/", target='_blank') Link
-    h3 H-island 目前仍為測試版，所有文章可能會被管理員全部刪除，請大家見諒
-    h3#APIstatus API Server 狀態：
-      span.success
-        i.fas.fa-thumbs-up
-        | &nbsp;正常運作
-      span.fail
-        i.fas.fa-exclamation-triangle
-        | 無法連接
+main.mainContainer.clearfix.dracula
+  div.container(data-replymode= pageContent.replyFormat ? 'true' : 'false')
+    header.pageTitle
+      h1 Horrific Island
+      h2 Github:&nbsp;
+        a(href='https://github.com/komica-random-person/HorrificIsland', target='_blank') Link
+        | &nbsp;&nbsp;Discord: &nbsp;
+        a(href="https://discord.gg/9Nwfms7", target='_blank') Link
+        | &nbsp;&nbsp;複製文庫: &nbsp;
+        a(href="https://komicapy.blogspot.com/", target='_blank') Link
+      h3 H-island 目前仍為測試版，所有文章可能會被管理員全部刪除，請大家見諒
+      h3#APIstatus API Server 狀態：
+        span.success
+          i.fas.fa-thumbs-up
+          | &nbsp;正常運作
+        span.fail
+          i.fas.fa-exclamation-triangle
+          | 無法連接
 
-  //- postArticle
-  section.postContainer(data-number= pageContent.replyFormat ? formatNum(pageContent.hisland[0].post.number) : '')
-    form#postTable.postTable
-      section.exit
-        div.btn.btn-danger
-          i.fas.fa-times-circle
-      if pageContent.replyFormat
-        header
-          h4 [
-            a.link(href='/') 回到列表
-            | ]
-      +postForm('名稱', 'postName', '名無し', 'text')
-      if !pageContent.replyFormat
-        //- replyFormat 代表是回復模式(看單一串)
-        +postForm('標題', 'postTitle', '無題', 'text')
-      +postForm('', 'postContent', '想聊些什麼？', 'textarea')
-        section.controlPannel
-          div.function(data-type='image')
-            label
-              input(type='checkbox', name='func', data-target='image')
-              i.fas.fa-file-image
-              i.fas.fa-file-image.on
-            span.tooltips 上傳圖片/使用網址附加圖片
-          if !pageContent.replyFormat
-            div.function(data-type='hashtag')
-              label
-                input(type='checkbox', name='func', data-target='hashtag')
-                i.fas.fa-hashtag
-                i.fas.fa-hashtag.on
-              span.tooltips 將串加入 hashtags
-          div.function(data-type='emoji')
-            label
-              input(type='checkbox', name='func')
-              i.far.fa-grin-squint
-              i.far.fa-grin-squint.on
-            span.tooltips 開啟顏文字庫
-          div.function(data-type='copyLibrary')
-            label
-              input(type='checkbox', name='func')
-              i.fas.fa-torah
-              i.fas.fa-torah.on
-            span.tooltips 開啟複製文庫
-          section.hidden-func.hashtag
-            input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔', autocomplete='off')
-          section.hidden-func.image
-            input(id='imgurl', type='text', placeholder='輸入圖片/影片之網址或拖曳圖片檔案到此', autocomplete='off')
-            div.hidden.btn.btn-default(onclick='this.nextSibling.click()')
-              i.far.fa-file-image
-              | &nbsp;選擇檔案
-            input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
-      section.submission
+    //- postArticle
+    section.postContainer(data-number= pageContent.replyFormat ? formatNum(pageContent.hisland[0].post.number) : '')
+      form#postTable.postTable
+        section.exit
+          div.btn.btn-danger
+            i.fas.fa-times-circle
+        if pageContent.replyFormat
+          header
+            h4 [
+              a.link(href='/') 回到列表
+              | ]
+        +postForm('名稱', 'postName', '名無し', 'text')
         if !pageContent.replyFormat
-          section.addition
-            label
-              input(type='checkbox', id='allowComment', checked)
-              div.btn.btn-on 留言: 開
-              div.btn.btn-off 留言: 關
-        div#submit.btn.btn-default(data-type= pageContent.replyFormat ? 'reply' : 'post')= pageContent.replyFormat ? '回復' : '開串！'
+          //- replyFormat 代表是回復模式(看單一串)
+          +postForm('標題', 'postTitle', '無題', 'text')
+        +postForm('', 'postContent', '想聊些什麼？', 'textarea')
+          section.controlPannel
+            div.function(data-type='image')
+              label
+                input(type='checkbox', name='func', data-target='image')
+                i.fas.fa-file-image
+                i.fas.fa-file-image.on
+              span.tooltips 上傳圖片/使用網址附加圖片
+            if !pageContent.replyFormat
+              div.function(data-type='hashtag')
+                label
+                  input(type='checkbox', name='func', data-target='hashtag')
+                  i.fas.fa-hashtag
+                  i.fas.fa-hashtag.on
+                span.tooltips 將串加入 hashtags
+            div.function(data-type='emoji')
+              label
+                input(type='checkbox', name='func')
+                i.far.fa-grin-squint
+                i.far.fa-grin-squint.on
+              span.tooltips 開啟顏文字庫
+            div.function(data-type='copyLibrary')
+              label
+                input(type='checkbox', name='func')
+                i.fas.fa-torah
+                i.fas.fa-torah.on
+              span.tooltips 開啟複製文庫
+            section.hidden-func.hashtag
+              input(id='hashtags', type='text', placeholder='將你的串加入標籤, 用半形逗號分隔', autocomplete='off')
+            section.hidden-func.image
+              input(id='imgurl', type='text', placeholder='輸入圖片/影片之網址或拖曳圖片檔案到此', autocomplete='off')
+              div.hidden.btn.btn-default(onclick='this.nextSibling.click()')
+                i.far.fa-file-image
+                | &nbsp;選擇檔案
+              input(id='imgfile', type='file', accept='.png,.jpg,.jpeg,.webm,.PNG,.JPG,.JPEG,.gif,.GIF')
+        section.submission
+          if !pageContent.replyFormat
+            section.addition
+              label
+                input(type='checkbox', id='allowComment', checked)
+                div.btn.btn-on 留言: 開
+                div.btn.btn-off 留言: 關
+          div#submit.btn.btn-default(data-type= pageContent.replyFormat ? 'reply' : 'post')= pageContent.replyFormat ? '回復' : '開串！'
 
-  main.articleContainer.col-xs-12.clearfix
-    if pageContent.hisland != undefined
-      each discussion in pageContent.hisland
-        +article(discussion, 'hisland')
-    if pageContent.komica != undefined
-      each discussion in pageContent.komica
-        +article(discussion, 'komica')
+    main.articleContainer.col-xs-12.clearfix
+      if pageContent.hisland != undefined
+        each discussion in pageContent.hisland
+          +article(discussion, 'hisland')
+      if pageContent.komica != undefined
+        each discussion in pageContent.komica
+          +article(discussion, 'komica')
 
-  section#hoverBox.hoverBox
+    section#hoverBox.hoverBox
 
-  div.bar.clearfix.col-xs-12
-  h3 (下面是DEBUG訊息請無視)
-  p.debug= JSON.stringify(pageContent)
+    div.bar.clearfix.col-xs-12
+    h3 (下面是DEBUG訊息請無視)
+    p.debug= JSON.stringify(pageContent)
 
-section#infoBox.hidden
-  section.mainContent
-    header
-      h2 This is header
-    main
-      p TEST
-      section.btnContainer
-        button.btn.btn-default Button
-section#mask.hidden
+  section#infoBox.hidden
+    section.mainContent
+      header
+        h2 This is header
+      main
+        p TEST
+        section.btnContainer
+          button.btn.btn-default Button
+  section#mask.hidden
 
-section#userPannel
-  section.in-block.user
-    | [&nbsp;
-    span#userId
-    | &nbsp;]
-  section.in-block.userFuncContainer
-    label(for='userPannelSwitch')
+  section#userPannel
+    section.in-block.user
       | [&nbsp;
-      span.link 控制面版
+      span#userId
       | &nbsp;]
-    input#userPannelSwitch(type='checkbox')
-    ul.in-block.userPannel
-      li.btn.btn-default.level
-        | NGID 相關&nbsp;
-        i.fas.fa-angle-double-right
-        ul.in-block
-          li.btn.btn-default(data-target='hidden') 取消隱藏文章
-          li.btn.btn-default(data-target='ngid_list') NGID 一覽
-          li.btn.btn-default(data-target='ngid_export') 匯出 NGID 名單
-          li.btn.btn-default(data-target='ngid_import') 匯入 NGID 名單
-      li.btn.btn-default.level
-        | 複製文庫&nbsp;
-        i.fas.fa-angle-double-right
-        ul.in-block
-          li.btn.btn-default(data-target='article_list') 複製文一覽(未做)
-          li.btn.btn-default(data-target='article_export') 匯出複製文庫 (未做)
-          li.btn.btn-default(data-target='article_import') 匯入複製文庫 (未做)
+    section.in-block.userFuncContainer
+      label(for='userPannelSwitch')
+        | [&nbsp;
+        span.link 控制面版
+        | &nbsp;]
+      input#userPannelSwitch(type='checkbox')
+      ul.in-block.userPannel
+        li.btn.btn-default.level
+          | NGID 相關&nbsp;
+          i.fas.fa-angle-double-right
+          ul.in-block
+            li.btn.btn-default(data-target='hidden') 取消隱藏文章
+            li.btn.btn-default(data-target='ngid_list') NGID 一覽
+            li.btn.btn-default(data-target='ngid_export') 匯出 NGID 名單
+            li.btn.btn-default(data-target='ngid_import') 匯入 NGID 名單
+        li.btn.btn-default.level
+          | 客製化版面
+          i.fas.fa-angle-double-right
+          ul.in-block
+            li.btn.btn-default(data-target='theme') 選擇主題
+        li.btn.btn-default.level
+          | 複製文庫&nbsp;
+          i.fas.fa-angle-double-right
+          ul.in-block
+            li.btn.btn-default(data-target='article_list') 複製文一覽(未做)
+            li.btn.btn-default(data-target='article_export') 匯出複製文庫 (未做)
+            li.btn.btn-default(data-target='article_import') 匯入複製文庫 (未做)

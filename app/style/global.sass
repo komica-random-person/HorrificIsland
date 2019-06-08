@@ -32,14 +32,122 @@ $dirCss: left right top bottom
       .#{nth($type, $t)}-#{nth($dir, $d)}-#{$i}
         #{nth($tCss, $t)}-#{nth($dirCss, $d)}: .5em * $i !important
 
-body
-  background: #1D1F21
-  color: rgba(255, 255, 255, .8)
 .link
   cursor: pointer
   color: #81A2BE
   &:focus, &:hover
     color: #71ade0
+span.quotable.id
+  color: #a3d1d1
+  &.id_3
+    color: #ffe153
+  &.id_6
+    color: #9aff02
+  &.id_9
+    color: #b766ad
+    text-shadow: 0 0 0.2em #b766ad
+  &.id_12
+    color: #ff00eb
+    text-shadow: 0 0 0.3em #ea0000
+  &.id_15
+    color: #ea0000
+    text-shadow: 0 0 0.3em #333
+main.mainContainer
+  &.dracula
+    background: #1D1F21
+    color: rgba(255, 255, 255, .8)
+    .postInfo .label
+      color: rgba(255, 255, 255, .8)
+    .hoverBox
+      background: #1D1F21
+    header
+      span
+        &.name
+          color: #EE88BC
+        &.title
+          color: #B294BB
+    p span.title
+      color: #fff
+    .replyBox
+      background: #282A2E
+    .controlPannel
+      background: rgba(0, 0, 0, .6)
+    article.thread, .postContainer, .pageTitle
+      border-bottom: 2px solid rgba(255, 255, 255, .7)
+    #userPannel
+      background: #54606d
+    .hiddenRepliesContainer p
+      color: #b7b7b7
+    .quote.missing
+      color: #ff8585
+  &.ch8
+    background: #EEF2FF
+    color: black
+    .postInfo .label
+      color: black
+    .hoverBox
+      background: #EEF2FF
+    header
+      span
+        &.name
+          color: #117743
+        &.title
+          color: #0F0C5D
+    p span.title
+      color: #AF0A0F
+    .replyBox
+      background: #D6DAF0
+      border-color: #B7C5D9
+      border-style: none solid solid none
+      border-width: 1px
+    .controlPannel
+      background: #b9c1ef
+    .link
+      color: #34345C
+    article.thread, .postContainer, .pageTitle
+      border-bottom: 2px solid #B7C5D9
+    #userPannel
+      background: #D6DAF0
+    span.id.id_6
+      color: #416d00
+    .quotable.id
+      color: #2b7979
+    .hiddenRepliesContainer p
+      color: #525252
+    .quote.missing
+      color: red
+  &.komica
+    background: #FFE
+    color: #800000
+    .postInfo .label
+      color: #800000
+    .hoverBox
+      background: #FFE
+      border-color: #333
+    header
+      span
+        &.name
+          color: #117743
+        &.title
+          color: #CC1105
+    p span.title
+      color: #AF0A0F
+    .replyBox
+      background: #F0E0D6
+    .controlPannel
+      background: #EA8
+    .link
+      color: #00E
+    article.thread, .postContainer, .pageTitle
+      border-bottom: 2px solid #333
+    #userPannel
+      background: #EA8
+    span.id.id_6
+      color: #416d00
+    .hiddenRepliesContainer p
+      color: #525252
+    .quote.missing
+      color: red
 .in-block
   display: inline-block
 tr
@@ -57,11 +165,9 @@ tr
     padding: 0
   header.pageTitle
     text-align: center
-    border-bottom: 3px solid rgba(255, 255, 255, .7)
     h1
       font-weight: bold
   .postContainer
-    border-bottom: 3px solid rgba(255, 255, 255, .7)
     text-align: center
     .exit
       display: none
@@ -114,7 +220,6 @@ tr
               margin-bottom: 0
       section.controlPannel
         text-align: left
-        background: rgba(0, 0, 0, .6)
         padding: 5px
         border-bottom-left-radius: 3px
         border-bottom-right-radius: 3px
@@ -134,6 +239,7 @@ tr
               display: block
               padding: .5em
               background: rgb(0, 0, 0)
+              color: rgba(255, 255, 255, .8)
               position: absolute
               top: 0
               left: 50%
@@ -229,7 +335,6 @@ article.thread, #hoverBox
   margin-bottom: .7em
   padding-left: 0
   padding-bottom: 1.4em
-  border-bottom: 2px solid rgba(255, 255, 255, .7)
   position: relative
   header.imgInfo h4, section.imgInfo h4
     font-size: .85em
@@ -285,31 +390,15 @@ article.thread, #hoverBox
         padding: .05em .3em
         vertical-align: top
         &.title
-          color: #B294BB
           font-weight: bold
           font-size: 1.125em
-        &.name
-          color: #EE88BC
-        &.quotable.id
-          color: #a3d1d1
-          &.id_3
-            color: #ffe153
-          &.id_6
-            color: #9aff02
-          &.id_9
-            color: #b766ad
-            text-shadow: 0 0 0.2em #b766ad
-          &.id_12
-            color: #ff00eb
-            text-shadow: 0 0 0.3em #ea0000
-          &.id_15
-            color: #ea0000
-            text-shadow: 0 0 0.3em #333
         &.articleType
           cursor: default
           font-weight: bold
           padding: .05em 0
           border-radius: 3px
+        &.name
+          font-weight: bold
     section
       display: table
       max-width: 100%
@@ -322,7 +411,6 @@ article.thread, #hoverBox
           &.show
             max-height: unset
         .hiddenRepliesContainer p
-          color: #b7b7b7
           margin: 0
     .imgContainer
       cursor: pointer
@@ -357,7 +445,6 @@ article.thread, #hoverBox
       span.title
         font-weight: 600
         font-size: 1.35em
-        color: #fff
       span.underline
         text-decoration: underline
       span.spoiler
@@ -366,12 +453,9 @@ article.thread, #hoverBox
         &:hover
           color: #fff
   .quotable, .quote, .quotedList
-    color: #81A2BE
     cursor: pointer
     &:hover, &:focus
       text-decoration: underline
-    &.missing
-      color: #ff8585
   .quotedList
     margin-top: 1em
     font-size: .9em
@@ -420,7 +504,6 @@ article.thread, #hoverBox
     .replyBox, .mainContent
       display: none!important
 .replyBox
-  background: #282A2E
   padding: .2em .5em
   margin-bottom: 5px
   .col-xs-12
@@ -435,7 +518,6 @@ article.thread, #hoverBox
   position: fixed
   top: -100%
   left: 0
-  background: rgb(32, 32, 32)
   border: 3px solid rgba(255, 255, 255, .7)
   padding: 0
   overflow: visible
@@ -517,7 +599,6 @@ section#userPannel
   top: 0
   width: 100%
   text-align: center
-  background: #54606d
   box-shadow: 0 1px 0 rgba(0,0,0,.2), 0 1.5px 0 rgba(0,0,0,.05), 0 2px 0 rgba(0,0,0,.05)
   border-bottom: 1px solid #d1d5da
   .in-block
