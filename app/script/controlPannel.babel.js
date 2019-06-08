@@ -11,12 +11,15 @@ class ControlPannel {
     const self = this;
     $(this.element).find('input.pannelSwitch').on('click', e => {
       e.stopPropagation();
-      $(self.element).find('input.pannelSwitch:checked').click();
       const target = e.target;
       const contropannel = findParent(target, 'articleControlPannel');
       const element = contropannel.querySelector('.control');
-      element.style.display = target.checked ? 'table' : 'none';
-      if(target.checked) {
+      const onClick = target.checked;
+      $(self.element).find('input.pannelSwitch:checked').prop('checked', false).end()
+        .find('.control').hide();
+      if(onClick) {
+        element.style.display = 'table';
+        target.checked = true;
         $(document).unbind('click').on('click', _e => {
           /* 模仿 8ch 行為，點其他地方關閉 control pannel */
           if(target.checked && findParent(_e.target, 'articleControlPannel') === null)
