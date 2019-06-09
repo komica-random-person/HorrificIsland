@@ -42,10 +42,10 @@ class Article {
       p.innerHTML = p.innerHTML.replace(/(http[s]*:\/\/[^\s|>|<]+?)([\s|<|^|@])/g, '<a class="link" rel="noopener" target="_blank" href="$1">$1</a>$2');
 
     p.querySelectorAll('a.link').forEach(e => {
-      const youtubeRegex = /https:\/\/(?:youtu.be|www.youtube.com)\/(?:watch\?v=|embed\/|)([^&\s"/<]+)/;
+      const youtubeRegex = /https:\/\/(?:youtu.be|www.youtube.com)\/(?:watch\?v=|embed\/|)([^&\s"/<>]+)/;
       const match = e.innerText.match(youtubeRegex);
       if(match) {
-        const youtubeEmbedUrl = `<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/${match[1]}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        const youtubeEmbedUrl = `<iframe style="max-width: 100%" width="560" height="315" src="https://www.youtube-nocookie.com/embed/${match[1]}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
         const hiddenYoutubeBlock = document.createElement('div');
         hiddenYoutubeBlock.innerHTML = `${youtubeEmbedUrl}`;
         e.parentElement.insertBefore(hiddenYoutubeBlock, e.nextSibling);
