@@ -64,6 +64,7 @@ module.exports = app => {
   };
   app.set('API', { threadAPI, getIP });
 
+  const cache = process.env.CACHE_ENABLE || true;
   app.set('getHIContent', (userid, cb) => {
     const contentCoolDown = process.env.CACHE_TIME || 30000;
     const requestData = {
@@ -73,10 +74,10 @@ module.exports = app => {
     if(app.get('contentCoolDown') === undefined) {
       app.set('contentCoolDown', Date.now());
     }
-    if(Date.now() - app.get('contentCoolDown') < contentCoolDown && app.get('HIsland-content') !== undefined) {
+    if(cache && Date.now() - app.get('contentCoolDown') < contentCoolDown && app.get('HIsland-content') !== undefined) {
       /* Under cache cool down, directly send content. */
       cb({ err: null, res: 200, body: app.get('HIsland-content') });
-    } else if(app.get('HIsland-content') !== undefined) {
+    } else if(cache && app.get('HIsland-content') !== undefined) {
       /* Over cache cool down, directly send content and update content */
       cb({ err: null, res: 200, body: app.get('HIsland-content') });
       request(requestData, (err, res, body) => {
@@ -86,7 +87,7 @@ module.exports = app => {
         }
       });
     } else {
-      /* First lunch app, get content and save to cache */
+      /* Lunch app in first time, get content and save to cache */
       request(requestData, (err, res, body) => {
         if(err == null && res.statusCode === 200) {
           app.set('HIsland-content', body);
@@ -129,12 +130,13 @@ module.exports = app => {
     return datas;
   };
 
+  const komicaContent = process.env.ENABLE_KOMICA || false;
   app.set('getMainContent', cb => {
     const currentTime = Date.now();
     const prevTime = app.get('komica-time');
     const cacheSecond = process.env.NODE_ENV === 'dev' ? 60 * 180 : 60 * 2;
 
-    if(prevTime === undefined || currentTime - prevTime > 1000 * cacheSecond) {
+    if(komicaContent && prevTime === undefined || currentTime - prevTime > 1000 * cacheSecond) {
       /* if currentTime - prevTime > threshold, refresh the content */
       app.set('komica-time', currentTime);
       request('https://homu.homu-api.com/page/0', (error, res, body) => {
@@ -158,7 +160,7 @@ module.exports = app => {
       /* Had refreshed recently, directly send old content */
       cb({
         status: 1,
-        content: app.get('komica-content'),
+        content: komicaContent ? [] : app.get('komica-content'),
         refresh: false,
       });
     }
