@@ -1,7 +1,9 @@
 'use strict';
 
 module.exports = app => {
-  app.get('/', (req, res) => {
+  app.get('^/$', (req, res) => {
+    let themeIndex = req.cookies.theme === undefined ? 0 : Number(req.cookies.theme);
+    themeIndex = isNaN(themeIndex) ? 0 : themeIndex;
     // req.app.get('getMainContent')(content => {
     const pageInfo = {
       name: 'index',
@@ -9,6 +11,7 @@ module.exports = app => {
       description: 'index',
       pageContent: {
         komica: [],
+        themeIndex,
       }
     };
     const userid = req.cookies.keygen;
