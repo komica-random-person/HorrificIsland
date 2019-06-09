@@ -121,7 +121,10 @@ mixin postForm(labelText, id, placeholder, type)
     if block
       block
 
-main.mainContainer.clearfix.dracula
+-
+  var theme = ['dracula', 'ch8', 'komica'];
+  var themeName = pageContent.themeIndex < theme.length && pageContent.themeIndex > 0 ? theme[pageContent.themeIndex] : theme[0];
+main(class= 'mainContainer clearfix ' + themeName)
   div.container(data-replymode= pageContent.replyFormat ? 'true' : 'false')
     header.pageTitle
       h1.m-t-2 Horrific Island

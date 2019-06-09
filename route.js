@@ -1,6 +1,8 @@
 /* global process, __dirname */
 module.exports = app => {
   app.get('^/$', (req, res) => {
+    let themeIndex = req.cookies.theme === undefined ? 0 : Number(req.cookies.theme);
+    themeIndex = isNaN(themeIndex) ? 0 : themeIndex;
     req.app.get('getMainContent')(content => {
       const pageInfo = {
         name: 'index',
@@ -8,6 +10,7 @@ module.exports = app => {
         description: 'index',
         pageContent: {
           komica: content.content,
+          themeIndex,
         }
       };
       const userid = req.cookies.keygen;

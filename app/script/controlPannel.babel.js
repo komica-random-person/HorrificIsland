@@ -206,8 +206,11 @@ class UserStorage {
           $articles.find('li[data-act="hide"]').text('顯示本文');
         });
       } else if(key === 'custom') {
-        console.log(data[key])
-        self.setTheme(data[key].theme);
+        const themeName = self.themeName[data[key].theme];
+        if($('main.mainContainer')[0].className.match(themeName) === null) {
+          self.setTheme(data[key].theme);
+          $.cookie('theme', data[key].theme);
+        }
       }
     }
   }
@@ -390,6 +393,7 @@ class UserStorage {
               const data = self.data.custom;
               data.theme = Number(themeNum);
               self.setKeyVal('custom', data);
+              $.cookie('theme', themeNum);
               $('#infoBox').click();
             },
             content: '儲存設定',
