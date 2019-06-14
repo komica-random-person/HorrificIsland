@@ -111,6 +111,26 @@ const infoBox = options => {
     $main.find('button').addClass('hidden');
 };
 
+/* Binding lazy load */
+let scroll = 0;
+window.onscroll = () => {
+  const currentY = window.pageYOffset;
+  if(currentY > scroll + 200 || scroll === 0) {
+    $('img').not('.shown').each((i, e) => {
+      const y = e.getBoundingClientRect().top;
+      const yWindowAxis = window.pageYOffset;
+      const almostVisible = yWindowAxis + window.innerHeight - y > -200;
+      if(almostVisible) {
+        e.className += ' shown';
+        e.setAttribute('src', e.dataset.src);
+      } else
+        return false; // break loop
+    });
+    scroll += 200;
+  }
+};
+window.scrollTo(window.scrollX, window.scrollY + 1);
+
 $(() => {
   /* 註解大部份都是解釋註解正下方的程式段落或者整個 function 的運作邏輯 */
   const user = new UserStorage();
