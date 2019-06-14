@@ -18,7 +18,7 @@ mixin article(data, articleType)
       section.contentSection.col-xs-12
         if post.image.url
           a.imgContainer(onclick='showImg(this)', data-ori=post.image.url, data-thumb=post.image.thumb)
-            img(src=post.image.thumb)
+            img(data-src=post.image.thumb)
         +articleHeader(post, 'post', articleType)
         section.mainContent
           p.content
@@ -57,7 +57,7 @@ mixin replyBox(reply, articleType)
           a.link(href=reply.image.url, target='_blank')= s[s.length - 1]
       //- there exist a ($filename)s.jpg file for each image, use Regex to get the url
       a.imgContainer(onclick='showImg(this)', data-ori=reply.image.url, data-thumb=reply.image.thumb)
-        img(src=reply.image.thumb)
+        img(data-src=reply.image.thumb)
     - var content = reply.content || '無本文'
     - var split = content.split('\n')
     p.content
@@ -218,8 +218,7 @@ main(class= 'mainContainer clearfix ' + themeName)
     section#hoverBox.hoverBox
 
     div.bar.clearfix.col-xs-12
-    h3 (下面是DEBUG訊息請無視)
-    p.debug= JSON.stringify(pageContent)
+    p.hidden.debug= JSON.stringify(pageContent)
 
   section#infoBox.hidden
     section.mainContent
